@@ -1,0 +1,24 @@
+from core.Model import *
+from core.Utils import Utils
+from models.EmailTemplate import EmailTemplate
+from models.Status import Status
+
+class EmailPool(Base, Model):
+    __tablename__ = 'emailpool'
+
+    id = Column(Integer, primary_key = True, autoincrement=True)
+    email = Column(String(100), nullable=False)
+    subject = Column(String(100), nullable=False)
+    content = Column(Text, nullable=False)
+    send_attemps = Column(mysql.TINYINT(1), default=0)
+    created = Column(DateTime, default = Utils.time())
+    updated = Column(DateTime, default = Utils.time(), onupdate =  Utils.time())
+    status_id = Column(Integer, ForeignKey(Status.id), default=Status.PENDING)
+    template_id = Column(Integer,ForeignKey(EmailTemplate.id), nullable=False)
+
+    template = relationship(EmailTemplate)
+    status = relationship(Status)
+
+    formatters = {
+        "created" : Utils.date_formatter
+    }

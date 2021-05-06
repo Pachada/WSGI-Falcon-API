@@ -1,0 +1,935 @@
+{
+	"info": {
+		"_postman_id": "91d937c3-03d0-40e8-98b7-849bb5ce285a",
+		"name": "REST API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login/Logout",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"daniel.trejo@atomic32.com\",\r\n    \"password\": \"appAtomic32\",\r\n    \"device_uuid\": \"12345-6789-09876-54321\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								"login"
+							]
+						},
+						"description": "URL para iniciar sesión; se envía las credenciales en el body y el device_uuid sí se tiene. Regresa un objeto session con el token.\r\n{\r\n    \"username\": xxxxx,\r\n    \"password\": xxxxx,\r\n    \"device_uuid\" : xxxxxx-xxxxxx-xxxx\r\n\r\n}"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "2KV4Q7qimf8pR8aL6LuPSr61T8ZqXHTN3bGrGzmR-cU",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/sessions/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								"logout"
+							]
+						},
+						"description": "URL para terminar la sessión asociada al token que se envía en los headers. Desactiva el token."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Password Recovery",
+			"item": [
+				{
+					"name": "request ",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"daniel.trejo@atomic32.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/password-recovery/request",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"password-recovery",
+								"request"
+							]
+						},
+						"description": "Empieza el proceso de cambio de contraseña.\r\nRecibe el username y envía un OTP de 5 digitos al correo del usuario con ese username.\r\n{\r\n    \"username\": \"sergio.roman\"\r\n}"
+					},
+					"response": []
+				},
+				{
+					"name": "validate code",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"otp\": \"ZR3A6\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/password-recovery/validate-code",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"password-recovery",
+								"validate-code"
+							]
+						},
+						"description": "Valida el otp enviado en el request. Regresa un objeto sessión con el token para realizar el cambio de contraseña.\r\n{\r\n    \"otp\": \"xxxxx\"\r\n}"
+					},
+					"response": []
+				},
+				{
+					"name": "change password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "NQxoYkpgDasuTMmUHSGh0a9q0f_4PMggVVIff88cjNY",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newpassword\": \"appAtomic32\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/password-recovery/change-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"password-recovery",
+								"change-password"
+							]
+						},
+						"description": "En el header de Authentication va el token que regresa desde validate code y en el body recibe la nueva contraseña.\r\n{\r\n    \"newpassword\": \"xxxx_xxxx\"\r\n}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Files",
+			"item": [
+				{
+					"name": "POST file Local",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "v9XyTELiq1F3a_Pub4YPyBseVMScVDGfPbQqoVwipZw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/dtrej/Pictures/Wallpapers/Cuphead.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/files/local",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"files",
+								"local"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET file Local",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "v9XyTELiq1F3a_Pub4YPyBseVMScVDGfPbQqoVwipZw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/files/local/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"files",
+								"local",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE file",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "2As8v1gLVs4tzuwJUOBrLJcAQE32ygwRcYjiaSozVec",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/files/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"files",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Confirm Email",
+			"item": [
+				{
+					"name": "Request Email Confirmation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/confirm-email/request",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"confirm-email",
+								"request"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Validate Email Confirmation Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/confirm-email/validate-code",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"confirm-email",
+								"validate-code"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Status",
+			"item": [
+				{
+					"name": "GET Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/status/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"status",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Status",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/status/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"status",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "Add Token to a Device",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "KjtelaXXHi_jj5BE7biWGISMOd9MV2181oALzLPwyKw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"token\": \"1234567890\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/devices/token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"devices",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET notifications not seen",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "vbVjfmzep850CZE7lh1Xsy5WctHv13EZYThTCtny9UQ",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/notifications",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark notifications as seen",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "vbVjfmzep850CZE7lh1Xsy5WctHv13EZYThTCtny9UQ",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"read\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/notifications/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Back Office",
+			"item": [
+				{
+					"name": "Roles",
+					"item": [
+						{
+							"name": "GET Roles",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/roles",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"roles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "POST Role",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"admin\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/roles",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"roles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PUT Role",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"leader\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/roles/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"roles",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DELETE Role",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/roles/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"roles",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Persons",
+					"item": [
+						{
+							"name": "Get Person",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/persons/3",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"persons",
+										"3"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Persons",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/persons",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"persons"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Post Person",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"first_name\": \"Daniel\",\r\n    \"last_name\": \"Trejo\",\r\n    \"birthday\": \"1998-01-10\",\r\n    \"gender\": \"m\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/persons",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"persons"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Put Person",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"first_name\": \"Daniel\",\r\n    \"last_name\": \"Trejo\",\r\n    \"birthday\": \"1998-01-10\",\r\n    \"gender\": \"m\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/persons/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"persons",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete person",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/persons/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"persons",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Users",
+					"item": [
+						{
+							"name": "Get All Users",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bk1qODjRn4ZNHKKg3oRtDnMT2jTlRHpp7rmZ148E3fw",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/users",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/users/2",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Post User",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "_Dw0ZgqK1LuHWguxN3cnZTsXLn9FAmdw_PIOz6jL6Zo",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"daniel.trejo\",\r\n    \"password\": \"appAtomic32\",\r\n    \"email\": \"email@gmail.com\",\r\n    \"phone\": \"5528461145\",\r\n    \"role_id\": 1,\r\n    \"person_id\" : 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/users",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Put User",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"username\": \"daniel.trejo\",\r\n    \"password\": \"appAtomic32\",\r\n    \"email\": \"email@gmail.com\",\r\n    \"phone\": \"5528461145\",\r\n    \"role_id\": 1,\r\n    \"person_id\" : 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/users/2",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete User",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/users/2",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"2"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "PING",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/health-check/ping",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"health-check",
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TEST",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/test",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"test"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

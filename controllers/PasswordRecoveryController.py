@@ -1,0 +1,108 @@
+from core.Controller import Controller, datetime, json
+from core.Utils import Utils
+from core.classes.Authenticator import Authenticator
+from models.User import User
+from models.EmailTemplate import EmailTemplate
+from core.classes.SmtpClient import SmtpClient
+import hashlib
+
+class PasswordRecoveryController(Controller):
+
+    def __init__(self):
+        self.actions = {
+            'request': self.__request,
+            'validate-code': self.__validate_code,
+            'change-password': self.__change_password
+        }
+
+    def __request(self, req, resp):
+        try:
+            data:dict = json.loads(req.stream.read())
+            username = data.get('username')
+            if not username:
+                self.response(resp, 400, error = "username needed")
+                return
+
+            user = User.get(User.username == username)
+            if not user:
+                self.response(resp, 404, error = "User not found")
+                return
+
+            otp = Utils.generate_otp(5)
+            user.otp = otp
+            user.otp_time = datetime.utcnow()
+            data_for_email = {'otp': otp}
+            client = SmtpClient.get_instance()
+            if Utils.check_if_valid_email(username):
+                client.send_email_to_pool(username, data_for_email, EmailTemplate.PASSWORD_RECOVERY)
+            else:
+                client.send_email_to_pool(user.email, data_for_email, EmailTemplate.PASSWORD_RECOVERY)
+            user.save()
+            self.response(resp, 200, message="OTP saved successfully")
+        except Exception as exc:
+            print(exc)
+            self.response(resp, 400, error = str(exc))
+
+    def __validate_code(self, req, resp):
+        try:
+            data:dict = json.loads(req.stream.read())
+            otp = data.get('otp')
+            if not otp:
+                self.response(resp, 400, message = "otp needed")
+                return
+
+            user = User.get(User.otp == otp)
+            if not user:
+                self.response(resp,401,message="Incorrect code")
+                return
+
+            if not Utils.validate_otp(user):
+                self.response(resp, 401, message = "code expired")
+                return
+
+            device_uuid = data.get('device_uuid', 'unknown')
+            session = Authenticator.login_by_otp(user, device_uuid)
+            user.otp = None
+            user.otp_time = None
+            if not user.save():
+                self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
+                return
+
+            req.context.session = session
+            data = {
+                "session": Utils.serialize_model(
+                    req.context.session,
+                    recursive=True,
+                    recursiveLimit=3,
+                    blacklist=["device"]
+                ),
+            }
+            self.response(resp, 200, data, message = "Session started")
+        except Exception as exc:
+            print(exc)
+            self.response(resp, 400, error = str(exc))
+
+    def __change_password(self, req, resp):
+        try:
+            data:dict = json.loads(req.stream.read())
+            new_password:str = data.get('new_password')
+            if not new_password:
+                self.response(resp, 400, error = "new_password is required")
+                return
+
+            session = req.context.session
+            user:User = session.user
+
+            new_password = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
+            user.password = new_password
+            if not user.save():
+                self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
+                return
+
+            self.response(resp, 200, message = "Password changed successfully")    
+        except Exception as exc:
+            print(exc)
+            self.response(resp, 400, error = str(exc))
+
+    def on_post(self, req, resp, action):
+        self.actions[action](req,resp)
