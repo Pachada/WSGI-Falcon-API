@@ -1,9 +1,11 @@
+from falcon.response import Response
+from falcon.request import Request
 import falcon
 from falcon.http_status import HTTPStatus
 
 class CORS_Handler(object):
 
-    def process_request(self, req, resp):
+    def process_request(self, req:Request, resp:Response):
         resp.set_header('Access-Control-Allow-Origin', '*')
         resp.set_header('Access-Control-Allow-Methods', '*')
         resp.set_header('Access-Control-Allow-Headers', '*')

@@ -4,7 +4,7 @@ from models.EmailTemplate import EmailTemplate
 from models.Status import Status
 
 class EmailSent(Base, Model):
-    __tablename__ = 'emailsent'
+    __tablename__ = 'email_sent'
 
     id = Column(Integer, primary_key = True, autoincrement=True)
     email = Column(String(100), nullable=False)

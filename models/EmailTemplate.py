@@ -6,7 +6,7 @@ class EmailTemplate(Base, Model):
     PASSWORD_RECOVERY = 1       #{{otp}}
     CONFIRM_EMAIL = 2           #{{email_confirmation_code}}
 
-    __tablename__ = 'emailtemplate'
+    __tablename__ = 'email_template'
 
     id = Column(Integer, primary_key = True, autoincrement=True)
     name = Column(String(45), nullable=False)

@@ -1,10 +1,12 @@
+from falcon.response import Response
+from falcon.request import Request
 from models.Session import Session
 from models.User import User
 from models.Device import Device
 from core.Utils import Utils
 import base64
 import os
-from sqlalchemy import and_, util
+from sqlalchemy import and_
 import json
 import hashlib
 
@@ -86,11 +88,11 @@ class Authenticator(object):
     def add_exception_route(self, route):
         self.exceptions.append(route)
 
-    def process_request(self, req, resp):
+    def process_request(self, req:Request, resp:Response):
         #Process the request before routing it.
         pass
 
-    def process_resource(self, req, resp, resource, params):
+    def process_resource(self, req:Request, resp:Response, resource, params):
         if req.path in self.exceptions:
             req.context.session = None
         else:
@@ -116,7 +118,7 @@ class Authenticator(object):
                 
             req.context.session = session
 
-    def process_response(self, req, resp, resource, req_succeeded):
+    def process_response(self, req:Request, resp:Response, resource, req_succeeded):
         #Post-processing of the response (after routing).
         pass
 

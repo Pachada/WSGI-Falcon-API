@@ -2,7 +2,7 @@ from core.Model import *
 from core.Utils import Utils
 
 class File(Base, Model):
-    __tablename__ 	= 'files'
+    __tablename__ 	= 'file'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     object = Column(String(255), nullable=False)

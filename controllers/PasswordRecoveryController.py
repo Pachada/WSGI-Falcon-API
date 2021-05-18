@@ -1,3 +1,5 @@
+from falcon.response import Response
+from falcon.request import Request
 from core.Controller import Controller, datetime, json
 from core.Utils import Utils
 from core.classes.Authenticator import Authenticator
@@ -15,7 +17,7 @@ class PasswordRecoveryController(Controller):
             'change-password': self.__change_password
         }
 
-    def __request(self, req, resp):
+    def __request(self, req:Request, resp:Response):
         try:
             data:dict = json.loads(req.stream.read())
             username = data.get('username')
@@ -32,18 +34,20 @@ class PasswordRecoveryController(Controller):
             user.otp = otp
             user.otp_time = datetime.utcnow()
             data_for_email = {'otp': otp}
+
             client = SmtpClient.get_instance()
             if Utils.check_if_valid_email(username):
                 client.send_email_to_pool(username, data_for_email, EmailTemplate.PASSWORD_RECOVERY)
             else:
                 client.send_email_to_pool(user.email, data_for_email, EmailTemplate.PASSWORD_RECOVERY)
+
             user.save()
-            self.response(resp, 200, message="OTP saved successfully")
+            self.response(resp, 200, message = "OTP saved successfully")
         except Exception as exc:
             print(exc)
             self.response(resp, 400, error = str(exc))
 
-    def __validate_code(self, req, resp):
+    def __validate_code(self, req:Request, resp:Response):
         try:
             data:dict = json.loads(req.stream.read())
             otp = data.get('otp')
@@ -82,7 +86,7 @@ class PasswordRecoveryController(Controller):
             print(exc)
             self.response(resp, 400, error = str(exc))
 
-    def __change_password(self, req, resp):
+    def __change_password(self, req:Request, resp:Response):
         try:
             data:dict = json.loads(req.stream.read())
             new_password:str = data.get('new_password')
@@ -104,5 +108,5 @@ class PasswordRecoveryController(Controller):
             print(exc)
             self.response(resp, 400, error = str(exc))
 
-    def on_post(self, req, resp, action):
+    def on_post(self, req:Request, resp:Response, action:str):
         self.actions[action](req,resp)

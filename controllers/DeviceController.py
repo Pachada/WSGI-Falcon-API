@@ -1,3 +1,5 @@
+from falcon.response import Response
+from falcon.request import Request
 from core.Controller import Controller, json
 from core.Utils import Utils
 from models.Device import Device
@@ -5,7 +7,7 @@ from models.Session import Session
 
 class DeviceController(Controller):
 
-    def on_put_token(self, req, resp):
+    def on_put_token(self, req:Request, resp:Response):
         try:
             session:Session = req.context.session
             device:Device = session.device
@@ -26,7 +28,7 @@ class DeviceController(Controller):
             print(exc)
             self.response(resp, 400, error = str(exc))
 
-    def on_get(self, req, resp, id=None):
+    def on_get(self, req:Request, resp:Response, id:int=None):
         if id:
             device = Device.get(id)
             if not device:
@@ -37,7 +39,7 @@ class DeviceController(Controller):
 
         self.response(resp, 200, Utils.serialize_model(device))
 
-    def on_post(self, req, resp, id=None):
+    def on_post(self, req:Request, resp:Response, id:int=None):
         if id:
             self.response(resp, 405)
             return
@@ -56,7 +58,7 @@ class DeviceController(Controller):
             print(exc)
             self.response(resp, 400, error = str(exc))
 
-    def on_put(self, req, resp, id=None):
+    def on_put(self, req:Request, resp:Response, id:int=None):
         if not id:
             self.response(resp, 405)
             return
@@ -76,7 +78,7 @@ class DeviceController(Controller):
             print(exc)
             self.response(resp, 400, error = str(exc))
     
-    def on_delete(self, req, resp, id=None):
+    def on_delete(self, req:Request, resp:Response, id:int=None):
         if not id:
             self.response(resp, 405)
             return

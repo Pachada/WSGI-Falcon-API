@@ -13,7 +13,7 @@ class Controller():
     INVALID_JSON = "Bad Request - Invalid JSON"
     ID_NOT_FOUND = "Not Found - Invalid ID"
     
-    def response(self, resp, http_code=200, data=None, message=None, error=None):
+    def response(self, resp, http_code=200, data=None, message=None, error=None, error_code=None):
         map = {
             200: falcon.HTTP_200,
             201: falcon.HTTP_201,
@@ -23,6 +23,7 @@ class Controller():
             404: falcon.HTTP_404,
             405: falcon.HTTP_405,
             409: falcon.HTTP_409,
+            413: falcon.HTTP_413,
             500: falcon.HTTP_500
         }
         resp.status = map[http_code]
@@ -34,6 +35,8 @@ class Controller():
             data["message"] = message
         if error:
             data["error"] = error
+        if error_code:
+            data["error_code"] = error_code
         resp.text = json.dumps(data, ensure_ascii=False)    
 
     def set_values(self, row, data:dict):

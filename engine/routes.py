@@ -5,7 +5,7 @@ from falcon import API
 
 class RouteLoader():
 
-    def __init__(self,server,authorization_middleware):
+    def __init__(self, server, authorization_middleware):
         self.server:API = server
         self.authorization_middleware:Authenticator = authorization_middleware
         self.config = configparser.ConfigParser()

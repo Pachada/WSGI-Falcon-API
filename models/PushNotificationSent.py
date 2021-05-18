@@ -1,18 +1,20 @@
 from core.Model import *
 from core.Utils import Utils
 from models.PushNotificationTemplate import PushNotificationTemplate
+from models.PushNotificationPool import PushNotificationPool
 from models.User import User
 from models.Device import Device
 from models.Status import Status
 
 class PushNotificationSent(Base, Model):
-    __tablename__ = 'pushnotificationsent'
+    __tablename__ = 'push_notification_sent'
 
     id = Column(Integer, primary_key = True, autoincrement=True)
     user_id = Column(Integer, ForeignKey(User.id))
     device_id = Column(Integer, ForeignKey(Device.id), default=None)
     template_id = Column(Integer, ForeignKey(PushNotificationTemplate.id))
     status_id = Column(mysql.TINYINT(1), ForeignKey(Status.id))
+    push_notification_pool_id = Column(Integer, ForeignKey(PushNotificationPool.id))
     ticket = Column(String(200), default=None)
     message = Column(String(200), nullable=False)
     data = Column(String(200)) #JSON
@@ -24,6 +26,7 @@ class PushNotificationSent(Base, Model):
     device = relationship(Device)
     template = relationship(PushNotificationTemplate)
     status = relationship(Status)
+    push_notification_pool = relationship(PushNotificationPool)
 
     formatters = {
         "created": Utils.date_formatter,

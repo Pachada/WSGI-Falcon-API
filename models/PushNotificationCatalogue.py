@@ -3,7 +3,7 @@ from core.Utils import Utils
 
 
 class PushNotificationCatalogue(Base, Model):
-    __tablename__ = "pushnotificationcatalogue"
+    __tablename__ = "push_notification_catalogue"
 
     id = Column(Integer, primary_key = True, autoincrement=True)
     action = Column(String(45), nullable=False)

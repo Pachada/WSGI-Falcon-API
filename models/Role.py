@@ -2,6 +2,10 @@ from core.Model import *
 from core.Utils import Utils
 
 class Role(Base, Model):
+    # Roles
+    ROOT = 1
+    USER = 2
+    
     __tablename__ = 'role'
 
     id = Column(Integer, primary_key = True, autoincrement=True)

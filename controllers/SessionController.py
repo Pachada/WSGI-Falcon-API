@@ -1,3 +1,5 @@
+from falcon.response import Response
+from falcon.request import Request
 from core.Controller import Controller, json
 from core.Utils import Utils
 from core.classes.Authenticator import Authenticator
@@ -12,7 +14,7 @@ class SessionController(Controller):
             'logout': self.__logout,
         }
     
-    def on_get(self, req, resp):
+    def on_get(self, req:Request, resp:Response):
         session:Session = req.context.session
         role:Role = session.user.role
 
@@ -28,7 +30,7 @@ class SessionController(Controller):
         }
         self.response(resp, 200, data)
 
-    def __login(self, req, resp):
+    def __login(self, req:Request, resp:Response):
         data:dict = json.loads(req.stream.read())
         username = data.get('username')
         password = data.get('password')
@@ -53,10 +55,10 @@ class SessionController(Controller):
         }
         self.response(resp, 200, data, message = "Session started")
 
-    def __logout(self, req, resp):
+    def __logout(self, req:Request, resp:Response):
         session = req.context.session
         Authenticator.logout(session)
         self.response(resp, 200, message = "Session ended")
 
-    def on_post(self, req, resp, action):
+    def on_post(self, req:Request, resp:Response, action:str):
         self.actions[action](req,resp)

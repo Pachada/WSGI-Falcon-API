@@ -4,7 +4,7 @@ from models.EmailTemplate import EmailTemplate
 from models.Status import Status
 
 class EmailPool(Base, Model):
-    __tablename__ = 'emailpool'
+    __tablename__ = 'email_pool'
 
     id = Column(Integer, primary_key = True, autoincrement=True)
     email = Column(String(100), nullable=False)

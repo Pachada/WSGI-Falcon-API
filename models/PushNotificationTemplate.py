@@ -5,7 +5,7 @@ from models.PushNotificationCatalogue import PushNotificationCatalogue
 class PushNotificationTemplate(Base, Model):
     #Templates                                  #Data
     
-    __tablename__ = 'pushnotificationtemplates'
+    __tablename__ = 'push_notification_template'
 
     id = Column(Integer, primary_key = True, autoincrement=True)
     name = Column(String(100), nullable=False)

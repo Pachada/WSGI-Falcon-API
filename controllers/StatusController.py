@@ -1,10 +1,12 @@
+from falcon.response import Response
+from falcon.request import Request
 from core.Controller import Controller, json
 from core.Utils import Utils
 from models.Status import Status
 
 class StatusController(Controller):
 
-    def on_get(self, req, resp, id=None):
+    def on_get(self, req:Request, resp:Response, id:int=None):
         if id:
             status = Status.get(id)
             if not status:
@@ -15,7 +17,7 @@ class StatusController(Controller):
 
         self.response(resp, 200, Utils.serialize_model(status))
 
-    def on_post(self, req, resp, id=None):
+    def on_post(self, req:Request, resp:Response, id:int=None):
         if id:
             self.response(resp,405)
             return
@@ -34,7 +36,7 @@ class StatusController(Controller):
             print(exc)
             self.response(resp, 400, error = str(exc))
 
-    def on_put(self, req, resp, id=None):
+    def on_put(self, req:Request, resp:Response, id:int=None):
         if not id:
             self.response(resp,405)
             return
@@ -54,7 +56,7 @@ class StatusController(Controller):
             print(exc)
             self.response(resp, 400, error = str(exc))
     
-    def on_delete(self, req, resp, id=None):
+    def on_delete(self, req:Request, resp:Response, id:int=None):
         if not id:
             self.response(resp,405)
             return

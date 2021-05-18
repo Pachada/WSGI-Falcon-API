@@ -1,12 +1,14 @@
-import hashlib
+from falcon.response import Response
+from falcon.request import Request
 from core.Controller import Controller, json
 from core.Utils import Utils
 from models.User import User
 from core.classes.Authenticator import Authenticator
+import hashlib
 
 class UserController(Controller):
 
-    def on_get(self, req, resp, id=None):
+    def on_get(self, req:Request, resp:Response, id:int=None):
         if id:
             user = User.get(id)
             if not user:
@@ -17,15 +19,20 @@ class UserController(Controller):
 
         self.response(resp, 200, Utils.serialize_model(user))
 
-    def on_post(self, req, resp, id=None):
+    def on_post(self, req:Request, resp:Response, id=None):
         # TODO: How to avoid someone getting the endpoint and the body it receives
         # and creates a root user?
+        # Solution for the moment, do not allow to create root users from here.
         if id:
             self.response(resp,405)
             return
 
         try:
             data:dict = json.loads(req.stream.read())
+            if data.get('role_id') == 1:
+                self.response(resp, 403, error = "Creation of root users is not allowed.")
+                return
+
             exists, message = User.check_if_user_exists(data.get('username'), data.get('email'))
             if exists:
                 self.response(resp, 409, error = message)
@@ -48,7 +55,7 @@ class UserController(Controller):
             print(exc)
             self.response(resp, 400, error = str(exc))
 
-    def on_put(self, req, resp, id=None):
+    def on_put(self, req:Request, resp:Response, id:int=None):
         if not id:
             self.response(resp,405)
             return
@@ -68,7 +75,7 @@ class UserController(Controller):
             print(exc)
             self.response(resp, 400, error = str(exc))
     
-    def on_delete(self, req, resp, id=None):
+    def on_delete(self, req:Request, resp:Response, id:int=None):
         if not id:
             self.response(resp,405)
             return

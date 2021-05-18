@@ -24,21 +24,23 @@ class PushNotificationClient():
         for key in data:
             message_for_notification = message_for_notification.replace("{{"+key+"}}", data[key])
         
+        push_notification = PushNotificationPool(
+            user_id = user.id,
+            template_id = template.id,
+            message = message_for_notification
+        )
+        # we create a new PushNotificationPool object and save it to DB
+        # in order to get its id. Then we add that id to the extra object.
+        # And save the PushNotificationPool object again. 
+        push_notification.save()
+
+        extra["notification_id"] = push_notification.id
+        
         catalogue = template.catalogue
         if catalogue:
-            action = catalogue.action
-            if not extra:
-                extra = {
-                    "action": action
-                }
-            else:
-                extra["action"] = action
+            extra["action"] = catalogue.action
 
-        pushNotification = PushNotificationPool(
-            user_id=user.id,
-            template_id=template.id,
-            message = message_for_notification,
-            data = json.dumps(extra)
-        )
-        pushNotification.save()
+        push_notification.data = json.dumps(extra)
+        push_notification.save()
+
 

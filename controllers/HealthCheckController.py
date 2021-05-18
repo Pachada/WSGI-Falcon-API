@@ -1,3 +1,5 @@
+from falcon.response import Response
+from falcon.request import Request
 from core.Controller import Controller, datetime
 from core.Utils import Utils
 
@@ -8,13 +10,12 @@ class HealthCheckController(Controller):
             'ping': self.__ping
         }
 
-    def __ping(self, req, resp):
-        data = {"timestamp":Utils.date_formatter(datetime.utcnow())}
-        self.response(resp,200,data)
+    def __ping(self, req:Request, resp:Response):
+        self.response(resp, 200, {"timestamp":Utils.date_formatter(datetime.utcnow())})
 
 
-    def on_post(self, req, resp, action):
+    def on_post(self, req:Request, resp:Response, action:str):
         self.actions[action](req, resp)
 
-    def on_get(self, req, resp, action):
+    def on_get(self, req:Request, resp:Response, action:str):
         self.actions[action](req, resp)
