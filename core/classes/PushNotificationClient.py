@@ -1,5 +1,5 @@
 import json
-from models.User import User
+from models.User import User, datetime
 from models.PushNotificationTemplate import PushNotificationTemplate
 from models.PushNotificationPool import PushNotificationPool
 
@@ -18,7 +18,7 @@ class PushNotificationClient():
         else:
             PushNotificationClient.__instance = self
 
-    def send_notification_to_pool(self, user:User, template_id:int, data:dict={}, extra:dict={}):
+    def send_notification_to_pool(self, user:User, template_id:int, data:dict={}, extra:dict={}, notification_time:datetime = None):
         template = PushNotificationTemplate.get(template_id)
         message_for_notification = f"{template.title}\n{template.message}"
         for key in data:
@@ -27,7 +27,8 @@ class PushNotificationClient():
         push_notification = PushNotificationPool(
             user_id = user.id,
             template_id = template.id,
-            message = message_for_notification
+            message = message_for_notification,
+            notification_time = notification_time if notification_time else datetime.utcnow()
         )
         # we create a new PushNotificationPool object and save it to DB
         # in order to get its id. Then we add that id to the extra object.

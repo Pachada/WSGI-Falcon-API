@@ -12,6 +12,7 @@ class PushNotificationPool(Base, Model):
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     template_id = Column(Integer, ForeignKey(PushNotificationTemplate.id), nullable=False)
     status_id = Column(Integer, ForeignKey(Status.id), default=Status.PENDING)
+    notification_time = Column(DateTime, default= Utils.time())
     message = Column(String(200), nullable=False)
     data = Column(String(200), default=None) #JSON/DICT
     ticket = Column(String, default=None)

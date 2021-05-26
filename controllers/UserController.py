@@ -22,7 +22,7 @@ class UserController(Controller):
     def on_post(self, req:Request, resp:Response, id=None):
         # TODO: How to avoid someone getting the endpoint and the body it receives
         # and creates a root user?
-        # Solution for the moment, do not allow to create root users from here.
+        # Solution for the moment, do not allow the creationg of root users from here.
         if id:
             self.response(resp,405)
             return

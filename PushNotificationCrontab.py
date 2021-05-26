@@ -39,13 +39,14 @@ class PushNotificationCrontab():
             list_of_notifications_to_send = PushNotificationPool.getAll(
                 and_(
                     PushNotificationPool.status_id.in_([Status.PENDING, Status.ERROR]),
-                    PushNotificationPool.send_attemps < 3
+                    PushNotificationPool.send_attemps < 3,
+                    PushNotificationPool.notification_time <= datetime.utcnow()
                 ),
                 limit=query_limit
                 )
 
             if not list_of_notifications_to_send:
-                print(f'Date and time: {str(datetime.now())[0:-7]}, no notifications to send.')
+                print(f'Date time: {str(datetime.now())[0:-7]}, no notifications to send.')
                 return
             
             for notification in list_of_notifications_to_send:
@@ -94,7 +95,7 @@ class PushNotificationCrontab():
             errors += self.__send_push_messages(notifications_to_send)
             selected = len(notifications_to_process)
             send = selected - errors
-            print(f'Date and time: {str(datetime.now())[0:-7]}, selected: {selected}, send: {send}, errors: {errors}')
+            print(f'Date time: {str(datetime.now())[0:-7]}, selected: {selected}, sended: {send}, errors: {errors}')
 
         except Exception as exc:
             print(exc)

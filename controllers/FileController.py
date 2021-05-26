@@ -23,7 +23,7 @@ class FileController(Controller):
         # Storage path for saving files localy
         self.storage_path = self.config.get('FILES', 'storage_path')
         # Maximum file size accepted
-        self.max_file_size = self.config.get('FILES', 'max_file_size')
+        self.max_file_size = int(self.config.get('FILES', 'max_file_size'))
 
     def on_delete_local(self, req:Request, resp:Response, id:int=None):
         if not id:

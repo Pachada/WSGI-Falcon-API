@@ -3,9 +3,10 @@ MVC structure for a Restful API using python, Falcon, and SQLAclhemy
 
 If you want to use this install the requierements: pip3 install -r requirements.txt
 
-Create a folder files.
+Create a folder with name files
 
 Create a config.ini file with the below info and update it with yours:
+
 [ROUTES]
 context = api
 root = api/profile
@@ -25,7 +26,6 @@ port = 465
 server = smtp.gmail.com 
 
 [EXPIRATION_TIMES]
-# In minutes
 session = 10080
 otp = 1440
 email_code = 1440
