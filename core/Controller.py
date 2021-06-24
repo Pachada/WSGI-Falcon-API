@@ -6,6 +6,11 @@ import time
 
 
 class Controller():
+    """
+    The Controller class inherits new controllers classes and
+    provide them with methods to return different responses depending its necessity.
+
+    """
 
     # Error mesages 
     MISSING_OR_EXCESSIVE_PARAMS = "Bad Request - Your request is missing or excessive parameters. Please verify and resubmit."

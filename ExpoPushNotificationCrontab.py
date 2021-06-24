@@ -18,20 +18,20 @@ from models.Session import Session
 from models.Status import Status
 from models.PushNotificationTemplate import PushNotificationTemplate
 
-class PushNotificationCrontab():
+class ExpoPushNotificationCrontab():
     __instance = None
 
     @staticmethod
     def get_instance():
-        if not PushNotificationCrontab.__instance:
-            PushNotificationCrontab()
-        return PushNotificationCrontab.__instance
+        if not ExpoPushNotificationCrontab.__instance:
+            ExpoPushNotificationCrontab()
+        return ExpoPushNotificationCrontab.__instance
     
     def __init__(self):
-        if PushNotificationCrontab.__instance is not None:
-            return PushNotificationCrontab.__instance
+        if ExpoPushNotificationCrontab.__instance is not None:
+            return ExpoPushNotificationCrontab.__instance
         else:
-            PushNotificationCrontab.__instance = self
+            ExpoPushNotificationCrontab.__instance = self
 
     def send_push_notifications(self, query_limit):
         notifications_to_process = []
@@ -46,7 +46,7 @@ class PushNotificationCrontab():
                 )
 
             if not list_of_notifications_to_send:
-                print(f'Date time: {str(datetime.now())[0:-7]}, no notifications to send.')
+                print(f'Date time: {datetime.now().strftime("%d/%b/%Y %H:%M:%S")}, no notifications to send.')
                 return
             
             for notification in list_of_notifications_to_send:
@@ -95,7 +95,7 @@ class PushNotificationCrontab():
             errors += self.__send_push_messages(notifications_to_send)
             selected = len(notifications_to_process)
             send = selected - errors
-            print(f'Date time: {str(datetime.now())[0:-7]}, selected: {selected}, sended: {send}, errors: {errors}')
+            print(f'Date time: {datetime.now().strftime("%d/%b/%Y %H:%M:%S")}, selected: {selected}, sended: {send}, errors: {errors}')
 
         except Exception as exc:
             print(exc)
@@ -204,7 +204,7 @@ class PushNotificationCrontab():
         push_notification_send.save()
 
 def main(query_limit):
-    client = PushNotificationCrontab.get_instance()
+    client = ExpoPushNotificationCrontab.get_instance()
     client.send_push_notifications(query_limit)
 
 

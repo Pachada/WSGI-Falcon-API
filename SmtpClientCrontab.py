@@ -28,6 +28,7 @@ class SmtpClientCrontab():
             self.port = self.config.get('SMTP', 'port')
             self.password = self.config.get('SMTP', 'password')
             self.server = self.config.get('SMTP', 'server')
+            self.fromemail = self.config.get('SMTP', 'fromemail')
             self.context = ssl.create_default_context()
 
     def send_email(self, query_limit:int):
@@ -47,7 +48,7 @@ class SmtpClientCrontab():
                 for email in emails_to_send:
                     email:EmailPool = email
                     msg, content = self.__create_message(email)
-                    response_code = server.sendmail(self.username, email.email, msg)
+                    response_code = server.sendmail(self.fromemail, email.email, msg)
 
                     if not response_code:
                         email.delete()
@@ -61,7 +62,7 @@ class SmtpClientCrontab():
                     
                 selected = len(emails_to_send)
                 send = selected - errors
-                print(f'Date and time: {datetime.now()}, selected: {selected}, sended: {send}, errores: {errors}')
+                print(f'Date and time: {datetime.now().strftime("%d/%b/%Y %H:%M:%S")}, selected: {selected}, sended: {send}, errores: {errors}')
         except Exception as exc:
             print(exc)
             print("Error sending email")
@@ -74,7 +75,7 @@ class SmtpClientCrontab():
     def __create_message(self, email:EmailPool):
         msg = MIMEMultipart()
         msg['Subject'] = email.subject
-        msg['From'] = self.username
+        msg['From'] = self.fromemail
         msg['To'] = email.email
         msg.attach(MIMEText(email.content, "html"))
         return msg.as_string(), email.content

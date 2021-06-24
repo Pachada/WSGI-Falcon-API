@@ -1,8 +1,10 @@
-import os
 import hashlib
+import os
 import tempfile
-from models.File import File
+
 from core.classes.S3Handler import S3Handler
+from models.File import File
+
 try:
     from magic import magic
 except ImportError:

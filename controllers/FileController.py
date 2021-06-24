@@ -108,7 +108,7 @@ class FileController(Controller):
             with open (file.object, "rb") as file_object:
                 file_content = file_object.read()
                 data = Utils.serialize_model(file)
-                data["base64"] = str(file_content)
+                data["base64"] = str(file_content)[2:-1]
             return data
 
             
@@ -118,7 +118,11 @@ class FileController(Controller):
             if id:
                 self.response(resp, 405)
                 return
-
+            
+            query_string = req.params
+            make_thumbnail = False
+            if query_string.get('thumbnail') == 'True': 
+                make_thumbnail = True
             data = []
             file_objects = []
             form = req.get_media()
@@ -142,7 +146,7 @@ class FileController(Controller):
                 
                 data.append(Utils.serialize_model(file))
                 file_objects.append(file)
-                if 'jpeg' in part.content_type or 'png' in part.content_type or 'jpg' in part.content_type:
+                if make_thumbnail and ('jpeg' in part.content_type or 'png' in part.content_type or 'jpg' in part.content_type):
                     thumbnail_content = self.create_thumbnail(part_data)
                     thumbnail_name = part.filename[:-4] + '_thumbnail' + part.filename[-4:]
                     thumbnail = self.create_file_local(thumbnail_name, thumbnail_content, part.content_type, is_thumbnail_flag=1)
@@ -155,9 +159,6 @@ class FileController(Controller):
             print(exc)
             self.response(resp,400,error = str(exc))
 
-        except Exception as exc:
-            print(exc)
-            self.response(resp,400,error = str(exc))
 
     def create_file_local(self, file_name:str, file_content, file_type, is_thumbnail_flag=0):
         random_number = randint(0, 100000)

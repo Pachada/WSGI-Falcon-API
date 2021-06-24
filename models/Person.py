@@ -8,7 +8,7 @@ class Person(Base, Model):
     id = Column(Integer, primary_key = True, autoincrement=True)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
-    birthday = Column(Date)
+    birthday = Column(DateTime)
     created = Column(DateTime, default = Utils.time())
     updated = Column(DateTime, default = Utils.time(), onupdate =  Utils.time())
     enable = Column(mysql.TINYINT(1), default=1)

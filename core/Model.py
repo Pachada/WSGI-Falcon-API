@@ -8,8 +8,31 @@ from core.database import Base, db_session as DB
 
 class Model():
 
+    """
+    The Model Class has methods to process queries in database in a easily way like
+    get one, get all, delete and save. The Model class inherits new models.
+    """
+
     @classmethod
     def get(self, value, filter=None, deleted=False, join=None, with_for_update=False):
+        """
+        The get() method can process a query with some parameters to get a response.
+
+        Parameters
+        ----------
+        value  :  `int`,`str`
+                A parameter to filter by.
+        filter  :  `str`
+                A parameter to filter.
+        deleted  :  `bool`
+                False by default.
+        with_for_update  :  `bool`
+                False by default.
+
+        Returns
+        ----------
+        `object`
+            An object with query results."""
         query = DB.query(self)
         if not deleted and "enable" in self.__table__.columns.keys():
             query = query.filter_by(enable=1)
@@ -26,6 +49,29 @@ class Model():
 
     @classmethod
     def getAll(self, filter=None, limit=None, offset=None, orderBy=None, deleted=False, join=None):
+        """
+        The getAll() method process a query and returns all found values.
+
+        Parameters
+        ----------
+        filter : `str`, `int`
+            A parameter to filter the query, None by default.
+        limit : `int`
+            Sets the query limit.
+        offset : `str`
+            The offset of query.
+        orderBy : `str`
+            Parameter to order the query.
+        deleted : `bool`
+            False by default.
+        join : `None`
+            None by default.
+
+        Returns
+        -------
+        `object`
+            An object with all results.
+        """
         query = DB.query(self)
         if join:
             if isinstance(join, list):
@@ -61,6 +107,16 @@ class Model():
             return False
     
     def soft_delete(self):
+        """
+        The soft_delete() method changes the status of a row in deleted column into *deleted* by adding 1,
+        this indicate that the row has not been deteled at all but in next queries this row will not be
+        taken at least that is specify in the query.
+
+        Returns
+        -------
+        `bool`
+            True if deleted = 1 and save() method processes successful for softDelete(), False otherwise.
+        """
         try:
             self.enable = 0
             return self.save()
@@ -70,6 +126,15 @@ class Model():
             return False
     
     def delete(self):
+        """
+        The delete() method deletes a row from database, if something went wrong
+        delete() can roll back changes made too.
+
+        Returns
+        -------
+        `bool`
+            True if delete and commit is process successful, False otherwise.
+        """
         try:
             DB.delete(self)
             DB.commit()
@@ -80,7 +145,26 @@ class Model():
             print(exc)
             return False
 
+    @classmethod
     def count(self, filter=None, deleted=False, join=None):
+        """
+        The count() method counts all rows depending its parameters wich can be filtered,
+        deleted or make a join.
+
+        Parameters
+        ----------
+        filter : `str`, `int`
+            Value to filter by.
+        deleted : `bool`
+            False by default.
+        join : `None`
+            None by default.
+
+        Returns
+        -------
+        `object`
+            An object with count() results.
+        """
         try:
             query = DB.query(self)
             if join:
@@ -96,7 +180,23 @@ class Model():
             print(exc)
             return False
 
+    @classmethod
     def sum(self, field, filter=None):
+        """
+        The sum() method sums all rows of a field, if there is not result then returns 0.
+
+        Parameters
+        ----------
+        field : `str`
+            A string for field of model.
+        filter : `None`
+            None by default.
+
+        Returns
+        -------
+        `int`
+            Sum of results.
+        """
         try:
             if field and hasattr(self, field):
                 field_ = getattr(self, field, None)
@@ -111,7 +211,23 @@ class Model():
             print(exc)
             return False
 
+    @classmethod
     def max(self, field, filter=None):
+        """
+        The max() method process a query and returns the max value of a field.
+
+        Parameters
+        ----------
+        field : `str`
+            A string for field of model.
+        filter : `None`
+            None by default.
+
+        Returns
+        -------
+        `object`
+            An object with max result.
+        """
         try:
             if field and hasattr(self, field):
                 field_ = getattr(self, field, None)
@@ -124,7 +240,23 @@ class Model():
             print(exc)
             return False
 
+    @classmethod
     def min(self, field, filter=None):
+        """
+        The min() method process a query and returns the min value of a field.
+
+        Parameters
+        ----------
+        field : `str`
+            A string for field of model.
+        filter : `None`
+            None by default.
+
+        Returns
+        -------
+        `object`
+            An object with min result.
+        """
         try:
             if field and hasattr(self, field):
                 field_ = getattr(self, field, None)
@@ -155,6 +287,20 @@ class Model():
 
     @staticmethod
     def saveAll(instances):
+        """
+        The saveAll() method adds more than one objects of Models and saves them to the database,
+        if something went wrong saveAll() can roll back changes made too.
+
+        Parameters
+        ----------
+        instances : `list`
+            A list of instances of model.
+
+        Returns
+        -------
+        `bool`
+            True if add and commit is process successful, False otherwise.
+        """
         try:
             if isinstance(instances, list):
                 DB.add_all(instances)
@@ -170,6 +316,19 @@ class Model():
 
     @staticmethod
     def remove(instance):
+        """
+        The remove() method removes an instance.
+
+        Parameters
+        ----------
+        instance : `instance`
+            A instance to remove.
+
+        Returns
+        -------
+        `bool`
+            Returns True if the instance is removed, False otherwise.
+        """
         try:
             DB.expunge(instance)
             return True
