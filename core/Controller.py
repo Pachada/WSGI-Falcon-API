@@ -6,20 +6,22 @@ import json
 from core.Utils import Utils
 
 
-class Controller():
+class Controller:
     """
     The Controller class inherits new controllers classes and
     provide them with methods to return different responses depending its necessity.
 
     """
 
-    # Error mesages 
+    # Error mesages
     MISSING_OR_EXCESSIVE_PARAMS = "Bad Request - Your request is missing or excessive parameters. Please verify and resubmit."
     PROBLEM_SAVING_TO_DB = "Internal Server Error - problem saving to database."
     INVALID_JSON = "Bad Request - Invalid JSON"
     ID_NOT_FOUND = "Not Found - Invalid ID"
-    
-    def response(self, resp, http_code=200, data=None, message=None, error=None, error_code=None):
+
+    def response(
+        self, resp, http_code=200, data=None, message=None, error=None, error_code=None
+    ):
         map = {
             200: falcon.HTTP_200,
             201: falcon.HTTP_201,
@@ -30,7 +32,7 @@ class Controller():
             405: falcon.HTTP_405,
             409: falcon.HTTP_409,
             413: falcon.HTTP_413,
-            500: falcon.HTTP_500
+            500: falcon.HTTP_500,
         }
         resp.status = map[http_code]
         if isinstance(data, list) and not data:
@@ -43,9 +45,9 @@ class Controller():
             data["error"] = error
         if error_code:
             data["error_code"] = error_code
-        resp.text = json.dumps(data, ensure_ascii=False)    
+        resp.text = json.dumps(data, ensure_ascii=False)
 
-    def set_values(self, row, data:dict):
+    def set_values(self, row, data: dict):
         try:
             for col in row.__table__.columns.keys():
                 if col in data:
@@ -62,8 +64,10 @@ class Controller():
             print("[ERROR-SETTING_VALUES]")
             print(exc)
             return False
-    
-    def generic_on_get(self, req:Request, resp:Response, model, id:int=None, filters=None):
+
+    def generic_on_get(
+        self, req: Request, resp: Response, model, id: int = None, filters=None
+    ):
         if id:
             row = model.get(id)
             if not row:
@@ -73,31 +77,35 @@ class Controller():
             row = model.getAll(filters)
 
         self.response(resp, 200, Utils.serialize_model(row))
-        
-    def generic_on_post(self, req:Request, resp:Response, model, content_location, id:int=None):
+
+    def generic_on_post(
+        self, req: Request, resp: Response, model, content_location, id: int = None
+    ):
         if id:
-            self.response(resp,405)
+            self.response(resp, 405)
             return
 
         try:
-            data:dict = json.loads(req.stream.read())
+            data: dict = json.loads(req.stream.read())
         except Exception as exc:
             print(exc)
-            self.response(resp, 400, error = str(exc))
+            self.response(resp, 400, error=str(exc))
             return
-        
+
         new_record = model()
-            
+
         if not self.set_values(new_record, data):
             self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
             return
 
-        self.response(resp, 201,Utils.serialize_model(new_record))
-        resp.append_header('content_location', f"/{content_location}/{new_record.id}")
-    
-    def generic_on_put(self, req:Request, resp:Response, model, id:int=None, extra_data:dict=None):
+        self.response(resp, 201, Utils.serialize_model(new_record))
+        resp.append_header("content_location", f"/{content_location}/{new_record.id}")
+
+    def generic_on_put(
+        self, req: Request, resp: Response, model, id: int = None, extra_data: dict = None
+    ):
         if not id:
-            self.response(resp,405)
+            self.response(resp, 405)
             return
 
         row = model.get(id)
@@ -105,20 +113,22 @@ class Controller():
             self.response(resp, 404, self.ID_NOT_FOUND)
             return
         try:
-            data:dict = json.loads(req.stream.read())
+            data: dict = json.loads(req.stream.read())
         except Exception as exc:
             print(exc)
-            self.response(resp, 400, error = str(exc))
-        
+            self.response(resp, 400, error=str(exc))
+
         if not self.set_values(row, data):
             self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
             return
 
         self.response(resp, 200, Utils.serialize_model(row))
-    
-    def generic_on_delete(self, req:Request, resp:Response, model, id:int=None, soft_delete=True):
+
+    def generic_on_delete(
+        self, req: Request, resp: Response, model, id: int = None, soft_delete=True
+    ):
         if not id:
-            self.response(resp,405)
+            self.response(resp, 405)
             return
 
         row = model.get(id)
@@ -134,5 +144,5 @@ class Controller():
             if not row.delete():
                 self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
                 return
-            
+
         self.response(resp, 200, Utils.serialize_model(row))

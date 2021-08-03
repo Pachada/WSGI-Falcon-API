@@ -4,10 +4,10 @@ from exponent_server_sdk import (
     PushMessage,
     PushServerError,
     PushTicketError,
-    PushTicket
+    PushTicket,
 )
 from requests.exceptions import ConnectionError, HTTPError
-import json 
+import json
 from datetime import datetime
 from sqlalchemy import or_, and_
 from core.Utils import Utils
@@ -18,7 +18,8 @@ from models.Session import Session
 from models.Status import Status
 from models.PushNotificationTemplate import PushNotificationTemplate
 
-class ExpoPushNotificationCrontab():
+
+class ExpoPushNotificationCrontab:
     __instance = None
 
     @staticmethod
@@ -26,7 +27,7 @@ class ExpoPushNotificationCrontab():
         if not ExpoPushNotificationCrontab.__instance:
             ExpoPushNotificationCrontab()
         return ExpoPushNotificationCrontab.__instance
-    
+
     def __init__(self):
         if ExpoPushNotificationCrontab.__instance is not None:
             return ExpoPushNotificationCrontab.__instance
@@ -40,93 +41,99 @@ class ExpoPushNotificationCrontab():
                 and_(
                     PushNotificationPool.status_id.in_([Status.PENDING, Status.ERROR]),
                     PushNotificationPool.send_attemps < 3,
-                    PushNotificationPool.notification_time <= datetime.utcnow()
+                    PushNotificationPool.notification_time <= datetime.utcnow(),
                 ),
-                limit=query_limit
-                )
+                limit=query_limit,
+            )
 
             if not list_of_notifications_to_send:
-                print(f'Date time: {datetime.now().strftime("%d/%b/%Y %H:%M:%S")}, no notifications to send.')
+                print(
+                    f'Date time: {datetime.now().strftime("%d/%b/%Y %H:%M:%S")}, no notifications to send.'
+                )
                 return
-            
+
             for notification in list_of_notifications_to_send:
-                notification:PushNotificationPool = notification
+                notification: PushNotificationPool = notification
                 notification.status_id = Status.PROCESSING
                 notification.save()
                 notifications_to_process.append(notification)
-            
+
             errors = 0
-            notifications_to_send:dict = {}
+            notifications_to_send: dict = {}
             for notification in notifications_to_process:
                 error = False
                 private_notifiaction = False
-                notification:PushNotificationPool = notification
-                
-                # Send notifications to the device associated with the last session of the user 
+                notification: PushNotificationPool = notification
+
+                # Send notifications to the device associated with the last session of the user
                 # check if the user has a valid sessions if the notification template is private.
-                template:PushNotificationTemplate = notification.template
+                template: PushNotificationTemplate = notification.template
                 if template.private:
                     private_notifiaction = True
 
-                last_session = Session.max("updated", Session.user_id == notification.user_id)
+                last_session = Session.max(
+                    "updated", Session.user_id == notification.user_id
+                )
                 session = Session.get(Session.updated == last_session)
                 if not session:
                     error = True
-                
-                if not error:    
-                    device:Device = session.device
-                    # if the notifications is private check if the sessions is valid 
-                    # Check that the device has an token 
+
+                if not error:
+                    device: Device = session.device
+                    # if the notifications is private check if the sessions is valid
+                    # Check that the device has an token
                     if private_notifiaction and not Utils.validate_session(session):
                         error = True
                     if not device.token:
                         error = True
-                
+
                 if error:
                     notification.status_id = Status.ERROR
                     errors += 1
                     notification.send_attemps = notification.send_attemps + 1
                     notification.save()
                     continue
-                    
+
                 # The sessión has a valid device and the device of that session has a token
                 notifications_to_send[notification] = device
-                
+
             errors += self.__send_push_messages(notifications_to_send)
             selected = len(notifications_to_process)
             send = selected - errors
-            print(f'Date time: {datetime.now().strftime("%d/%b/%Y %H:%M:%S")}, selected: {selected}, sended: {send}, errors: {errors}')
+            print(
+                f'Date time: {datetime.now().strftime("%d/%b/%Y %H:%M:%S")}, selected: {selected}, sended: {send}, errors: {errors}'
+            )
 
         except Exception as exc:
             print(exc)
             print("Error sending push notifications")
             if notifications_to_process:
-                notification:PushNotificationPool
+                notification: PushNotificationPool
                 for notification in notifications_to_process:
                     notification.status_id = Status.ERROR
                     notification.save()
 
     # Send PushNotification to multiple tokens
-    def __send_push_messages(self, data:dict):
+    def __send_push_messages(self, data: dict):
         errors = 0
         try:
             error = False
             push_messages = []
             for push_notification, device in data.items():
-                push_notification:PushNotificationPool = push_notification
-                device:Device = device
+                push_notification: PushNotificationPool = push_notification
+                device: Device = device
                 message = PushMessage(
-                    to = device.token,
-                    body = push_notification.message,
-                    data = json.loads(push_notification.data)
+                    to=device.token,
+                    body=push_notification.message,
+                    data=json.loads(push_notification.data),
                 )
                 push_messages.append(message)
 
             push_tickets = PushClient().publish_multiple(push_messages)
             # Lets associate the ticket with the PushNotificationPool
             for (push_notification, _), ticket in zip(data.items(), push_tickets):
-                push_notification:PushNotificationPool = push_notification
-                ticket:PushTicket = ticket
+                push_notification: PushNotificationPool = push_notification
+                ticket: PushTicket = ticket
                 push_notification.ticket = ticket.id
                 push_notification.save()
 
@@ -134,16 +141,16 @@ class ExpoPushNotificationCrontab():
             # Encountered some likely formatting/validation error.
             print(exc)
             error = True
-            
+
         except (ConnectionError, HTTPError) as exc:
             # Encountered some Connection or HTTP error
             print(exc)
             error = True
-        
+
         if error:
             print("Error sendind push notifications to Expo server")
             for push_notification in data:
-                push_notification:PushNotificationPool = push_notification
+                push_notification: PushNotificationPool = push_notification
                 push_notification.status_id = Status.ERROR
                 push_notification.save()
                 errors += 1
@@ -154,9 +161,11 @@ class ExpoPushNotificationCrontab():
         # flows.
         for ticket in push_tickets:
             try:
-                ticket:PushTicket = ticket
-                push_notification = PushNotificationPool.get(PushNotificationPool.ticket == ticket.id)
-                device:Device = data[push_notification]
+                ticket: PushTicket = ticket
+                push_notification = PushNotificationPool.get(
+                    PushNotificationPool.ticket == ticket.id
+                )
+                device: Device = data[push_notification]
                 error = False
 
                 ticket.validate_response()
@@ -178,7 +187,7 @@ class ExpoPushNotificationCrontab():
                 # Encountered some other per-notification error.
                 error = True
                 comments = "push ticket error"
-                
+
             if error:
                 push_notification.status = Status.ERROR
                 push_notification.send_attemps = push_notification.send_attemps + 1
@@ -188,25 +197,30 @@ class ExpoPushNotificationCrontab():
             self.__save_to_sended(push_notification, device, comments)
         return errors
 
-
-    def __save_to_sended(self, push_notification:PushNotificationPool, device:Device=None, comments=None ):
+    def __save_to_sended(
+        self,
+        push_notification: PushNotificationPool,
+        device: Device = None,
+        comments=None,
+    ):
         push_notification_send = PushNotificationSent(
-            user_id = push_notification.user_id,
-            device_id = device.id if device else None,
-            template_id = push_notification.template_id,
-            push_notification_pool_id = push_notification.id,
-            ticket = push_notification.ticket if push_notification.ticket else None,
-            message = push_notification.message,
-            data = push_notification.data,
-            idStatus = push_notification.status_id,
-            comments = comments if comments else None
+            user_id=push_notification.user_id,
+            device_id=device.id if device else None,
+            template_id=push_notification.template_id,
+            push_notification_pool_id=push_notification.id,
+            ticket=push_notification.ticket if push_notification.ticket else None,
+            message=push_notification.message,
+            data=push_notification.data,
+            idStatus=push_notification.status_id,
+            comments=comments if comments else None,
         )
         push_notification_send.save()
+
 
 def main(query_limit):
     client = ExpoPushNotificationCrontab.get_instance()
     client.send_push_notifications(query_limit)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(100)

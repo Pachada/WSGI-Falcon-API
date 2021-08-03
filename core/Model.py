@@ -1,4 +1,18 @@
-from sqlalchemy import Column, Integer, String, BigInteger, ForeignKey, DateTime, Date,Text, Float, CHAR, SmallInteger, func, distinct
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    BigInteger,
+    ForeignKey,
+    DateTime,
+    Date,
+    Text,
+    Float,
+    CHAR,
+    SmallInteger,
+    func,
+    distinct,
+)
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import relationship, exc
 from sqlalchemy.sql import func
@@ -6,7 +20,8 @@ from sqlalchemy.dialects import mysql
 from datetime import datetime
 from core.database import Base, db_session as DB
 
-class Model():
+
+class Model:
 
     """
     The Model Class has methods to process queries in database in a easily way like
@@ -48,7 +63,15 @@ class Model():
             return query.first()
 
     @classmethod
-    def getAll(self, filter=None, limit=None, offset=None, orderBy=None, deleted=False, join=None):
+    def getAll(
+        self,
+        filter=None,
+        limit=None,
+        offset=None,
+        orderBy=None,
+        deleted=False,
+        join=None,
+    ):
         """
         The getAll() method process a query and returns all found values.
 
@@ -105,7 +128,7 @@ class Model():
             print("[ERROR-SAVING]")
             print(exc)
             return False
-    
+
     def soft_delete(self):
         """
         The soft_delete() method changes the status of a row in deleted column into *deleted* by adding 1,
@@ -124,7 +147,7 @@ class Model():
             print("[ERROR-SOFT-DELETING]")
             print(exc)
             return False
-    
+
     def delete(self):
         """
         The delete() method deletes a row from database, if something went wrong
@@ -144,7 +167,7 @@ class Model():
             print("[ERROR-DELETING]")
             print(exc)
             return False
-    
+
     @classmethod
     def delete_multiple(self, filter):
         try:

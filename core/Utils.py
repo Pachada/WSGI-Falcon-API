@@ -336,7 +336,7 @@ class Utils:
         if re.search(regex, email):
             return True
         return False
-    
+
     @staticmethod
     def get_start_date_and_end_date(start_date=None, end_days=15):
         if not end_days:
@@ -344,7 +344,7 @@ class Utils:
 
         if not start_date:
             startdate = datetime.utcnow()
-        
+
         else:
             startdate_formated = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S")
             startdate = Utils.get_datetime_from_utc6_to_utc0(start_date)
@@ -353,11 +353,14 @@ class Utils:
             # if it has date but not hours and is a different day as today: the startdate is the one sended.
             # if it has date and hour the stardate is the one sended
             today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-            if startdate_formated.hour == 0 and startdate_formated.minute == 0 and startdate_formated.second == 0:
+            if (
+                startdate_formated.hour == 0
+                and startdate_formated.minute == 0
+                and startdate_formated.second == 0
+            ):
                 if today == startdate_formated:
                     startdate = datetime.utcnow()
 
-            
         enddate = startdate + timedelta(days=end_days)
 
         return startdate, enddate

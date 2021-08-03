@@ -5,28 +5,39 @@ from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
 Config = configparser.ConfigParser()
-Config.read('config.ini')
+Config.read("config.ini")
 
-host = Config.get('DATABASE', 'host')
-port = Config.get('DATABASE', 'port')
-database = Config.get('DATABASE', 'database')
-user = Config.get('DATABASE', 'user')
-password = Config.get('DATABASE', 'password')
+host = Config.get("DATABASE", "host")
+port = Config.get("DATABASE", "port")
+database = Config.get("DATABASE", "database")
+user = Config.get("DATABASE", "user")
+password = Config.get("DATABASE", "password")
 
 engine = create_engine(
-    'mysql+mysqlconnector://' +
-    str(user)+':'+str(password)+'@'+str(host)+':'+str(port)+'/'+str(database),
+    "mysql+mysqlconnector://"
+    + str(user)
+    + ":"
+    + str(password)
+    + "@"
+    + str(host)
+    + ":"
+    + str(port)
+    + "/"
+    + str(database),
     pool_size=20,
     max_overflow=10,
     pool_recycle=3600,
     pool_timeout=10,
     isolation_level="READ UNCOMMITTED",
-    pool_pre_ping=True
+    pool_pre_ping=True,
 )
-db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+db_session = scoped_session(
+    sessionmaker(autocommit=False, autoflush=False, bind=engine)
+)
 
 Base = declarative_base()
 Base.query = db_session.query_property()
+
 
 @event.listens_for(engine, "engine_connect")
 def ping_connection(connection, branch):

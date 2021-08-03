@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: restapi
 -- ------------------------------------------------------
--- Server version	8.0.25-0ubuntu0.20.04.1
+-- Server version	8.0.26-0ubuntu0.20.04.2
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -23,16 +23,16 @@ DROP TABLE IF EXISTS `device`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `device` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `uuid` varchar(300) NOT NULL,
-  `user_id` int NOT NULL,
+  `user_id` bigint NOT NULL,
   `token` varchar(100) DEFAULT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  KEY `device_idUser_idx` (`user_id`),
-  CONSTRAINT `device_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `fk_device_user_id_idx` (`user_id`),
+  CONSTRAINT `fk_device_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -54,20 +54,20 @@ DROP TABLE IF EXISTS `email_pool`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `email_pool` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `email` varchar(100) NOT NULL,
   `subject` varchar(100) NOT NULL,
   `content` text NOT NULL,
   `send_attemps` tinyint(1) NOT NULL DEFAULT '0',
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `status_id` int NOT NULL,
-  `template_id` int NOT NULL,
+  `status_id` bigint NOT NULL,
+  `template_id` bigint NOT NULL,
   PRIMARY KEY (`id`),
   KEY `emailpool_idTemplate_idx` (`template_id`),
   KEY `emailpool_idStatus_idx` (`status_id`),
-  CONSTRAINT `emailpool_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `emailpool_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `email_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_email_pool_email_template_id` FOREIGN KEY (`template_id`) REFERENCES `email_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_email_pool_status_id` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -88,18 +88,18 @@ DROP TABLE IF EXISTS `email_sent`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `email_sent` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL,
   `email` varchar(100) NOT NULL,
   `code` varchar(45) NOT NULL,
   `content` text NOT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `template_id` int NOT NULL,
-  `status_id` int NOT NULL,
+  `template_id` bigint NOT NULL,
+  `status_id` bigint NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `emailsent_idTemplate_idx` (`template_id`),
-  KEY `emailsent_idStatus_idx` (`status_id`),
-  CONSTRAINT `emailsent_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `emailsent_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `email_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `fk_email_sent_email_template_id_idx` (`template_id`),
+  KEY `fk_email_sent_status_id_idx` (`status_id`),
+  CONSTRAINT `fk_email_sent_email_template_id` FOREIGN KEY (`template_id`) REFERENCES `email_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_email_sent_status_id` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -120,7 +120,7 @@ DROP TABLE IF EXISTS `email_template`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `email_template` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `subject` varchar(100) NOT NULL,
   `description` varchar(500) NOT NULL,
@@ -150,7 +150,7 @@ DROP TABLE IF EXISTS `file`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `file` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `object` varchar(255) NOT NULL,
   `size` int NOT NULL,
   `type` varchar(100) NOT NULL,
@@ -181,15 +181,16 @@ DROP TABLE IF EXISTS `person`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `person` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL,
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
-  `birthday` date DEFAULT NULL,
+  `birthday` datetime DEFAULT NULL,
+  `sex` varchar(45) DEFAULT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -198,7 +199,7 @@ CREATE TABLE `person` (
 
 LOCK TABLES `person` WRITE;
 /*!40000 ALTER TABLE `person` DISABLE KEYS */;
-INSERT INTO `person` VALUES (1,'Daniel','Trejo','1998-01-10','2021-05-03 10:46:20','2021-05-03 10:46:20',1);
+INSERT INTO `person` VALUES (1,'Daniel','Trejo','1998-01-10 00:00:00',NULL,'2021-05-03 10:46:20','2021-05-03 10:46:20',1);
 /*!40000 ALTER TABLE `person` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -210,7 +211,7 @@ DROP TABLE IF EXISTS `push_notification_catalogue`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `push_notification_catalogue` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `action` varchar(45) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
@@ -234,10 +235,10 @@ DROP TABLE IF EXISTS `push_notification_pool`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `push_notification_pool` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL,
-  `template_id` int NOT NULL,
-  `status_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `template_id` bigint NOT NULL,
+  `status_id` bigint NOT NULL,
   `notification_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `message` varchar(200) NOT NULL,
   `data` varchar(200) DEFAULT NULL,
@@ -247,12 +248,12 @@ CREATE TABLE `push_notification_pool` (
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  KEY `pushnotificationpool_idUser_idx` (`user_id`),
-  KEY `pushnotificationpool_idTemplate_idx` (`template_id`),
-  KEY `pushnotificationpool_idStatus_idx` (`status_id`),
-  CONSTRAINT `pushnotificationpool_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `pushnotificationpool_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `push_notification_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `pushnotificationpool_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `fk_push_notification_pool_user_id_idx` (`user_id`),
+  KEY `fk_push_notification_pool_push_notification_template_id_idx` (`template_id`),
+  KEY `fk_push_notification_pool_status_id_idx` (`status_id`),
+  CONSTRAINT `fk_push_notification_pool_push_notification_template_id` FOREIGN KEY (`template_id`) REFERENCES `push_notification_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_push_notification_pool_status_id` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_push_notification_pool_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -273,12 +274,12 @@ DROP TABLE IF EXISTS `push_notification_sent`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `push_notification_sent` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL,
-  `device_id` int NOT NULL,
-  `template_id` int NOT NULL,
-  `status_id` int NOT NULL,
-  `push_notification_pool_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `device_id` bigint NOT NULL,
+  `template_id` bigint NOT NULL,
+  `status_id` bigint NOT NULL,
+  `push_notification_pool_id` bigint NOT NULL,
   `ticket` varchar(200) DEFAULT NULL,
   `message` varchar(200) NOT NULL,
   `data` varchar(200) NOT NULL,
@@ -286,16 +287,16 @@ CREATE TABLE `push_notification_sent` (
   `read` tinyint(1) NOT NULL DEFAULT '0',
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `pushnotificationsent_idUser_idx` (`user_id`),
-  KEY `pushnotificationsent_idDevice_idx` (`device_id`),
-  KEY `pushnotificationsent_idTemplate_idx` (`template_id`),
-  KEY `pushnotificationsent_idStatus_idx` (`status_id`),
-  KEY `pushnotificationsent_idPushNotificationPool_idx` (`push_notification_pool_id`),
-  CONSTRAINT `pushnotificationsent_idDevice` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `pushnotificationsent_idPushNotificationPool` FOREIGN KEY (`push_notification_pool_id`) REFERENCES `push_notification_pool` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `pushnotificationsent_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `pushnotificationsent_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `push_notification_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `pushnotificationsent_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `fk_push_notification_sent_user_id_idx` (`user_id`),
+  KEY `fk_push_notification_sent_devie_id_idx` (`device_id`),
+  KEY `fk_push_notification_sent_push_notification_template_id_idx` (`template_id`),
+  KEY `fk_push_notification_sent_status_id_idx` (`status_id`),
+  KEY `fk_push_notification_sent_push_notification_pool_id_idx` (`push_notification_pool_id`),
+  CONSTRAINT `fk_push_notification_sent_device_id` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_push_notification_sent_push_notification_pool_id` FOREIGN KEY (`push_notification_pool_id`) REFERENCES `push_notification_pool` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_push_notification_sent_push_notification_template_id` FOREIGN KEY (`template_id`) REFERENCES `push_notification_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_push_notification_sent_status_id` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_push_notification_sent_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -316,19 +317,19 @@ DROP TABLE IF EXISTS `push_notification_template`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `push_notification_template` (
-  `id` int NOT NULL,
+  `id` bigint NOT NULL,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) NOT NULL,
   `title` varchar(200) NOT NULL,
   `message` varchar(200) NOT NULL,
   `private` tinyint(1) NOT NULL,
-  `catalogue_id` int NOT NULL,
+  `catalogue_id` bigint NOT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  KEY `pushnotificationtemplate_idCatalogue_idx` (`catalogue_id`),
-  CONSTRAINT `pushnotificationtemplate_idCatalogue` FOREIGN KEY (`catalogue_id`) REFERENCES `push_notification_catalogue` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `fk_push_notification_template_catalogue_id_idx` (`catalogue_id`),
+  CONSTRAINT `fk_push_notification_template_catalogue_id` FOREIGN KEY (`catalogue_id`) REFERENCES `push_notification_catalogue` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -349,7 +350,7 @@ DROP TABLE IF EXISTS `role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `role` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(30) NOT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -376,18 +377,18 @@ DROP TABLE IF EXISTS `session`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `session` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL COMMENT '		',
-  `device_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL COMMENT '		',
+  `device_id` bigint NOT NULL,
   `token` varchar(120) NOT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  KEY `session_idUser_idx` (`user_id`),
-  KEY `session_idDevice_idx` (`device_id`),
-  CONSTRAINT `session_idDevice` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `session_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `fk_session_user_id_idx` (`user_id`),
+  KEY `fk_session_device_id_idx` (`device_id`),
+  CONSTRAINT `fk_session_device_id` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_session_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -397,7 +398,7 @@ CREATE TABLE `session` (
 
 LOCK TABLES `session` WRITE;
 /*!40000 ALTER TABLE `session` DISABLE KEYS */;
-INSERT INTO `session` VALUES (1,1,1,'2egj2uhwbW2RB4xtTq37mUvwmol00J_sCv69oR0UULw','2021-05-03 16:06:01','2021-05-19 01:37:54',1),(2,1,2,'ha1b2ijiCDf_ah96LNIo0iSNShK_JmQdc9pezOmkpd8','2021-05-04 17:13:40','2021-05-04 17:13:40',1);
+INSERT INTO `session` VALUES (1,1,1,'O4FIfN4kUsbJHAaaJCSldp2Fnm_LG2yxU7wzNqboZOs','2021-05-03 16:06:01','2021-08-02 21:44:34',1),(2,1,2,'ha1b2ijiCDf_ah96LNIo0iSNShK_JmQdc9pezOmkpd8','2021-05-04 17:13:40','2021-05-04 17:13:40',1);
 /*!40000 ALTER TABLE `session` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -409,10 +410,10 @@ DROP TABLE IF EXISTS `status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `status` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `description` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -433,13 +434,13 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `username` varchar(100) NOT NULL,
   `password` varchar(300) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `phone` varchar(15) NOT NULL,
-  `role_id` int NOT NULL,
-  `person_id` int DEFAULT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `role_id` bigint NOT NULL,
+  `person_id` bigint DEFAULT NULL,
   `otp` varchar(6) DEFAULT NULL,
   `otp_time` datetime DEFAULT NULL,
   `email_confirmation_code` varchar(6) DEFAULT NULL,
@@ -449,10 +450,10 @@ CREATE TABLE `user` (
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  KEY `user_idRole_idx` (`role_id`),
-  KEY `user_idPerson_idx` (`person_id`),
-  CONSTRAINT `user_idPerson` FOREIGN KEY (`person_id`) REFERENCES `person` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `user_idRole` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `fk_user_role_id_idx` (`role_id`),
+  KEY `fk_user_person_id_idx` (`person_id`),
+  CONSTRAINT `fk_user_person_id` FOREIGN KEY (`person_id`) REFERENCES `person` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_role_id` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -475,4 +476,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-06-24  8:24:46
+-- Dump completed on 2021-08-03 10:52:08

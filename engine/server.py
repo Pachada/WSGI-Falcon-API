@@ -9,8 +9,10 @@ CORS_middleware = CORS_Handler()
 sqlalchemy_session_manager = SQLAlchemySessionManager()
 
 # Create server
-server = falcon.App(middleware=[CORS_middleware, authorization_middleware, sqlalchemy_session_manager])
-#server = falcon.App()
+server = falcon.App(
+    middleware=[CORS_middleware, authorization_middleware, sqlalchemy_session_manager]
+)
+# server = falcon.App()
 
 # Load routes
 routeLoader = RouteLoader(server, authorization_middleware)
