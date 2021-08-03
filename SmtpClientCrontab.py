@@ -2,7 +2,7 @@ import smtplib, ssl
 import configparser
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from models.EmailSent import EmailSent
+from models.EmailSent import EmailSent, and_
 from models.EmailPool import EmailPool
 from datetime import datetime
 from models.Status import Status
@@ -37,7 +37,14 @@ class SmtpClientCrontab():
             with smtplib.SMTP(self.server, self.port) as server:
                 server.starttls(context=self.context)
                 server.login(self.username, self.password)
-                list_of_emails = EmailPool.getAll(filter = EmailPool.status_id.in_([Status.PENDING, Status.ERROR]), limit=query_limit)
+                
+                list_of_emails = EmailPool.getAll(and_(
+                    EmailPool.status_id.in_([Status.PENDING, Status.ERROR]),
+                    EmailPool.send_time <= datetime.utcnow()
+                    ), 
+                    limit=query_limit
+                    )
+
                 errors = 0
                 for email in list_of_emails:
                     email:EmailPool = email
@@ -88,7 +95,7 @@ class SmtpClientCrontab():
             send = Status.SEND
             code = "250: Requested mail action okay, completed"
             
-        email = EmailSent(template_id = template_id, content = msg, email = email, send = send, code = code)
+        email = EmailSent(template_id = template_id, content = msg, email = email, status_id = send, code = code)
         email.save()
 
 

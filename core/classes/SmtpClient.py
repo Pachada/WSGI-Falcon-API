@@ -1,4 +1,4 @@
-from models.EmailPool import EmailPool
+from models.EmailPool import EmailPool, datetime
 from models.EmailTemplate import EmailTemplate
 
 class SmtpClient():
@@ -16,9 +16,9 @@ class SmtpClient():
         else:
             SmtpClient.__instance = self
 
-    def send_email_to_pool(self, receiver_email:str, data:dict, template_id:int):
+    def send_email_to_pool(self, receiver_email:str, data:dict, template_id:int, send_time:datetime=None):
         content, subject = self.__create_message_for_pool(data, template_id)
-        self.__save_to_pool(content, receiver_email, template_id, subject)
+        self.__save_to_pool(content, receiver_email, template_id, subject, send_time)
 
     def __create_message_for_pool(self, data:dict, template_id:int):
         template = EmailTemplate.get(template_id)
@@ -29,6 +29,13 @@ class SmtpClient():
         subject = template.subject
         return content, subject
 
-    def __save_to_pool(self, msg:str, email:str, template_id:int, subject:str):
-        email = EmailPool(template_id = template_id, content = msg, email = email, subject = subject)
+    def __save_to_pool(self, msg:str, email:str, template_id:int, subject:str, send_time:datetime=None):
+        email = EmailPool(
+            template_id = template_id, 
+            content = msg, 
+            email = email, 
+            subject = subject,
+            send_time = send_time if send_time else datetime.utcnow()
+            )
+
         email.save()

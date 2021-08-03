@@ -6,7 +6,7 @@ class NewsTypeController(Controller):
 
     def on_get(self, req, resp):
         types = NewsType.getAll()
-        data = Utils.serializeModel(types)
+        data = Utils.serialize_model(types)
         self.response(resp,200,data)
 
     def on_post(self, req, resp):

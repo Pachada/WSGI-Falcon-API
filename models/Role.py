@@ -8,7 +8,7 @@ class Role(Base, Model):
     
     __tablename__ = 'role'
 
-    id = Column(Integer, primary_key = True, autoincrement=True)
+    id = Column(BigInteger, primary_key = True, autoincrement=True)
     name = Column(String(30), nullable=False)
     created = Column(DateTime, default = Utils.time())
     updated = Column(DateTime, default = Utils.time(), onupdate =  Utils.time())

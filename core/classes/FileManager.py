@@ -16,7 +16,7 @@ class FileManager():
     put a file or get a file using S3Handler Class.
     """
     @staticmethod
-    def getFileInfo(file_path):
+    def get_file_info(file_path):
         """
         The getFileInfo() method gets information of a file and return it in a dictionary.
 ​
@@ -33,18 +33,18 @@ class FileManager():
             size = os.stat(file_path).st_size
             name = os.path.basename(file_path)
             _type = magic.from_file(file_path, mime=True)
-            hash = hashlib.sha224(name + str(size)).hexdigest()
+            #hash = hashlib.sha224(name + str(size)).hexdigest()
             return {
                 'size': size,
                 'name': name,
-                'hash': hash,
+                #'hash': hash,
                 'type': _type
             }
         else:
             return None
 
     @staticmethod
-    def putFile(bucket_name, profile, content, key, region="us-west-2", metadata={}):
+    def put_file(bucket_name, content, key, file_type=None, file_name=None, profile=None, region="us-west-2", metadata={}, is_thumbnail=False):
         """
         The putFile() method creates a temporary file and write inside it the content,
         then creates a new handler of S3Handler class to use upload_file() method, finally
@@ -72,23 +72,24 @@ class FileManager():
         tmpFile = tempfile.NamedTemporaryFile()
         tmpFile.write(content)
         tmpFile.seek(0)
-        metadataInfo = FileManager.getFileInfo(tmpFile.name)
-        handler = S3Handler(bucket_name, profile, region)
+        metadata_info = FileManager.get_file_info(tmpFile.name)
+        handler = S3Handler(bucket_name, region, profile)
         obj = handler.upload_file(tmpFile, key, metadata=metadata)
 
         record = File(
             object=key,
-            size=metadataInfo.get("size"),
-            type=metadataInfo.get("type"),
-            name=metadataInfo.get("name"),
-            hash=metadataInfo.get("hash"),
+            size=metadata_info.get("size"),
+            type= file_type if file_type else metadata_info.get("type"),
+            name= file_name if file_name else metadata_info.get("name"),
+            hash=key,
+            is_thumbnail = is_thumbnail
         )
         if record.save():
             tmpFile.close()
             return record
 
     @staticmethod
-    def getfile(bucket_name, profile, idFile, aws_region):
+    def get_file(bucket_name, file_id, aws_region, profile=None):
         """
         The getfile() method gets a file from database and creates a handler to download it using
         download_file() method.
@@ -108,17 +109,30 @@ class FileManager():
         -------
         `instance`
             An instance of the downloaded file."""
-        file = File.get(idFile)
+        file = File.get(file_id)
         if file:
-            handler = S3Handler(bucket_name, profile, region="us-west-2")
+            handler = S3Handler(bucket_name, aws_region, profile=profile)
             try:
                 fileobj = handler.download_file(file.object)
                 return file, fileobj
             except Exception as e:
                 print(e)
-                return None
+                return None, None
 
-        return None
+        return None, None
 
-    def presignedURL(arg):
-        pass
+    
+    @staticmethod
+    def delete_file(bucket_name, file_id, aws_region, profile=None):
+        file = File.get(file_id)
+        if not file:
+            return None
+
+        handler = S3Handler(bucket_name, aws_region, profile=profile)
+        try:
+            return file, handler.delete_file(file.object)
+        except Exception as e:
+            print(e)
+            return None, None
+
+

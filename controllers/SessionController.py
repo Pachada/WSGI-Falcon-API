@@ -31,7 +31,12 @@ class SessionController(Controller):
         self.response(resp, 200, data)
 
     def __login(self, req:Request, resp:Response):
-        data:dict = json.loads(req.stream.read())
+        try:
+            data:dict = json.loads(req.stream.read())
+        except Exception as exc:
+            self.response(resp, 400, error = str(exc))
+            return
+            
         username = data.get('username')
         password = data.get('password')
         uuid = data.get('device_uuid','unknown')

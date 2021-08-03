@@ -10,5 +10,5 @@ class Status(Base, Model):
     
     __tablename__ = 'status'
 
-    id = Column(Integer, primary_key = True, autoincrement=True)
+    id = Column(BigInteger, primary_key = True, autoincrement=True)
     description = Column(String(100), nullable=False)

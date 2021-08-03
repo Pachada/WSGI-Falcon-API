@@ -15,7 +15,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"daniel.trejo@atomic32.com\",\r\n    \"password\": \"appAtomic32\",\r\n    \"device_uuid\": \"12345-6789-09876-54321\"\r\n}\r\n",
+							"raw": "{\r\n    \"username\": \"daniel.trejo\",\r\n    \"password\": \"123\",\r\n    \"device_uuid\": \"12345-6789-09876-54321\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -64,6 +64,148 @@
 			]
 		},
 		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bk1qODjRn4ZNHKKg3oRtDnMT2jTlRHpp7rmZ148E3fw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"daniel.trejo\",\r\n    \"password\": \"restAPI!\",\r\n    \"email\": \"dtrejog98@gmail.com\",\r\n    \"phone\": \"5528461145\",\r\n    \"role_id\": 1,\r\n    \"person_id\" : 1,\r\n    \"device_uuid\": \"1234-5678-9012\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Put User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"daniel.trejo\",\r\n    \"password\": \"appAtomic32\",\r\n    \"email\": \"email@gmail.com\",\r\n    \"phone\": \"5528461145\",\r\n    \"role_id\": 1,\r\n    \"person_id\" : 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Password Recovery",
 			"item": [
 				{
@@ -73,7 +215,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"daniel.trejo@atomic32.com\"\r\n}",
+							"raw": "{\r\n    \"username\": \"daniel.trejo\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -129,13 +271,13 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "NQxoYkpgDasuTMmUHSGh0a9q0f_4PMggVVIff88cjNY",
+								"value": "ha1b2ijiCDf_ah96LNIo0iSNShK_JmQdc9pezOmkpd8",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"newpassword\": \"appAtomic32\"\r\n}",
+							"raw": "{\r\n    \"new_password\": \"123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -183,13 +325,19 @@
 							]
 						},
 						"url": {
-							"raw": "{{base_url}}/files/local",
+							"raw": "{{base_url}}/files/local?thumbnail=False",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"files",
 								"local"
+							],
+							"query": [
+								{
+									"key": "thumbnail",
+									"value": "False"
+								}
 							]
 						}
 					},
@@ -284,6 +432,15 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email_code\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{base_url}}/confirm-email/validate-code",
 							"host": [
@@ -309,7 +466,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "",
+								"value": "ZqqTHEJVHfI0F3HXV3RMXVf421SgWoEjXjFG3PjBWnM",
 								"type": "text"
 							}
 						],
@@ -505,7 +662,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "",
+										"value": "Jewa2MFMCx7CKN7Vw95VWFBxAGcAQPPgcw11-zt-mUo",
 										"type": "text"
 									}
 								],
@@ -528,7 +685,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "",
+										"value": "Jewa2MFMCx7CKN7Vw95VWFBxAGcAQPPgcw11-zt-mUo",
 										"type": "text"
 									}
 								],
@@ -752,71 +909,69 @@
 							"response": []
 						}
 					]
-				},
+				}
+			]
+		},
+		{
+			"name": "Session",
+			"item": [
 				{
-					"name": "Users",
+					"name": "GET Session Info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "xT-lDDzYim_0c-Gm-JFnZu5QgloK_WK4n329DZcwQXI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Extras",
+			"item": [
+				{
+					"name": "News",
 					"item": [
 						{
-							"name": "Get All Users",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bk1qODjRn4ZNHKKg3oRtDnMT2jTlRHpp7rmZ148E3fw",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/users",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"users"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Get User",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/users/2",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"users",
-										"2"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Post User",
+							"name": "Post News without file",
 							"request": {
 								"method": "POST",
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "_Dw0ZgqK1LuHWguxN3cnZTsXLn9FAmdw_PIOz6jL6Zo",
+										"value": "w6myYlXtbBOjNO2V8IO7eXtfIU9vazyNMMkQiMAabl8",
 										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"username\": \"daniel.trejo\",\r\n    \"password\": \"appAtomic32\",\r\n    \"email\": \"email@gmail.com\",\r\n    \"phone\": \"5528461145\",\r\n    \"role_id\": 1,\r\n    \"person_id\" : 1\r\n}",
+									"raw": "{\n    \"type\": 1,\n    \"title\": \"¡Recuerda guardar muy bien tus llaves de acceso!\",\n    \"body\": \"Pruebas\",\n    \"startdate\": \"2021-05-04T09:54:00\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -824,31 +979,158 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/users",
+									"raw": "{{base_url}}/news",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"users"
+										"news"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "Put User",
+							"name": "Post News with file",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "t7cb0wAWRK5P25pkFaVy-B2O8_hJWe4ypj8yhkN_DnU",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": 2,\n    \"title\": \"Formulario regreso seguro IMSS\",\n    \"body\": \"Buen día, comunidad Atomic, el IMSS nos mando un formulario que todos deben de contestar...\",\n    \"idFile\": 1,\n    \"idThumbnail\": 1,\n    \"startdate\": \"2021-03-29T10:00:00\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/news",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"news"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get News",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "kHrSomwfjHGStXZY-fp2hJ4mpXmT7ahSjOA2Ei-DQoM",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/news",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"news"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get News by id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "kHrSomwfjHGStXZY-fp2hJ4mpXmT7ahSjOA2Ei-DQoM"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/news/62",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"news",
+										"62"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Pending News",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "hs2Kn-s4c9tJgdxZ_ieQ6IINjzDI4u7kukRyQucua0w",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/news/pendings",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"news",
+										"pendings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get News Types",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "lb2dDxv8Bpu-5K7e9h3ubMMsX6ZhdaIdQdZiy971E7k",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/news/types",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"news",
+										"types"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Put news",
 							"request": {
 								"method": "PUT",
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+										"value": "Nk6_Us5nLcYYnZMIyWgJ6ifBewxtGAc_FlrknJ7eZhA",
 										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"username\": \"daniel.trejo\",\r\n    \"password\": \"appAtomic32\",\r\n    \"email\": \"email@gmail.com\",\r\n    \"phone\": \"5528461145\",\r\n    \"role_id\": 1,\r\n    \"person_id\" : 1\r\n}",
+									"raw": "{\n    \"title\": \"Formulario regreso\",\n    \"body\": \"Buen día, comunidad Atomic...\",\n    \"idFile\": 3,\n    \"idThumbnail\": 4,\n    \"startdate\": \"2021-03-22\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -856,12 +1138,12 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/users/2",
+									"raw": "{{base_url}}/news/2",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"users",
+										"news",
 										"2"
 									]
 								}
@@ -869,24 +1151,24 @@
 							"response": []
 						},
 						{
-							"name": "Delete User",
+							"name": "Delete news",
 							"request": {
 								"method": "DELETE",
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "EhV54MxK55x9UeDKVAgP6mhrOwh9gzQgS3HTmuCD7w4",
+										"value": "t7cb0wAWRK5P25pkFaVy-B2O8_hJWe4ypj8yhkN_DnU",
 										"type": "text"
 									}
 								],
 								"url": {
-									"raw": "{{base_url}}/users/2",
+									"raw": "{{base_url}}/news/5",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"users",
-										"2"
+										"news",
+										"5"
 									]
 								}
 							},

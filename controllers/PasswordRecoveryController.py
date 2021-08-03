@@ -6,7 +6,7 @@ from core.classes.Authenticator import Authenticator
 from models.User import User
 from models.EmailTemplate import EmailTemplate
 from core.classes.SmtpClient import SmtpClient
-import hashlib
+
 
 class PasswordRecoveryController(Controller):
 
@@ -97,8 +97,8 @@ class PasswordRecoveryController(Controller):
             session = req.context.session
             user:User = session.user
 
-            new_password = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
-            user.password = new_password
+            new_password_hashed = Utils.get_hashed_string(new_password)
+            user.password = new_password_hashed
             if not user.save():
                 self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
                 return

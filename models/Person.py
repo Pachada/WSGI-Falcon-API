@@ -5,10 +5,10 @@ from core.Utils import Utils
 class Person(Base, Model):
     __tablename__ = 'person'
 
-    id = Column(Integer, primary_key = True, autoincrement=True)
-    first_name = Column(String(50), nullable=False)
-    last_name = Column(String(50), nullable=False)
-    birthday = Column(DateTime)
+    id = Column(BigInteger, primary_key = True, autoincrement=True)
+    first_name = Column(String(50), default=None)
+    last_name = Column(String(50), default=None)
+    birthday = Column(DateTime, default=None)
     created = Column(DateTime, default = Utils.time())
     updated = Column(DateTime, default = Utils.time(), onupdate =  Utils.time())
     enable = Column(mysql.TINYINT(1), default=1)

@@ -8,7 +8,6 @@ import base64
 import os
 from sqlalchemy import and_
 import json
-import hashlib
 
 
 class Authenticator(object):
@@ -126,7 +125,7 @@ class Authenticator(object):
     def login(username, password, device_uuid = "unknown"):
         user = User.get(User.username == username)
         if user:
-            password = Authenticator.get_hashed_password(password)
+            password = Utils.get_hashed_string(password)
             if password == user.password:
                 session = Authenticator.start_user_session(user, device_uuid)
                 if session:
@@ -175,7 +174,3 @@ class Authenticator(object):
     @staticmethod
     def logout(session:Session):
         return session.soft_delete()
-    
-    @staticmethod
-    def get_hashed_password(password:str):
-        return hashlib.sha256(password.encode('utf-8')).hexdigest() 

@@ -8,12 +8,13 @@ from PIL import Image
 import io
 import os
 import sys
-import hashlib
 import base64
 from random import randint
 from falcon.media.multipart import BodyPart, MultipartParseError, MultipartParseOptions
+import magic
 
-class FileController(Controller):
+
+class FileLocalController(Controller):
 
     def __init__(self):
         self.config = configparser.ConfigParser()
@@ -24,6 +25,48 @@ class FileController(Controller):
         self.storage_path = self.config.get('FILES', 'storage_path')
         # Maximum file size accepted
         self.max_file_size = int(self.config.get('FILES', 'max_file_size'))
+    
+    def on_get_image(self, req:Request, resp:Response, id:int=None):
+        if id:
+            file = File.get(id)
+            if not file:
+                self.response(resp, 404, message =  "No  file")
+                return
+
+        resp.stream = open(file.object, "rb")
+        resp.content_length = file.size
+        resp.content_type = file.type
+
+    def on_post_image(self, req:Request, resp:Response, id:int=None):
+        if id:
+            self.response(resp, 405)
+            return
+
+        return self.__post_local_handler(req, resp, False)
+
+    def on_post_base64(self, req:Request, resp:Response, id:int=None):
+        if id:
+            self.response(resp, 405)
+            return
+        
+        data:dict = json.loads(req.stream.read())
+        base64_info = data.get('base64')
+        file_name = data.get('file_name')
+        if not file_name or not base64_info:
+            self.response(resp, 400, error = "Se nececitan el 'file_name' y el 'base64'")
+            return
+        
+        mimetype = magic.from_buffer(base64.b64decode(base64_info), mime=True)
+
+        if mimetype not in self.accepted_files:
+            error_message = f"files of type {mimetype} are not accepted, please submit a valid file format: {self.accepted_files}"
+            self.response(resp, 400, error = error_message, error_code = "0004")
+            return
+        
+        file = self.create_file_local(file_name, base64_info, mimetype, encode_to_base64=False)
+
+        self.response(resp, 201, Utils.serialize_model(file))
+        
 
     def on_delete_local(self, req:Request, resp:Response, id:int=None):
         if not id:
@@ -114,53 +157,13 @@ class FileController(Controller):
             
     def on_post_local(self, req:Request, resp:Response, id:int=None):
         print("Saving file in local server")
-        try:
-            if id:
-                self.response(resp, 405)
-                return
-            
-            query_string = req.params
-            make_thumbnail = False
-            if query_string.get('thumbnail') == 'True': 
-                make_thumbnail = True
-            data = []
-            file_objects = []
-            form = req.get_media()
-            for part in form:
-                part:BodyPart = part
-                if part.content_type not in self.accepted_files:
-                    if file_objects:
-                        self.__delete_file(file_objects)
-                    error_message = f"files of type {part.content_type} are not accepted, please submit a valid file format: {self.accepted_files}"
-                    self.response(resp, 400, error = error_message, error_code = "0004")
-                    return
-                
-                part_data = part.stream.read()
-                if sys.getsizeof(part_data) > self.max_file_size:
-                    self.response(resp, 413, message=f"{part.name} content is to large", error_code="0006")
-                    if file_objects:
-                        self.__delete_file(file_objects)
-                    return
+        if id:
+            self.response(resp, 405)
+            return
+        
+        return self.__post_local_handler(req, resp, True)
 
-                file = self.create_file_local(part.filename, part_data, part.content_type)
-                
-                data.append(Utils.serialize_model(file))
-                file_objects.append(file)
-                if make_thumbnail and ('jpeg' in part.content_type or 'png' in part.content_type or 'jpg' in part.content_type):
-                    thumbnail_content = self.create_thumbnail(part_data)
-                    thumbnail_name = part.filename[:-4] + '_thumbnail' + part.filename[-4:]
-                    thumbnail = self.create_file_local(thumbnail_name, thumbnail_content, part.content_type, is_thumbnail_flag=1)
-                    data.append(Utils.serialize_model(thumbnail))
-                    file_objects.append(thumbnail)
-            
-            self.response(resp, 201, data)
-
-        except Exception as exc:
-            print(exc)
-            self.response(resp,400,error = str(exc))
-
-
-    def create_file_local(self, file_name:str, file_content, file_type, is_thumbnail_flag=0):
+    def create_file_local(self, file_name:str, file_content, file_type, is_thumbnail_flag=0, encode_to_base64=True):
         random_number = randint(0, 100000)
         filename = str(random_number) + file_name[:-4] + str(time.time()) + file_name[-4:] 
         file_path = os.path.join(self.storage_path, filename)
@@ -169,8 +172,12 @@ class FileController(Controller):
         # from being used.
         temp_file_path = file_path + '~'
 
-        if not isinstance(file_content, bytes):
+        if isinstance(file_content, str):
+            file_content = file_content.encode('utf-8')
+
+        elif not isinstance(file_content, bytes):
             file_content = file_content.read()
+        
 
         with open(temp_file_path, 'wb') as temp_file:
             temp_file.write(file_content)
@@ -187,7 +194,7 @@ class FileController(Controller):
         )
 
         hash_string = str(file.size) + str(file.name) + str(file.type) + str(file.created) + str(time.time()) + str(filename)
-        file.hash = hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
+        file.hash = Utils.get_hashed_string(hash_string)
 
         file_path_hashed = os.path.join(self.storage_path, file.hash)
         os.rename(file_path, file_path_hashed)
@@ -195,10 +202,11 @@ class FileController(Controller):
 
         file.save()
 
-        # Now that we have the info of the file, encode it in base64 
-        with open(file_path_hashed, 'wb') as file_path_to_encode:
-            file_content = base64.b64encode(file_content)
-            file_path_to_encode.write(file_content)
+        if encode_to_base64:
+            # Now that we have the info of the file, encode it in base64 
+            with open(file_path_hashed, 'wb') as file_path_to_encode:
+                file_content = base64.b64encode(file_content)
+                file_path_to_encode.write(file_content)
             
         return file
     
@@ -214,3 +222,41 @@ class FileController(Controller):
                 image_data_content.save(b, "JPEG")
         b.seek(0)
         return b
+    
+    def __post_local_handler(self, req:Request, resp:Response, encode_to_base64):
+        query_string = req.params
+        make_thumbnail = False
+        if query_string.get('thumbnail') == 'True': 
+            make_thumbnail = True
+            
+        data = []
+        file_objects =  []
+        form = req.get_media()
+        for part in form:
+            part:BodyPart = part
+            if part.content_type not in self.accepted_files:
+                if file_objects:
+                    self.__delete_file(file_objects)
+                error_message = f"files of type {part.content_type} are not accepted, please submit a valid file format: {self.accepted_files}"
+                self.response(resp, 400, error = error_message)
+                return
+            
+            part_data = part.stream.read()
+            if sys.getsizeof(part_data) > self.max_file_size:
+                self.response(resp, 413, message=f"{part.name} content is to large")
+                if file_objects:
+                    self.__delete_file(file_objects)
+                return
+
+            file = self.create_file_local(part.filename, part_data, part.content_type, encode_to_base64=encode_to_base64)
+            data.append(Utils.serialize_model(file))
+            file_objects.append(file)
+
+            if make_thumbnail and ('jpeg' in part.content_type or 'png' in part.content_type or 'jpg' in part.content_type):
+                    thumbnail_content = self.create_thumbnail(part_data)
+                    thumbnail_name = part.filename[:-4] + '_thumbnail' + part.filename[-4:]
+                    thumbnail = self.create_file_local(thumbnail_name, thumbnail_content, part.content_type, is_thumbnail_flag=1)
+                    data.append(Utils.serialize_model(thumbnail))
+                    file_objects.append(thumbnail)
+        
+        self.response(resp, 201, data)

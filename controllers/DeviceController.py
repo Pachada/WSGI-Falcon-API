@@ -29,65 +29,10 @@ class DeviceController(Controller):
             self.response(resp, 400, error = str(exc))
 
     def on_get(self, req:Request, resp:Response, id:int=None):
-        if id:
-            device = Device.get(id)
-            if not device:
-                self.response(resp, 404, error=self.ID_NOT_FOUND)
-                return
-        else:
-            device = Device.getAll()
-
-        self.response(resp, 200, Utils.serialize_model(device))
-
-    def on_post(self, req:Request, resp:Response, id:int=None):
-        if id:
-            self.response(resp, 405)
-            return
-
-        try:
-            data:dict = json.loads(req.stream.read())
-            device = Device(uuid = data.get('uuid'), description = data.get('description'), user_id = data.get('user_id'))
-            
-            if not device.save(): 
-                self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
-                return
-
-            self.response(resp, 201, Utils.serialize_model(device))
-            resp.append_header('content_location', f"/devices/{device.id}")
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error = str(exc))
+        self.generic_on_get(req, resp, Device, id)
 
     def on_put(self, req:Request, resp:Response, id:int=None):
-        if not id:
-            self.response(resp, 405)
-            return
-
-        try:
-            device = Device.get(id)
-            if not device:
-                self.response(resp, 404, self.ID_NOT_FOUND)
-                return
-                
-            data:dict = json.loads(req.stream.read())
-            self.set_values(device, data)
-
-            self.response(resp, 200, Utils.serialize_model(device))
-
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error = str(exc))
+        self.generic_on_put(req, resp, Device, id)
     
     def on_delete(self, req:Request, resp:Response, id:int=None):
-        if not id:
-            self.response(resp, 405)
-            return
-
-        device = Device.get(id)
-        if not device:
-            self.response(resp, 404, self.ID_NOT_FOUND)
-            return
-
-        device.soft_delete()
-        device.save()
-        self.response(resp, 200, Utils.serialize_model(device))
+        self.generic_on_delete(req, resp, Device, id)

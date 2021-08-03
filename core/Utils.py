@@ -4,16 +4,150 @@ import re
 from random import randint
 import configparser
 import pytz
+import hashlib
 
-class Utils():
-    
+
+class Utils:
+    @staticmethod
+    def string_to_datetime(date: str):
+        try:
+            date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S")
+        except ValueError as e:
+            try:
+                date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+            except ValueError as e:
+                try:
+                    date = datetime.strptime(date, "%Y/%m/%d %H:%M:%S")
+                except ValueError as e:
+                    raise ValueError("Invalid date format")
+
+        return date
+
+    @staticmethod
+    def datetime_from_timezone_utc0_to_Mexico_City(date=None):
+        """
+        Changes date with timezone UTC-0 to America/Mexico_City time
+
+        Parameters
+        ----------
+        value : `date or datetime`
+                Value to changes its location
+
+        Returns
+        -------
+        `datetime`
+            datetime with new timezone
+        """
+        if not date:
+            return
+        if isinstance(date, str):
+            date = Utils.string_to_datetime(date)
+
+        if not date.tzinfo:
+            utc0_timezone = pytz.utc
+            date = utc0_timezone.localize(date)
+
+        return date.astimezone(pytz.timezone("America/Mexico_City"))
+
+    @staticmethod
+    def datetime_from_timezone_Mexico_City_to_utc0(date=None):
+        """
+        Changes date with timezone America/Mexico_City to UTC-0 time
+
+        Parameters
+        ----------
+        value : `date or datetime`
+                Value to changes its location
+
+        Returns
+        -------
+        `datetime`
+            datetime with new timezone
+        """
+        if not date:
+            return
+        if isinstance(date, str):
+            date = Utils.string_to_datetime(date)
+
+        # Transfor the datetime object with time zone America/Mexico_City to UTC0
+        if not date.tzinfo:
+            local_timezone = pytz.timezone("America/Mexico_City")
+            date = local_timezone.localize(date)
+
+        return date.astimezone(pytz.utc)
+
+    @staticmethod
+    def date_formatter(value):
+        """
+        Return a string representation of a date
+
+        Parameters
+        ----------
+        value : `date or datetime`
+                value to return as string
+
+        Returns
+        -------
+        `str`
+            The str representation of date.
+        """
+        if isinstance(value, date) and not isinstance(value, datetime):
+            value = datetime(value.year, value.month, value.day)
+
+        today = datetime.now(pytz.timezone("America/Mexico_City"))
+        if (
+            isinstance(value, datetime)
+            and value.hour == 0
+            and value.minute == 0
+            and value.second == 0
+            and value.day == today.day
+        ):
+            return value.isoformat(timespec="seconds")
+
+        if isinstance(value, datetime):
+            local_time = Utils.datetime_from_timezone_utc0_to_Mexico_City(value)
+            return local_time.isoformat(timespec="seconds")[:-6]
+
+        else:
+            return value
+
+    @staticmethod
+    def get_hashed_string(data: str) -> str:
+        """
+        return the sha256 hash of a string
+
+        Parameters
+        ----------
+        data : `str`
+                Value to get its hash
+
+        Returns
+        -------
+        `str`
+            Hash of the data
+        """
+        return hashlib.sha256(data.encode("utf-8")).hexdigest()
+
     @staticmethod
     def time():
-        """Return the current utc0 time function"""
+        """
+        Return the current utc0 time function
+        Used for creating the models time.
+        SQLAClhemy recibes a function and execute it.
+
+        """
         return datetime.utcnow
 
     @staticmethod
-    def serialize_model(object, recursive=False, formatters=None, translator=None, recursiveLimit=3, blacklist=[], attributes_blacklist=[]):
+    def serialize_model(
+        object,
+        recursive=False,
+        formatters=None,
+        translator=None,
+        recursiveLimit=3,
+        blacklist=[],
+        attributes_blacklist=[],
+    ):
         """
         Take an object that can be a model instance or a model instances list
         and serialize it in a dictionary recursively, which means that serialization
@@ -44,11 +178,22 @@ class Utils():
             if isinstance(object, list):
                 return []
             return
+
         if isinstance(object, list):
             lst = []
             for item in object:
-                lst.append(Utils.serialize_model(item, recursive, formatters, recursiveLimit=recursiveLimit, blacklist=blacklist, attributes_blacklist=attributes_blacklist))
+                lst.append(
+                    Utils.serialize_model(
+                        item,
+                        recursive,
+                        formatters,
+                        recursiveLimit=recursiveLimit,
+                        blacklist=blacklist,
+                        attributes_blacklist=attributes_blacklist,
+                    )
+                )
             return lst
+
         else:
             result = {}
             if formatters is None:
@@ -67,30 +212,18 @@ class Utils():
                         recursiveObj = getattr(object, relation)
                         blacklistModel = getattr(recursiveObj, "blacklist", blacklist)
                         result[relation] = Utils.serialize_model(
-                            recursiveObj, recursive, recursiveLimit=limit, blacklist=blacklistModel)
+                            recursiveObj,
+                            recursive,
+                            recursiveLimit=limit,
+                            blacklist=blacklistModel,
+                        )
+
             return result
-
-    @staticmethod
-    def date_formatter(value):
-        if isinstance(value, date) and not isinstance(value,datetime):
-            value = datetime(value.year, value.month, value.day)
-            
-        if isinstance(value, datetime) and value.hour == 0 and value.minute == 0 and value.second == 0:
-            return value.isoformat()
-
-        if isinstance(value, datetime):
-            # Fix for the moment to return the time in UTC-6 not UTC-0
-            utc_now = pytz.utc.localize(value)
-            local_time = utc_now.astimezone(pytz.timezone("America/Mexico_City"))
-            return local_time.isoformat()[:-6]
-            
-        else:
-            return value
 
     @staticmethod
     def float_formatter(value):
         """
-        Take a *value* and return the value formatted into a float,
+        Take a *value* and return the value formatted into a float with two decimals,
         if the value is not a basestring instance, then return the same value without float format.
 
         Parameters
@@ -104,7 +237,7 @@ class Utils():
             A number with float format.
         """
         if isinstance(value, float) or isinstance(value, str) or isinstance(value, int):
-            return '{0:.2f}'.format(value)
+            return "{0:.2f}".format(value)
         else:
             return value
 
@@ -112,11 +245,11 @@ class Utils():
     def generate_otp(length):
         exclude = ["I", "O"]
         letters = list(string.ascii_uppercase)
-        numbers = [i for i in range(0,10)]
+        numbers = [i for i in range(0, 10)]
         letters.extend(numbers)
         otp = ""
         while len(otp) < length:
-            index = randint(0,35)
+            index = randint(0, 35)
             letter_to_add = letters[index]
             if letter_to_add not in exclude:
                 otp += str(letter_to_add)
@@ -138,10 +271,10 @@ class Utils():
             True if otp_time is still valid, False otherwise.
         """
         config = configparser.ConfigParser()
-        config.read('config.ini')
-        otp_expiration_time = int(config.get('EXPIRATION_TIMES', 'otp'))
+        config.read("config.ini")
+        otp_expiration_time = int(config.get("EXPIRATION_TIMES", "otp"))
         delta = datetime.utcnow() - user.otp_time
-        if (delta.total_seconds()/60) >= otp_expiration_time:
+        if (delta.total_seconds() / 60) >= otp_expiration_time:
             return False
         return True
 
@@ -161,10 +294,12 @@ class Utils():
             True if email_time is still valid, False otherwise.
         """
         config = configparser.ConfigParser()
-        config.read('config.ini')
-        email_confirmation_code_expiration_time = int(config.get('EXPIRATION_TIMES', 'email_code'))
+        config.read("config.ini")
+        email_confirmation_code_expiration_time = int(
+            config.get("EXPIRATION_TIMES", "email_code")
+        )
         delta = datetime.utcnow() - user.email_confirmation_code_time
-        if (delta.total_seconds()/60) >= email_confirmation_code_expiration_time:
+        if (delta.total_seconds() / 60) >= email_confirmation_code_expiration_time:
             return False
         return True
 
@@ -184,21 +319,45 @@ class Utils():
             True if session is still valid, False otherwise.
         """
         config = configparser.ConfigParser()
-        config.read('config.ini')
-        session_expiration_time = int(config.get('EXPIRATION_TIMES', 'session'))
+        config.read("config.ini")
+        session_expiration_time = int(config.get("EXPIRATION_TIMES", "session"))
         token = session.token
         if token is not None:
             delta = datetime.utcnow() - session.updated
-            if (delta.total_seconds()/60) >= session_expiration_time:
+            if (delta.total_seconds() / 60) >= session_expiration_time:
                 return False
             return True
 
-        return False    
+        return False
 
     @staticmethod
     def check_if_valid_email(email):
-        regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$'
+        regex = "^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$"
         if re.search(regex, email):
             return True
         return False
+    
+    @staticmethod
+    def get_start_date_and_end_date(start_date=None, end_days=15):
+        if not end_days:
+            end_days = 15
 
+        if not start_date:
+            startdate = datetime.utcnow()
+        
+        else:
+            startdate_formated = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S")
+            startdate = Utils.get_datetime_from_utc6_to_utc0(start_date)
+
+            # If it only has the date but not hours and if it is the same day as today: the stardate is utcnow.
+            # if it has date but not hours and is a different day as today: the startdate is the one sended.
+            # if it has date and hour the stardate is the one sended
+            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            if startdate_formated.hour == 0 and startdate_formated.minute == 0 and startdate_formated.second == 0:
+                if today == startdate_formated:
+                    startdate = datetime.utcnow()
+
+            
+        enddate = startdate + timedelta(days=end_days)
+
+        return startdate, enddate

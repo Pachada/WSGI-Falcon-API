@@ -4,7 +4,7 @@ from core.Utils import Utils
 class File(Base, Model):
     __tablename__ 	= 'file'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
     object = Column(String(255), nullable=False)
     size = Column(Integer, nullable=False)
     type = Column(String(255), nullable=False)

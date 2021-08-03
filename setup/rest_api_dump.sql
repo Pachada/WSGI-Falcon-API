@@ -32,8 +32,8 @@ CREATE TABLE `device` (
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `device_idUser_idx` (`user_id`),
-  CONSTRAINT `device_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+  CONSTRAINT `device_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,9 +66,9 @@ CREATE TABLE `email_pool` (
   PRIMARY KEY (`id`),
   KEY `emailpool_idTemplate_idx` (`template_id`),
   KEY `emailpool_idStatus_idx` (`status_id`),
-  CONSTRAINT `emailpool_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`),
-  CONSTRAINT `emailpool_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `email_template` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+  CONSTRAINT `emailpool_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `emailpool_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `email_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -98,9 +98,9 @@ CREATE TABLE `email_sent` (
   PRIMARY KEY (`id`),
   KEY `emailsent_idTemplate_idx` (`template_id`),
   KEY `emailsent_idStatus_idx` (`status_id`),
-  CONSTRAINT `emailsent_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`),
-  CONSTRAINT `emailsent_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `email_template` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `emailsent_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `emailsent_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `email_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -129,7 +129,7 @@ CREATE TABLE `email_template` (
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -161,7 +161,7 @@ CREATE TABLE `file` (
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +189,7 @@ CREATE TABLE `person` (
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -213,7 +213,7 @@ CREATE TABLE `push_notification_catalogue` (
   `id` int NOT NULL AUTO_INCREMENT,
   `action` varchar(45) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -238,6 +238,7 @@ CREATE TABLE `push_notification_pool` (
   `user_id` int NOT NULL,
   `template_id` int NOT NULL,
   `status_id` int NOT NULL,
+  `notification_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `message` varchar(200) NOT NULL,
   `data` varchar(200) DEFAULT NULL,
   `ticket` varchar(200) DEFAULT NULL,
@@ -249,10 +250,10 @@ CREATE TABLE `push_notification_pool` (
   KEY `pushnotificationpool_idUser_idx` (`user_id`),
   KEY `pushnotificationpool_idTemplate_idx` (`template_id`),
   KEY `pushnotificationpool_idStatus_idx` (`status_id`),
-  CONSTRAINT `pushnotificationpool_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`),
-  CONSTRAINT `pushnotificationpool_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `push_notification_template` (`id`),
-  CONSTRAINT `pushnotificationpool_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `pushnotificationpool_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pushnotificationpool_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `push_notification_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pushnotificationpool_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -290,12 +291,12 @@ CREATE TABLE `push_notification_sent` (
   KEY `pushnotificationsent_idTemplate_idx` (`template_id`),
   KEY `pushnotificationsent_idStatus_idx` (`status_id`),
   KEY `pushnotificationsent_idPushNotificationPool_idx` (`push_notification_pool_id`),
-  CONSTRAINT `pushnotificationsent_idDevice` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`),
-  CONSTRAINT `pushnotificationsent_idPushNotificationPool` FOREIGN KEY (`push_notification_pool_id`) REFERENCES `push_notification_pool` (`id`),
-  CONSTRAINT `pushnotificationsent_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`),
-  CONSTRAINT `pushnotificationsent_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `push_notification_template` (`id`),
-  CONSTRAINT `pushnotificationsent_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `pushnotificationsent_idDevice` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pushnotificationsent_idPushNotificationPool` FOREIGN KEY (`push_notification_pool_id`) REFERENCES `push_notification_pool` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pushnotificationsent_idStatus` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pushnotificationsent_idTemplate` FOREIGN KEY (`template_id`) REFERENCES `push_notification_template` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pushnotificationsent_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -327,8 +328,8 @@ CREATE TABLE `push_notification_template` (
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `pushnotificationtemplate_idCatalogue_idx` (`catalogue_id`),
-  CONSTRAINT `pushnotificationtemplate_idCatalogue` FOREIGN KEY (`catalogue_id`) REFERENCES `push_notification_catalogue` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `pushnotificationtemplate_idCatalogue` FOREIGN KEY (`catalogue_id`) REFERENCES `push_notification_catalogue` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -354,7 +355,7 @@ CREATE TABLE `role` (
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -385,9 +386,9 @@ CREATE TABLE `session` (
   PRIMARY KEY (`id`),
   KEY `session_idUser_idx` (`user_id`),
   KEY `session_idDevice_idx` (`device_id`),
-  CONSTRAINT `session_idDevice` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `session_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+  CONSTRAINT `session_idDevice` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `session_idUser` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -396,7 +397,7 @@ CREATE TABLE `session` (
 
 LOCK TABLES `session` WRITE;
 /*!40000 ALTER TABLE `session` DISABLE KEYS */;
-INSERT INTO `session` VALUES (1,1,1,'ZqqTHEJVHfI0F3HXV3RMXVf421SgWoEjXjFG3PjBWnM','2021-05-03 16:06:01','2021-05-04 16:43:12',1),(2,1,2,'ha1b2ijiCDf_ah96LNIo0iSNShK_JmQdc9pezOmkpd8','2021-05-04 17:13:40','2021-05-04 17:13:40',1);
+INSERT INTO `session` VALUES (1,1,1,'2egj2uhwbW2RB4xtTq37mUvwmol00J_sCv69oR0UULw','2021-05-03 16:06:01','2021-05-19 01:37:54',1),(2,1,2,'ha1b2ijiCDf_ah96LNIo0iSNShK_JmQdc9pezOmkpd8','2021-05-04 17:13:40','2021-05-04 17:13:40',1);
 /*!40000 ALTER TABLE `session` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -411,7 +412,7 @@ CREATE TABLE `status` (
   `id` int NOT NULL AUTO_INCREMENT,
   `description` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -450,9 +451,9 @@ CREATE TABLE `user` (
   PRIMARY KEY (`id`),
   KEY `user_idRole_idx` (`role_id`),
   KEY `user_idPerson_idx` (`person_id`),
-  CONSTRAINT `user_idPerson` FOREIGN KEY (`person_id`) REFERENCES `person` (`id`),
-  CONSTRAINT `user_idRole` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+  CONSTRAINT `user_idPerson` FOREIGN KEY (`person_id`) REFERENCES `person` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_idRole` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -474,4 +475,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-05-18 14:48:15
+-- Dump completed on 2021-06-24  8:24:46

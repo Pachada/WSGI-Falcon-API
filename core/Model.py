@@ -144,6 +144,17 @@ class Model():
             print("[ERROR-DELETING]")
             print(exc)
             return False
+    
+    @classmethod
+    def delete_multiple(self, filter):
+        try:
+            query = self.__table__.delete().where(filter)
+            DB.execute(query)
+            DB.commit()
+            return True
+        except Exception as exc:
+            print(exc)
+            return False
 
     @classmethod
     def count(self, filter=None, deleted=False, join=None):

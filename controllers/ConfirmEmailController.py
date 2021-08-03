@@ -35,6 +35,7 @@ class ConfirmEmailController(Controller):
                 client.send_email_to_pool(user.email, data_for_email, EmailTemplate.CONFIRM_EMAIL)
 
             self.response(resp, 200, message="Email code saved successfully")
+            
         except Exception as exc:
             print(exc)
             self.response(resp, 400, error = str(exc))

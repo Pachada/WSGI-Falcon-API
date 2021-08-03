@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from falcon.response import Response
+from falcon.request import Request
+from datetime import datetime, timedelta, time
 import falcon
 import json
-import hashlib
-import time
+from core.Utils import Utils
 
 
 class Controller():
@@ -49,13 +50,89 @@ class Controller():
             for col in row.__table__.columns.keys():
                 if col in data:
                     if col == "password":
-                        password = hashlib.sha256(data[col].encode('utf-8')).hexdigest()
+                        password = Utils.get_hashed_string(data[col])
                         setattr(row, col, password)
                         continue
+
                     setattr(row, col, data[col])
-            row.save()
+
+            return row.save()
 
         except Exception as exc:
             print("[ERROR-SETTING_VALUES]")
             print(exc)
             return False
+    
+    def generic_on_get(self, req:Request, resp:Response, model, id:int=None, filters=None):
+        if id:
+            row = model.get(id)
+            if not row:
+                self.response(resp, 404, error=self.ID_NOT_FOUND)
+                return
+        else:
+            row = model.getAll(filters)
+
+        self.response(resp, 200, Utils.serialize_model(row))
+        
+    def generic_on_post(self, req:Request, resp:Response, model, content_location, id:int=None):
+        if id:
+            self.response(resp,405)
+            return
+
+        try:
+            data:dict = json.loads(req.stream.read())
+        except Exception as exc:
+            print(exc)
+            self.response(resp, 400, error = str(exc))
+            return
+        
+        new_record = model()
+            
+        if not self.set_values(new_record, data):
+            self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
+            return
+
+        self.response(resp, 201,Utils.serialize_model(new_record))
+        resp.append_header('content_location', f"/{content_location}/{new_record.id}")
+    
+    def generic_on_put(self, req:Request, resp:Response, model, id:int=None, extra_data:dict=None):
+        if not id:
+            self.response(resp,405)
+            return
+
+        row = model.get(id)
+        if not row:
+            self.response(resp, 404, self.ID_NOT_FOUND)
+            return
+        try:
+            data:dict = json.loads(req.stream.read())
+        except Exception as exc:
+            print(exc)
+            self.response(resp, 400, error = str(exc))
+        
+        if not self.set_values(row, data):
+            self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
+            return
+
+        self.response(resp, 200, Utils.serialize_model(row))
+    
+    def generic_on_delete(self, req:Request, resp:Response, model, id:int=None, soft_delete=True):
+        if not id:
+            self.response(resp,405)
+            return
+
+        row = model.get(id)
+        if not row:
+            self.response(resp, 404, self.ID_NOT_FOUND)
+            return
+
+        if soft_delete:
+            if not row.soft_delete():
+                self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
+                return
+        else:
+            if not row.delete():
+                self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
+                return
+            
+        self.response(resp, 200, Utils.serialize_model(row))

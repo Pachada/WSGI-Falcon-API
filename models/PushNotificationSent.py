@@ -9,12 +9,12 @@ from models.Status import Status
 class PushNotificationSent(Base, Model):
     __tablename__ = 'push_notification_sent'
 
-    id = Column(Integer, primary_key = True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey(User.id))
-    device_id = Column(Integer, ForeignKey(Device.id), default=None)
-    template_id = Column(Integer, ForeignKey(PushNotificationTemplate.id))
+    id = Column(BigInteger, primary_key = True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey(User.id))
+    device_id = Column(BigInteger, ForeignKey(Device.id), default=None)
+    template_id = Column(BigInteger, ForeignKey(PushNotificationTemplate.id))
     status_id = Column(mysql.TINYINT(1), ForeignKey(Status.id))
-    push_notification_pool_id = Column(Integer, ForeignKey(PushNotificationPool.id))
+    push_notification_pool_id = Column(BigInteger, ForeignKey(PushNotificationPool.id))
     ticket = Column(String(200), default=None)
     message = Column(String(200), nullable=False)
     data = Column(String(200)) #JSON

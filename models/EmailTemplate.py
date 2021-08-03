@@ -8,7 +8,7 @@ class EmailTemplate(Base, Model):
 
     __tablename__ = 'email_template'
 
-    id = Column(Integer, primary_key = True, autoincrement=True)
+    id = Column(BigInteger, primary_key = True, autoincrement=True)
     name = Column(String(45), nullable=False)
     subject = Column(String(100), nullable=False)
     description = Column(String(500), nullable=False)

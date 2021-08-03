@@ -5,7 +5,7 @@ from models.User import User
 class Device(Base, Model):
     __tablename__ = 'device'
 
-    id = Column(Integer, primary_key = True, autoincrement=True)
+    id = Column(BigInteger, primary_key = True, autoincrement=True)
     uuid = Column(String(300), nullable=False)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
     token = Column(String(100), default=None)

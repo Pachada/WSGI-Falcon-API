@@ -8,10 +8,10 @@ from models.Status import Status
 class PushNotificationPool(Base, Model):
     __tablename__ = 'push_notification_pool'
 
-    id = Column(Integer, primary_key = True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
-    template_id = Column(Integer, ForeignKey(PushNotificationTemplate.id), nullable=False)
-    status_id = Column(Integer, ForeignKey(Status.id), default=Status.PENDING)
+    id = Column(BigInteger, primary_key = True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey(User.id), nullable=False)
+    template_id = Column(BigInteger, ForeignKey(PushNotificationTemplate.id), nullable=False)
+    status_id = Column(BigInteger, ForeignKey(Status.id), default=Status.PENDING)
     notification_time = Column(DateTime, default= Utils.time())
     message = Column(String(200), nullable=False)
     data = Column(String(200), default=None) #JSON/DICT

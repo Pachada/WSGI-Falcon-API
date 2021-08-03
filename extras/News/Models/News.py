@@ -21,15 +21,14 @@ class News(Base, Model):
     enddate = Column(DateTime, default=datetime.utcnow())
     enable = Column(mysql.TINYINT(1), default=1)
 
-    client = relationship(Client)
     user = relationship(User)
     file = relationship(File, foreign_keys=file_id_image)
     thumbnail = relationship(File, foreign_keys=file_id_thumbnail)
     type = relationship(NewsType)
 
     formatters = {
-        "created": Utils.dateFormatter,
-        "updated": Utils.dateFormatter,
-        "startdate": Utils.dateFormatter,
-        "enddate": Utils.dateFormatter
+        "created": Utils.date_formatter,
+        "updated": Utils.date_formatter,
+        "startdate": Utils.date_formatter,
+        "enddate": Utils.date_formatter
     }

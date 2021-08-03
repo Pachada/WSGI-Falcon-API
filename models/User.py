@@ -6,13 +6,13 @@ from models.Person import Person
 class User(Base, Model):
     __tablename__ = 'user'
     
-    id = Column(Integer, primary_key = True, autoincrement=True)
+    id = Column(BigInteger, primary_key = True, autoincrement=True)
     username = Column(String(100), nullable=False)
     password = Column(String(300), nullable=False)
     email = Column(String(100), nullable=False)
-    phone = Column(String(15))
-    role_id = Column(Integer, ForeignKey(Role.id), nullable=False)
-    person_id = Column(Integer, ForeignKey(Person.id))
+    phone = Column(String(15), default=None)
+    role_id = Column(BigInteger, ForeignKey(Role.id), default=Role.USER)
+    person_id = Column(BigInteger, ForeignKey(Person.id))
     otp = Column(String(6), default=None)
     otp_time = Column(DateTime, default=None)
     email_confirmation_code = Column(String(6), default=None)
@@ -34,12 +34,14 @@ class User(Base, Model):
 
     @staticmethod
     def check_if_user_exists(username, email):
-        check_username = User.get(User.username == username)
-        if check_username:
-            return True, "This username already exists"
+        if username:
+            check_username = User.get(User.username == username)
+            if check_username:
+                return True, "This username already exists"
         
-        check_email = User.get(User.email == email)
-        if check_email:
-            return True, "This email already has an account"
+        if email:
+            check_email = User.get(User.email == email)
+            if check_email:
+                return True, "This email already has an account"
         
         return False, ""
