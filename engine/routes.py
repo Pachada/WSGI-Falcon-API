@@ -39,6 +39,7 @@ class RouteLoader():
         self.server.add_route(self.context_prefix + '/files/s3', files3Controller)
         self.server.add_route(self.context_prefix + '/files/s3/{id:int}', files3Controller)
         self.server.add_route(self.context_prefix + '/files/s3/base64', files3Controller, suffix='base64')
+        self.server.add_route(self.context_prefix + '/files/s3/base64/{id:int}', files3Controller, suffix='base64')
         self.server.add_route(self.context_prefix + '/notifications', notificationController)
         self.server.add_route(self.context_prefix + '/notifications/{id:int}', notificationController)
 

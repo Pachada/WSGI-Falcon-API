@@ -75,6 +75,8 @@ class S3Handler(object):
             self.bucket.download_fileobj(path, tmpFile)
             tmpFile.seek(0)
             return tmpFile
+
+        print("No Bucket")
         return None
 
     def delete_file(self, key):

@@ -130,8 +130,9 @@ class FileManager:
                 fileobj = handler.download_file(file.object)
                 return file, fileobj
             except Exception as e:
+                print("[ERROR-GETTING-FILE-FROM-S3]")
                 print(e)
-                return None, None
+                return file, None
 
         return None, None
 
@@ -139,11 +140,11 @@ class FileManager:
     def delete_file(bucket_name, file_id, aws_region, profile=None):
         file = File.get(file_id)
         if not file:
-            return None
+            return None, None
 
         handler = S3Handler(bucket_name, aws_region, profile=profile)
         try:
             return file, handler.delete_file(file.object)
         except Exception as e:
-            print(e)
+            print(str(e))
             return None, None

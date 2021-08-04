@@ -405,6 +405,32 @@
 							"response": []
 						},
 						{
+							"name": "GET file s3 as base64",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "JeNcs1ZIlGWHTVNf3D8gEUMFKTC4CIMP2yAVTVELXZY"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/files/s3/base64/6",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"files",
+										"s3",
+										"base64",
+										"6"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "DELETE file",
 							"request": {
 								"method": "DELETE",

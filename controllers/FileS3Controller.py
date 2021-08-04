@@ -1,13 +1,15 @@
 from falcon.request import Request
 from falcon.response import Response
-from core.Controller import Controller, time, json
+from core.Controller import Controller, json
 from core.Utils import Utils
 from models.File import File
 import configparser
 from PIL import Image
 import io
+from io import BufferedReader
 import sys
 import base64
+import time
 from falcon.media.multipart import BodyPart, MultipartParseError, MultipartParseOptions
 import magic
 from core.classes.FileManager import FileManager
@@ -37,12 +39,21 @@ class FileS3Controller(Controller):
             self.response(resp, 404, error="No file with that id")
             return
 
-        file_content = file_object.read()
-        data = Utils.serialize_model(file)
-        data["base64"] = str(file_content)[2:-1]
-        file_object.close()
+        if not file_object:
+            self.response(resp, 500, error="Erro geting file from s3")
+            return
 
-        self.response(resp, 200, data)
+        resp.stream = BufferedReader(file_object)
+        resp.content_length = file.size
+        resp.content_type = file.type
+
+    def on_post(self, req: Request, resp: Response, id: int = None):
+        print("Saving file in s3 server")
+        if id:
+            self.response(resp, 405)
+            return
+
+        return self.__post_handler(req, resp)
 
     def on_delete(self, req: Request, resp: Response, id: int = None):
         if not id:
@@ -58,7 +69,7 @@ class FileS3Controller(Controller):
             self.response(resp, 500, error="Error deleting file from S3")
             return
 
-        if not file.soft_delete():
+        if not file.delete():
             self.response(
                 resp,
                 500,
@@ -68,29 +79,54 @@ class FileS3Controller(Controller):
 
         self.response(resp, 200, Utils.serialize_model(file))
 
+    # -------------------------------- base64 --------------------------------
+
+    def on_get_base64(self, req: Request, resp: Response, id: int = None):
+        if not id:
+            self.response(resp, 405)
+            return
+
+        file, file_object = FileManager.get_file(self.bucket, id, self.region)
+
+        if not file:
+            self.response(resp, 404, error="No file with that id")
+            return
+
+        file_content = file_object.read()
+        file_content_b64 = base64.b64encode(file_content)
+        data = Utils.serialize_model(file)
+        data["base64"] = str(file_content_b64)[2:-1]
+        file_object.close()
+
+        self.response(resp, 200, data)
+
     def on_post_base64(self, req: Request, resp: Response, id: int = None):
         print("Saving file in s3 server")
         if id:
             self.response(resp, 405)
             return
 
-        data: dict = json.loads(req.stream.read())
+        try:
+            data: dict = json.loads(req.stream.read())
+        except Exception as exc:
+            self.response(resp, 400, error=str(exc))
+            return
+
         base64_info: str = data.get("base64")
         file_name = data.get("file_name")
         if not file_name or not base64_info:
-            self.response(resp, 400, error="'file_name' and 'base64' needed")
+            self.response(resp, 400, error="Se nececitan el 'file_name' y el 'base64'")
             return
 
-        mimetype = magic.from_buffer(base64.b64decode(base64_info), mime=True)
+        base64_decoded = base64.b64decode(base64_info)
+        mimetype = magic.from_buffer(base64_decoded, mime=True)
 
         if mimetype not in self.accepted_files:
             error_message = f"files of type {mimetype} are not accepted, please submit a valid file format: {self.accepted_files}"
             self.response(resp, 400, error=error_message)
             return
 
-        file = self.__create_file_s3(
-            file_name, base64_info, mimetype, encode_to_base64=False
-        )
+        file = self.__create_file_s3(file_name, base64_decoded, mimetype)
 
         if not file:
             self.response(resp, 500, error="Problem puting image in S3")
@@ -98,81 +134,7 @@ class FileS3Controller(Controller):
 
         self.response(resp, 201, Utils.serialize_model(file))
 
-    def on_post(self, req: Request, resp: Response, id: int = None):
-        print("Saving file in s3 server")
-        try:
-            if id:
-                self.response(resp, 405)
-                return
-
-            query_string = req.params
-            make_thumbnail = False
-            if query_string.get("thumbnail") == "True":
-                make_thumbnail = True
-            data = []
-            file_objects = []
-            form = req.get_media()
-            for part in form:
-                part: BodyPart = part
-                if part.content_type not in self.accepted_files:
-                    if file_objects:
-                        for item in file_objects:
-                            self.on_delete(req, resp, item.id)
-                    error_message = f"files of type {part.content_type} are not accepted, please submit a valid file format: {self.accepted_files}"
-                    self.response(resp, 400, error=error_message)
-                    return
-
-                part_data = part.stream.read()
-                if sys.getsizeof(part_data) > self.max_file_size:
-                    self.response(resp, 413, message=f"{part.name} content is to large")
-                    for item in file_objects:
-                        self.on_delete(req, resp, item.id)
-                    return
-
-                file = self.__create_file_s3(
-                    part.filename, part_data, part.content_type
-                )
-                if not file:
-                    data.append(
-                        {"file_name": part.name, "error": "Problem saving image in S3"}
-                    )
-                    continue
-
-                data.append(Utils.serialize_model(file))
-                file_objects.append(file)
-
-                if make_thumbnail and (
-                    "jpeg" in part.content_type
-                    or "png" in part.content_type
-                    or "jpg" in part.content_type
-                ):
-                    thumbnail_content = self.__create_thumbnail(part_data)
-                    thumbnail_name = (
-                        part.filename[:-4] + "_thumbnail" + part.filename[-4:]
-                    )
-                    thumbnail = self.__create_file_s3(
-                        thumbnail_name,
-                        thumbnail_content,
-                        part.content_type,
-                        is_thumbnail=True,
-                    )
-                    if not file:
-                        data.append(
-                            {
-                                "thumbnail_of_file_name": part.name,
-                                "error": "Problem saving image in S3",
-                            }
-                        )
-                        continue
-
-                    data.append(Utils.serialize_model(thumbnail))
-                    file_objects.append(thumbnail)
-
-            self.response(resp, 201, data)
-
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
+    # -------------------------------- Utils --------------------------------
 
     def __create_file_s3(
         self,
@@ -180,7 +142,7 @@ class FileS3Controller(Controller):
         file_content,
         file_type,
         is_thumbnail=False,
-        encode_to_base64=True,
+        encode_to_base64=False,
     ):
         if isinstance(file_content, str):
             file_content = file_content.encode("utf-8")
@@ -221,3 +183,71 @@ class FileS3Controller(Controller):
                 image_data_content.save(b, "JPEG")
         b.seek(0)
         return b
+
+    def __post_handler(self, req: Request, resp: Response, encode_to_base64=False):
+        query_string = req.params
+        make_thumbnail = False
+        if query_string.get("thumbnail") == "True":
+            make_thumbnail = True
+        data = []
+        file_objects = []
+        form = req.get_media()
+        for part in form:
+            part: BodyPart = part
+            if part.content_type not in self.accepted_files:
+                if file_objects:
+                    for item in file_objects:
+                        self.on_delete(req, resp, item.id)
+                error_message = f"files of type {part.content_type} are not accepted, please submit a valid file format: {self.accepted_files}"
+                self.response(resp, 400, error=error_message)
+                return
+
+            part_data = part.stream.read()
+            if sys.getsizeof(part_data) > self.max_file_size:
+                self.response(resp, 413, message=f"{part.name} content is to large")
+                for item in file_objects:
+                    self.on_delete(req, resp, item.id)
+                return
+
+            file = self.__create_file_s3(
+                part.filename,
+                part_data,
+                part.content_type,
+                encode_to_base64=encode_to_base64,
+            )
+            if not file:
+                data.append(
+                    {"file_name": part.name, "error": self.PROBLEM_SAVING_TO_DB}
+                )
+                continue
+
+            data.append(Utils.serialize_model(file))
+            file_objects.append(file)
+
+            if make_thumbnail and (
+                "jpeg" in part.content_type
+                or "png" in part.content_type
+                or "jpg" in part.content_type
+            ):
+                thumbnail_content = self.__create_thumbnail(part_data)
+                thumbnail_name = part.filename[:-4] + "_thumbnail" + part.filename[-4:]
+                thumbnail = self.__create_file_s3(
+                    thumbnail_name,
+                    thumbnail_content,
+                    part.content_type,
+                    is_thumbnail=True,
+                    encode_to_base64=encode_to_base64,
+                )
+                if not thumbnail:
+                    data.append(
+                        {
+                            "thumbnail_of_file_name": part.name,
+                            "error": self.PROBLEM_SAVING_TO_DB,
+                        }
+                    )
+                    continue
+
+                data.append(Utils.serialize_model(thumbnail))
+                file_objects.append(thumbnail)
+
+        self.response(resp, 201, data)
