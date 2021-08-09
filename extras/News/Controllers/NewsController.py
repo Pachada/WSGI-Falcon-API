@@ -48,14 +48,15 @@ class NewsController(Controller):
 
             news = News(
                 user_id=user.id,
-                file_id_image=data.get("file_id", None),
-                file_id_thumbnail=data.get("thumbnail_id", None),
+                file_id_image=data.get("file_id"),
+                file_id_thumbnail=data.get("thumbnail_id"),
                 type_id=data.get("type"),
                 title=data.get("title"),
                 body=data.get("body"),
                 startdate=startdate_utc,
                 enddate=news_enddate,
             )
+
 
             if not news.save():
                 self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
