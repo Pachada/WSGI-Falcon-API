@@ -136,13 +136,13 @@ class Controller:
             self.response(resp, 404, self.ID_NOT_FOUND)
             return
 
-        if soft_delete:
-            if not row.soft_delete():
-                self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
-                return
-        else:
-            if not row.delete():
-                self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
-                return
-
+        if (
+            soft_delete
+            and not row.soft_delete()
+            or not soft_delete
+            and not row.delete()
+        ):
+            self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
+            return
+            
         self.response(resp, 200, Utils.serialize_model(row))

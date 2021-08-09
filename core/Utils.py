@@ -104,12 +104,11 @@ class Utils:
         ):
             return value.isoformat(timespec="seconds")
 
-        if isinstance(value, datetime):
-            local_time = Utils.datetime_from_timezone_utc0_to_Mexico_City(value)
-            return local_time.isoformat(timespec="seconds")[:-6]
-
-        else:
+        if not isinstance(value, datetime):
             return value
+
+        local_time = Utils.datetime_from_timezone_utc0_to_Mexico_City(value)
+        return local_time.isoformat(timespec="seconds")[:-6]
 
     @staticmethod
     def get_hashed_string(data: str) -> str:
@@ -180,45 +179,39 @@ class Utils:
             return
 
         if isinstance(object, list):
-            lst = []
-            for item in object:
-                lst.append(
-                    Utils.serialize_model(
+            return [Utils.serialize_model(
                         item,
                         recursive,
                         formatters,
                         recursiveLimit=recursiveLimit,
                         blacklist=blacklist,
                         attributes_blacklist=attributes_blacklist,
+                    ) for item in object]
+
+        result = {}
+        if formatters is None:
+            formatters = getattr(object, "formatters", {})
+        for c in object.__table__.columns.keys():
+            if c == "password" or c in attributes_blacklist:
+                continue
+            value = getattr(object, str(c))
+            if c in formatters:
+                value = formatters[c](value)
+            result[c] = value
+        if recursive and recursiveLimit > 1:
+            limit = recursiveLimit - 1
+            for relation in object.__mapper__.relationships.keys():
+                if relation not in blacklist:
+                    recursiveObj = getattr(object, relation)
+                    blacklistModel = getattr(recursiveObj, "blacklist", blacklist)
+                    result[relation] = Utils.serialize_model(
+                        recursiveObj,
+                        recursive,
+                        recursiveLimit=limit,
+                        blacklist=blacklistModel,
                     )
-                )
-            return lst
 
-        else:
-            result = {}
-            if formatters is None:
-                formatters = getattr(object, "formatters", {})
-            for c in object.__table__.columns.keys():
-                if c == "password" or c in attributes_blacklist:
-                    continue
-                value = getattr(object, str(c))
-                if c in formatters:
-                    value = formatters[c](value)
-                result[c] = value
-            if recursive and recursiveLimit - 1 > 0:
-                limit = recursiveLimit - 1
-                for relation in object.__mapper__.relationships.keys():
-                    if relation not in blacklist:
-                        recursiveObj = getattr(object, relation)
-                        blacklistModel = getattr(recursiveObj, "blacklist", blacklist)
-                        result[relation] = Utils.serialize_model(
-                            recursiveObj,
-                            recursive,
-                            recursiveLimit=limit,
-                            blacklist=blacklistModel,
-                        )
-
-            return result
+        return result
 
     @staticmethod
     def float_formatter(value):
@@ -236,7 +229,7 @@ class Utils:
         `float`
             A number with float format.
         """
-        if isinstance(value, float) or isinstance(value, str) or isinstance(value, int):
+        if isinstance(value, (float, str, int)):
             return "{0:.2f}".format(value)
         else:
             return value
@@ -245,7 +238,7 @@ class Utils:
     def generate_otp(length):
         exclude = ["I", "O"]
         letters = list(string.ascii_uppercase)
-        numbers = [i for i in range(0, 10)]
+        numbers = [i for i in range(10)]
         letters.extend(numbers)
         otp = ""
         while len(otp) < length:
@@ -274,9 +267,7 @@ class Utils:
         config.read("config.ini")
         otp_expiration_time = int(config.get("EXPIRATION_TIMES", "otp"))
         delta = datetime.utcnow() - user.otp_time
-        if (delta.total_seconds() / 60) >= otp_expiration_time:
-            return False
-        return True
+        return delta.total_seconds() / 60 < otp_expiration_time
 
     @staticmethod
     def validate_email_code(user):
@@ -299,9 +290,7 @@ class Utils:
             config.get("EXPIRATION_TIMES", "email_code")
         )
         delta = datetime.utcnow() - user.email_confirmation_code_time
-        if (delta.total_seconds() / 60) >= email_confirmation_code_expiration_time:
-            return False
-        return True
+        return delta.total_seconds() / 60 < email_confirmation_code_expiration_time
 
     @staticmethod
     def validate_session(session):
@@ -324,18 +313,13 @@ class Utils:
         token = session.token
         if token is not None:
             delta = datetime.utcnow() - session.updated
-            if (delta.total_seconds() / 60) >= session_expiration_time:
-                return False
-            return True
-
+            return delta.total_seconds() / 60 < session_expiration_time
         return False
 
     @staticmethod
     def check_if_valid_email(email):
         regex = "^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$"
-        if re.search(regex, email):
-            return True
-        return False
+        return bool(re.search(regex, email))
 
     @staticmethod
     def get_start_date_and_end_date(start_date=None, end_days=15):
@@ -357,9 +341,8 @@ class Utils:
                 startdate_formated.hour == 0
                 and startdate_formated.minute == 0
                 and startdate_formated.second == 0
-            ):
-                if today == startdate_formated:
-                    startdate = datetime.utcnow()
+            ) and today == startdate_formated:
+                startdate = datetime.utcnow()
 
         enddate = startdate + timedelta(days=end_days)
 

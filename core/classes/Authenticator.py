@@ -78,10 +78,12 @@ class Authenticator(object):
         if not privileges:
             return False
 
-        resources = []
-        for privilege in privileges:
-            if privilege["method"] == method:
-                resources.append(privilege["resource"])
+        resources = [
+            privilege["resource"]
+            for privilege in privileges
+            if privilege["method"] == method
+        ]
+
         if not resources:
             return False
 

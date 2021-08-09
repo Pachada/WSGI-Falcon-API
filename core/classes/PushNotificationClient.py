@@ -38,10 +38,9 @@ class PushNotificationClient:
             user_id=user.id,
             template_id=template.id,
             message=message_for_notification,
-            notification_time=notification_time
-            if notification_time
-            else datetime.utcnow(),
+            notification_time=notification_time or datetime.utcnow(),
         )
+
         # we create a new PushNotificationPool object and save it to DB
         # in order to get its id. Then we add that id to the extra object.
         # And save the PushNotificationPool object again.

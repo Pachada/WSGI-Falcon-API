@@ -1,4 +1,3 @@
-import hashlib
 import os
 import tempfile
 
@@ -91,11 +90,12 @@ class FileManager:
         record = File(
             object=key,
             size=metadata_info.get("size"),
-            type=file_type if file_type else metadata_info.get("type"),
-            name=file_name if file_name else metadata_info.get("name"),
+            type=file_type or metadata_info.get("type"),
+            name=file_name or metadata_info.get("name"),
             hash=key,
             is_thumbnail=is_thumbnail,
         )
+
         if record.save():
             tmpFile.close()
             return record

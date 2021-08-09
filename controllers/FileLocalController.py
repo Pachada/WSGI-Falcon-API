@@ -141,10 +141,7 @@ class FileLocalController(Controller):
         """
 
         if isinstance(file, list):
-            lst = []
-            for item in file:
-                lst.append(self.__get_file_data(item))
-            return lst
+            return [self.__get_file_data(item) for item in file]
 
         elif isinstance(file, File):
 

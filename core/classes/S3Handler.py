@@ -50,10 +50,9 @@ class S3Handler(object):
                 `instance`
                     A instance of bucket.put_object() method."""
         if self.bucket:
-            obj = self.bucket.put_object(
+            return self.bucket.put_object(
                 Key=path, Body=fileObj, ACL=public, Metadata=metadata
             )
-            return obj
         return None
 
     def download_file(self, path):

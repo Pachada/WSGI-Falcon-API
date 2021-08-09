@@ -49,7 +49,8 @@ class SmtpClient:
             content=msg,
             email=email,
             subject=subject,
-            send_time=send_time if send_time else datetime.utcnow(),
+            send_time=send_time or datetime.utcnow(),
         )
+
 
         email.save()

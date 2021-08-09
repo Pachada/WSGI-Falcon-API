@@ -55,7 +55,7 @@ class ConfirmEmailController(Controller):
             session: Session = req.context.session
             user: User = session.user
 
-            if not email_code == user.email_confirmation_code:
+            if email_code != user.email_confirmation_code:
                 self.response(resp, 401, error="Incorrect code")
                 return
 

@@ -208,12 +208,13 @@ class ExpoPushNotificationCrontab:
             device_id=device.id if device else None,
             template_id=push_notification.template_id,
             push_notification_pool_id=push_notification.id,
-            ticket=push_notification.ticket if push_notification.ticket else None,
+            ticket=push_notification.ticket or None,
             message=push_notification.message,
             data=push_notification.data,
             idStatus=push_notification.status_id,
-            comments=comments if comments else None,
+            comments=comments or None,
         )
+
         push_notification_send.save()
 
 

@@ -24,13 +24,13 @@ class PushNotificationCrontabOneSignal:
     def __init__(self):
         if PushNotificationCrontabOneSignal.__instance is not None:
             return PushNotificationCrontabOneSignal.__instance
-        else:
-            PushNotificationCrontabOneSignal.__instance = self
-            self.config = configparser.ConfigParser()
-            self.config.read("config.ini")
-            self.app_id = self.config.get("ONESIGNAL", "app_id")
-            self.api_key = self.config.get("ONESIGNAL", "api_key")
-            self.client = Client(self.app_id, self.api_key)
+            
+        PushNotificationCrontabOneSignal.__instance = self
+        self.config = configparser.ConfigParser()
+        self.config.read("config.ini")
+        self.app_id = self.config.get("ONESIGNAL", "app_id")
+        self.api_key = self.config.get("ONESIGNAL", "api_key")
+        self.client = Client(self.app_id, self.api_key)
 
     def send_push_notifications(self, query_limit):
         notifications_to_process = []
