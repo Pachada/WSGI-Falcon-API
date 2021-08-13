@@ -82,22 +82,22 @@
     {
         "name": "get_files",
         "method": "GET",
-        "resource": "FileController"
+        "resource": "FileLocalController"
     },
     {
         "name": "post_files",
         "method": "POST",
-        "resource": "FileController"
+        "resource": "FileLocalController"
     },
     {
         "name": "put_files",
         "method": "PUT",
-        "resource": "FileController"
+        "resource": "FileLocalController"
     },
     {
         "name": "delete_files",
         "method": "DELETE",
-        "resource": "FileController"
+        "resource": "FileLocalController"
     },
     {
         "name": "get_devices",

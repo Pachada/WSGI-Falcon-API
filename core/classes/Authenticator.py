@@ -107,11 +107,13 @@ class Authenticator(object):
         else:
             session = Session.get(Session.token == req.auth)
             if not session:
+                print("No session")
                 resource.response(resp, 401, error="Unauthorized")
                 resp.complete = True
                 return
 
             if not Utils.validate_session(session):
+                print("Session expired")
                 self.logout(session)
                 resource.response(resp, 401, message="Session expired")
                 resp.complete = True
@@ -121,6 +123,7 @@ class Authenticator(object):
             method = req.method
             resource_name = type(resource).__name__
             if not self.__has_privileges(role_name, method, resource_name):
+                print("No privileges")
                 resource.response(resp, 401, message="Unauthorized")
                 resp.complete = True
                 return

@@ -54,7 +54,7 @@ class FileManager:
         profile=None,
         region="us-west-2",
         metadata={},
-        is_thumbnail=False,
+        is_thumbnail=0,
     ):
         """
                 The putFile() method creates a temporary file and write inside it the content,

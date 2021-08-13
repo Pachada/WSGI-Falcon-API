@@ -52,5 +52,4 @@ class SmtpClient:
             send_time=send_time or datetime.utcnow(),
         )
 
-
         email.save()

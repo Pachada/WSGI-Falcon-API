@@ -366,7 +366,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/files/s3/base64",
+									"raw": "{{base_url}}/files/s3/base64?thumbnail=True",
 									"host": [
 										"{{base_url}}"
 									],
@@ -374,6 +374,12 @@
 										"files",
 										"s3",
 										"base64"
+									],
+									"query": [
+										{
+											"key": "thumbnail",
+											"value": "True"
+										}
 									]
 								}
 							},
@@ -535,73 +541,6 @@
 							"response": []
 						},
 						{
-							"name": "POST file Local image",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "MdpVpmAWPJCdHwLd98iOPC8yfakQYOk2qxiPMN18rO8",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "file",
-											"type": "file",
-											"src": "/C:/Users/dtrej/Pictures/Wallpapers/Cuphead.jpg"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{base_url}}/files/local/image?thumbnail=False",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"files",
-										"local",
-										"image"
-									],
-									"query": [
-										{
-											"key": "thumbnail",
-											"value": "False"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "GET file Local image",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "v9XyTELiq1F3a_Pub4YPyBseVMScVDGfPbQqoVwipZw",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/files/local/image/353",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"files",
-										"local",
-										"image",
-										"353"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "GET file Local",
 							"request": {
 								"method": "GET",
@@ -621,6 +560,32 @@
 										"files",
 										"local",
 										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GET file Local as base64",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "g5Tya1y-u9rhBQxxetQgMpvg8Vnq0wdqw2dxdZqntpc",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/files/local/base64/4",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"files",
+										"local",
+										"base64",
+										"4"
 									]
 								}
 							},
