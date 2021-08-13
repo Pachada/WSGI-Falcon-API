@@ -28,7 +28,7 @@ class FileLocalController(FileController):
             self.response(resp, 409, error="File content not found")
             return
 
-        resp.downloadable_as = file.name
+        #resp.downloadable_as = file.name
         resp.stream = open(file.object, "rb")
         resp.content_length = file.size
         resp.content_type = file.type
