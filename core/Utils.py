@@ -1,4 +1,5 @@
 from datetime import time, date, datetime, timedelta
+from dateutil.parser import parse
 import string
 import re
 from random import randint
@@ -8,23 +9,22 @@ import hashlib
 
 
 class Utils:
+
+    @staticmethod
+    def today_in_tz(timezone="America/Mexico_City", zero_time=False, as_utc0=False):
+        today = datetime.now(pytz.timezone(timezone))
+        if zero_time:
+            today = today.replace(hour=0, minute=0, second=0)
+        if as_utc0:
+            return Utils.change_datetime_timezone_to_utc0(today)
+        return today
+
     @staticmethod
     def string_to_datetime(date: str):
-        try:
-            date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S")
-        except ValueError as e:
-            try:
-                date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-            except ValueError as e:
-                try:
-                    date = datetime.strptime(date, "%Y/%m/%d %H:%M:%S")
-                except ValueError as e:
-                    raise ValueError("Invalid date format")
-
-        return date
+        return parse(date)
 
     @staticmethod
-    def datetime_from_timezone_utc0_to_Mexico_City(date=None):
+    def change_datetime_timezone_from_utc0_to_another(date=None, tz_to_change="America/Mexico_City"):
         """
         Changes date with timezone UTC-0 to America/Mexico_City time
 
@@ -40,19 +40,19 @@ class Utils:
         """
         if not date:
             return
+
         if isinstance(date, str):
             date = Utils.string_to_datetime(date)
 
         if not date.tzinfo:
-            utc0_timezone = pytz.utc
-            date = utc0_timezone.localize(date)
+            date = pytz.utc.localize(date)
 
-        return date.astimezone(pytz.timezone("America/Mexico_City"))
+        return date.astimezone(pytz.timezone(tz_to_change))
 
     @staticmethod
-    def datetime_from_timezone_Mexico_City_to_utc0(date=None):
+    def change_datetime_timezone_to_utc0(date=None, date_tz="America/Mexico_City"):
         """
-        Changes date with timezone America/Mexico_City to UTC-0 time
+        Changes date to UTC-0 timezone
 
         Parameters
         ----------
@@ -66,13 +66,13 @@ class Utils:
         """
         if not date:
             return
+
         if isinstance(date, str):
             date = Utils.string_to_datetime(date)
 
         # Transfor the datetime object with time zone America/Mexico_City to UTC0
         if not date.tzinfo:
-            local_timezone = pytz.timezone("America/Mexico_City")
-            date = local_timezone.localize(date)
+            date = pytz.timezone(date_tz).localize(date)
 
         return date.astimezone(pytz.utc)
 
@@ -107,7 +107,7 @@ class Utils:
         if not isinstance(value, datetime):
             return value
 
-        local_time = Utils.datetime_from_timezone_utc0_to_Mexico_City(value)
+        local_time = Utils.change_datetime_timezone_from_utc0_to_another(value)
         return local_time.isoformat(timespec="seconds")[:-6]
 
     @staticmethod

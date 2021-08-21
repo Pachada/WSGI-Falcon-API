@@ -211,7 +211,7 @@ class ExpoPushNotificationCrontab:
             ticket=push_notification.ticket or None,
             message=push_notification.message,
             data=push_notification.data,
-            idStatus=push_notification.status_id,
+            status_id=push_notification.status_id,
             comments=comments or None,
         )
 

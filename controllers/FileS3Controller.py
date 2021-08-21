@@ -31,7 +31,7 @@ class FileS3Controller(FileController):
             self.response(resp, 500, error="Error geting file from s3")
             return
 
-        #resp.downloadable_as = file.name
+        resp.set_header('content-disposition', f'inline; filename="{file.name}"')
         resp.stream = BufferedReader(file_object)
         resp.content_length = file.size
         resp.content_type = file.type

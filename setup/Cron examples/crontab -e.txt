@@ -1,0 +1,14 @@
+https://crontab.guru/
+
+
+En la carpeta cron creamos un archivo .sh:
+
+#!/bin/bash
+cd /home/ubuntu/api/crons
+python3 ExpoPushNotificationCrontab.py >> /home/ubuntu/logs/push-notifications.log 2>&1
+
+luego: crontab -e
+
+y agregamos el Cron
+
+* * * * * sh /home/ubuntu/api/crons/push_notifications_cron.sh

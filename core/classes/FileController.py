@@ -52,7 +52,7 @@ class FileController(Controller):
 
         base64_info, file_name, error_message = self.get_base64_info(req)
         if not base64_info:
-            self.response(resp, 400, errror=error_message)
+            self.response(resp, 400, error=error_message)
             return
 
         base64_decoded = self.decode_base64_file(base64_info)
