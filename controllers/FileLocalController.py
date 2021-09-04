@@ -1,15 +1,10 @@
-from falcon.request import Request
-from falcon.response import Response
-from core.classes.FileController import FileController
-from core.Utils import Utils
-from models.File import File
+from core.classes.FileController import FileController, Utils, File, Request, Response
 import os
 import time
 from random import randint
 
 
 class FileLocalController(FileController):
-    
     def __init__(self):
         super().__init__()
         self.storage_path = self.config.get("FILES", "storage_path")
@@ -28,10 +23,13 @@ class FileLocalController(FileController):
             self.response(resp, 409, error="File content not found")
             return
 
-        resp.set_header('content-disposition', f'inline; filename="{file.name}"')
+        resp.set_header("content-disposition", f'inline; filename="{file.name}"')
         resp.stream = open(file.object, "rb")
         resp.content_length = file.size
         resp.content_type = file.type
+
+    def on_post(self, req: Request, resp: Response, id: int = None):
+        super().on_post(req, resp, id)
 
     def on_delete(self, req: Request, resp: Response, id: int = None):
         if not id:
@@ -46,7 +44,7 @@ class FileLocalController(FileController):
         self.__delete_file(file, soft_delete=False)
         self.response(resp, 200, Utils.serialize_model(file))
 
-# -------------------------------- base64 --------------------------------
+    # -------------------------------- base64 --------------------------------
 
     def on_get_base64(self, req: Request, resp: Response, id: int = None):
         try:
@@ -63,7 +61,7 @@ class FileLocalController(FileController):
         except Exception as exc:
             print(exc)
             self.response(resp, 500, error=str(exc))
-    
+
     # -------------------------------- Utils --------------------------------
 
     def __get_file_data_as_base64(self, file, base64=False):

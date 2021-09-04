@@ -1,7 +1,4 @@
-from falcon.response import Response
-from falcon.request import Request
-from core.Controller import Controller, json
-from core.Utils import Utils
+from core.Controller import Controller, Utils, Request, Response, json, datetime
 from models.Person import Person
 from models.User import User
 from core.classes.Authenticator import Authenticator
@@ -9,7 +6,7 @@ from core.classes.Authenticator import Authenticator
 
 class UserController(Controller):
     def on_get(self, req: Request, resp: Response, id: int = None):
-        self.generic_on_get(req, resp, User, id)
+        super().generic_on_get(req, resp, User, id)
 
     def on_post(self, req: Request, resp: Response, id=None):
         if id:
@@ -26,10 +23,10 @@ class UserController(Controller):
             return self.create_user(req, resp, data)
 
     def on_put(self, req: Request, resp: Response, id: int = None):
-        self.generic_on_put(req, resp, User, id)
+        super().generic_on_put(req, resp, User, id)
 
     def on_delete(self, req: Request, resp: Response, id: int = None):
-        self.generic_on_delete(req, resp, User, id)
+        super().generic_on_delete(req, resp, User, id)
 
     # ------------------------------- Utils -------------------------------
 

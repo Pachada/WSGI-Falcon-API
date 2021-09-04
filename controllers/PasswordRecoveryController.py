@@ -1,7 +1,4 @@
-from falcon.response import Response
-from falcon.request import Request
-from core.Controller import Controller, datetime, json
-from core.Utils import Utils
+from core.Controller import Controller, Utils, Request, Response, json, datetime
 from core.classes.Authenticator import Authenticator
 from models.User import User
 from models.EmailTemplate import EmailTemplate

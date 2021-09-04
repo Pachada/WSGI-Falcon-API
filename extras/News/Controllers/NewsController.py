@@ -16,20 +16,10 @@ class NewsController(Controller):
         self.response(resp, 200, Utils.serialize_model(news))
 
     def on_get(self, req, resp, id=None):
-        if id:
-            news = News.get(id)
-            if not news:
-                self.response(resp, 404, self.ID_NOT_FOUND)
-                return
-        else:
-            today = datetime.utcnow()
-
-            news = News.getAll(
-                and_(News.startdate <= today, News.enddate >= today),
-                orderBy=News.startdate.desc(),
-            )
-
-        self.response(resp, 200, Utils.serialize_model(news))
+        super().generic_on_get(req, resp, News, id, 
+        filter =(and_(News.startdate <= datetime.utcnow(), News.enddate >= datetime.utcnow())),
+        orderBy=(News.startdate.desc())
+        )
 
     def on_post(self, req: Request, resp: Response, id: int = None):
         if id:
@@ -83,19 +73,7 @@ class NewsController(Controller):
             self.response(resp, 400, error=str(exc))
 
     def on_delete(self, req: Request, resp: Response, id=None):
-        if not id:
-            self.response(resp, 405)
-            return
-
-        news = News.get(id)
-        if not news:
-            self.response(resp, 404, self.ID_NOT_FOUND)
-            return
-
-        news.soft_delete()
-        news.save()
-
-        self.response(resp, 200, Utils.serialize_model(news))
+        super().generic_on_delete(req, resp, News, id, soft_delete=False, delete_file=True)
 
     def on_put(self, req: Request, resp: Response, id: int = None):
         try:

@@ -17,6 +17,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy.orm import relationship, exc
 from sqlalchemy.sql import func
 from sqlalchemy.dialects import mysql
+from sqlalchemy.orm.util import was_deleted, has_identity
 from datetime import datetime
 from core.database import Base, db_session as DB
 
@@ -27,6 +28,38 @@ class Model:
     The Model Class has methods to process queries in database in a easily way like
     get one, get all, delete and save. The Model class inherits new models.
     """
+
+    def exists_in_database(self):
+        """
+        Return True if the object exists in database, False otherwise.
+        """
+        try:
+            row = self.get(self.id)
+            return row and not was_deleted(self) and has_identity(self)
+        except exc.ObjectDeletedError:
+            return False
+
+    def get_files(self):
+        """
+        Returns a list with the file objects of a Model subclass
+        """
+        return [
+            getattr(self, relation)
+            for relation in self.__mapper__.relationships.keys()
+            if "file" in relation
+        ]
+
+    def delete_model_files(self, req, resp, s3_file=True, local_file=False):
+        """
+        The  delete_model_files() delete the files asociated to a model instance using the FileS3Controller
+        or the FileLocalController on_delete methods, witch requiere the req and resp.
+        Be carefull; if the relatonship with the model is in Cascade, it will delete the row.
+        """
+        for file in self.get_files():
+            if s3_file:
+                file.delete_file_from_s3(req, resp)
+            elif local_file:
+                file.delete_file_from_local()
 
     @classmethod
     def get(self, value, filter=None, deleted=False, join=None, with_for_update=False):

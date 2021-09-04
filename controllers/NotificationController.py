@@ -1,7 +1,4 @@
-from falcon.response import Response
-from falcon.request import Request
-from core.Controller import Controller, json
-from core.Utils import Utils
+from core.Controller import Controller, Utils, Request, Response, json, datetime
 from models.User import User
 from models.PushNotificationSent import PushNotificationSent, and_
 from models.PushNotificationPool import PushNotificationPool
@@ -11,7 +8,7 @@ from models.Status import Status
 class NotificationController(Controller):
     def on_get(self, req: Request, resp: Response, id: int = None):
         user = req.context.session.user
-        self.generic_on_get(
+        super().generic_on_get(
             req,
             resp,
             PushNotificationSent,

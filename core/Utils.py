@@ -6,9 +6,15 @@ from random import randint
 import configparser
 import pytz
 import hashlib
+import os
 
 
 class Utils:
+    @staticmethod
+    def get_config_ini_file_path():
+        thisfolder = os.path.dirname(os.path.abspath(__file__))
+        parent_folder = os.path.abspath(os.path.join(thisfolder, os.pardir))
+        return os.path.abspath(os.path.join(parent_folder, "config.ini"))
 
     @staticmethod
     def today_in_tz(timezone="America/Mexico_City", zero_time=False, as_utc0=False):
@@ -24,7 +30,9 @@ class Utils:
         return parse(date)
 
     @staticmethod
-    def change_datetime_timezone_from_utc0_to_another(date=None, tz_to_change="America/Mexico_City"):
+    def change_datetime_timezone_from_utc0_to_another(
+        date=None, tz_to_change="America/Mexico_City"
+    ):
         """
         Changes date with timezone UTC-0 to America/Mexico_City time
 
@@ -94,7 +102,7 @@ class Utils:
         if isinstance(value, date) and not isinstance(value, datetime):
             value = datetime(value.year, value.month, value.day)
 
-        today = datetime.now(pytz.timezone("America/Mexico_City"))
+        today = Utils.today_in_tz()
         if (
             isinstance(value, datetime)
             and value.hour == 0
@@ -108,7 +116,7 @@ class Utils:
             return value
 
         local_time = Utils.change_datetime_timezone_from_utc0_to_another(value)
-        return local_time.isoformat(timespec="seconds")[:-6]
+        return local_time.isoformat(timespec="seconds")
 
     @staticmethod
     def get_hashed_string(data: str) -> str:
@@ -142,7 +150,6 @@ class Utils:
         object,
         recursive=False,
         formatters=None,
-        translator=None,
         recursiveLimit=3,
         blacklist=[],
         attributes_blacklist=[],
@@ -179,14 +186,17 @@ class Utils:
             return
 
         if isinstance(object, list):
-            return [Utils.serialize_model(
-                        item,
-                        recursive,
-                        formatters,
-                        recursiveLimit=recursiveLimit,
-                        blacklist=blacklist,
-                        attributes_blacklist=attributes_blacklist,
-                    ) for item in object]
+            return [
+                Utils.serialize_model(
+                    item,
+                    recursive,
+                    formatters,
+                    recursiveLimit=recursiveLimit,
+                    blacklist=blacklist,
+                    attributes_blacklist=attributes_blacklist,
+                )
+                for item in object
+            ]
 
         result = {}
         if formatters is None:
@@ -264,7 +274,7 @@ class Utils:
             True if otp_time is still valid, False otherwise.
         """
         config = configparser.ConfigParser()
-        config.read("config.ini")
+        config.read(Utils.get_config_ini_file_path())
         otp_expiration_time = int(config.get("EXPIRATION_TIMES", "otp"))
         delta = datetime.utcnow() - user.otp_time
         return delta.total_seconds() / 60 < otp_expiration_time
@@ -285,7 +295,7 @@ class Utils:
             True if email_time is still valid, False otherwise.
         """
         config = configparser.ConfigParser()
-        config.read("config.ini")
+        config.read(Utils.get_config_ini_file_path())
         email_confirmation_code_expiration_time = int(
             config.get("EXPIRATION_TIMES", "email_code")
         )
@@ -308,7 +318,7 @@ class Utils:
             True if session is still valid, False otherwise.
         """
         config = configparser.ConfigParser()
-        config.read("config.ini")
+        config.read(Utils.get_config_ini_file_path())
         session_expiration_time = int(config.get("EXPIRATION_TIMES", "session"))
         token = session.token
         if token is not None:

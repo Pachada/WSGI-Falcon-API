@@ -66,7 +66,13 @@ class Controller:
             return False
 
     def generic_on_get(
-        self, req: Request, resp: Response, model, id: int = None, filters=None
+        self,
+        req: Request,
+        resp: Response,
+        model,
+        id: int = None,
+        filters=None,
+        order_by=None,
     ):
         if id:
             row = model.get(id)
@@ -74,7 +80,7 @@ class Controller:
                 self.response(resp, 404, error=self.ID_NOT_FOUND)
                 return
         else:
-            row = model.getAll(filters)
+            row = model.getAll(filters, orderBy=order_by)
 
         self.response(resp, 200, Utils.serialize_model(row))
 
@@ -102,7 +108,7 @@ class Controller:
         resp.append_header("content_location", f"/{content_location}/{new_record.id}")
 
     def generic_on_put(
-        self, req: Request, resp: Response, model, id: int = None, extra_data: dict = None
+        self, req: Request, resp: Response, model, id: int = None, extra_data: dict = {}
     ):
         if not id:
             self.response(resp, 405)
@@ -118,6 +124,8 @@ class Controller:
             print(exc)
             self.response(resp, 400, error=str(exc))
 
+        data.update(extra_data)
+
         if not self.set_values(row, data):
             self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
             return
@@ -125,7 +133,13 @@ class Controller:
         self.response(resp, 200, Utils.serialize_model(row))
 
     def generic_on_delete(
-        self, req: Request, resp: Response, model, id: int = None, soft_delete=True
+        self,
+        req: Request,
+        resp: Response,
+        model,
+        id: int = None,
+        soft_delete=True,
+        delete_file=False,
     ):
         if not id:
             self.response(resp, 405)
@@ -136,13 +150,16 @@ class Controller:
             self.response(resp, 404, self.ID_NOT_FOUND)
             return
 
-        if (
-            soft_delete
-            and not row.soft_delete()
-            or not soft_delete
-            and not row.delete()
-        ):
+        data = Utils.serialize_model(row)
+
+        if delete_file:
+            row.delete_model_files(req, resp)
+            if not row.exists_in_database():  # Checamos que el row aún exista
+                self.response(resp, 200, data)
+                return
+
+        if soft_delete and not row.soft_delete() or not row.delete():
             self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
             return
-            
-        self.response(resp, 200, Utils.serialize_model(row))
+
+        self.response(resp, 200, data)

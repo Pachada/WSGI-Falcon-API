@@ -1,7 +1,4 @@
-from falcon.request import Request
-from falcon.response import Response
-from core.Controller import Controller, json
-from core.Utils import Utils
+from core.Controller import Controller, Utils, Request, Response, json, datetime
 from models.File import File
 import configparser
 from PIL import Image
@@ -13,10 +10,9 @@ import magic
 
 
 class FileController(Controller):
-
     def __init__(self):
         self.config = configparser.ConfigParser()
-        self.config.read("config.ini")
+        self.config.read(Utils.get_config_ini_file_path())
         # list of accepted files types
         self.accepted_files = json.loads(self.config.get("FILES", "accepted_files"))
         # Maximum file size accepted

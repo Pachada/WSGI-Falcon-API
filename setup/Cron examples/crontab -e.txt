@@ -2,13 +2,25 @@ https://crontab.guru/
 
 
 En la carpeta cron creamos un archivo .sh:
+- Nos movemos a la carpeta donde estan los crons
+- Exportamos al PYTHONPATH el directorio donde estan todos los archivos del API
+- Llamamos al script y redirigimos el output a un archivo en logs
 
-#!/bin/bash
-cd /home/ubuntu/api/crons
-python3 ExpoPushNotificationCrontab.py >> /home/ubuntu/logs/push-notifications.log 2>&1
+Ejemplo:
+
+    #!/bin/bash
+    cd /home/ubuntu/api/crons
+    export PYTHONPATH=$PYTHONPATH:"/home/ubuntu/api"
+    python3 ExpoPushNotificationCrontab.py >> /home/ubuntu/logs/push-notifications.log 2>&1
+
 
 luego: crontab -e
 
 y agregamos el Cron
 
 * * * * * sh /home/ubuntu/api/crons/push_notifications_cron.sh
+
+Para agregar el cron para que el servidor se inicialice cuando se boote el servidor 
+creamos el start-cron.sh y en crotab -e agregamos:
+
+@reboot sh /home/ubuntu/api/crons/start-cron.sh

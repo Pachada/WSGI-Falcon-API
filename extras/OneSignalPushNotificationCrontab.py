@@ -26,7 +26,7 @@ class PushNotificationCrontabOneSignal():
         else:
             PushNotificationCrontabOneSignal.__instance = self
             self.config = configparser.ConfigParser()
-            self.config.read('config.ini')
+            self.config.read(Utils.get_config_ini_file_path())
             self.app_id = self.config.get('ONESIGNAL', 'app_id')
             self.api_key = self.config.get('ONESIGNAL', 'api_key')
             self.client = Client(self.app_id, self.api_key)

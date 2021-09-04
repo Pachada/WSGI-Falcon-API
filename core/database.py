@@ -3,9 +3,10 @@ from sqlalchemy import create_engine, exc, event, select
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+from core.Utils import Utils
 
 Config = configparser.ConfigParser()
-Config.read("config.ini")
+Config.read(Utils.get_config_ini_file_path())
 
 host = Config.get("DATABASE", "host")
 port = Config.get("DATABASE", "port")

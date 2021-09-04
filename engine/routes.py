@@ -2,6 +2,7 @@ from controllers import *
 import configparser
 from core.classes.Authenticator import Authenticator
 from falcon import API
+from core.Utils import Utils
 
 class RouteLoader():
 
@@ -9,7 +10,7 @@ class RouteLoader():
         self.server:API = server
         self.authorization_middleware:Authenticator = authorization_middleware
         self.config = configparser.ConfigParser()
-        self.config.read('config.ini')
+        self.config.read(Utils.get_config_ini_file_path())
         self.context_from_config = self.config.get('ROUTES', 'context')
         self.context_prefix = '/'+self.context_from_config if self.context_from_config != '' else ''
 
