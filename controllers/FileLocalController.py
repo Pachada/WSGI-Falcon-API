@@ -1,10 +1,10 @@
-from core.classes.FileController import FileController, Utils, File, Request, Response
+from core.classes.FileUtils import FileController, FileAbstract, Utils, File, Request, Response
 import os
 import time
 from random import randint
 
 
-class FileLocalController(FileController):
+class FileLocalController(FileController, FileAbstract):
     def __init__(self):
         super().__init__()
         self.storage_path = self.config.get("FILES", "storage_path")
@@ -130,7 +130,7 @@ class FileLocalController(FileController):
         file_content,
         file_type,
         is_thumbnail=0,
-        encode_to_base64=True,
+        encode_to_base64=True
     ):
         random_number = randint(0, 100000)
         filename = (

@@ -1,10 +1,10 @@
-from core.classes.FileController import FileController, Utils, File, Request, Response
+from core.classes.FileUtils import FileController, FileAbstract, Utils, File, Request, Response
 from io import BufferedReader
 import time
 from core.classes.FileManager import FileManager
 
 
-class FileS3Controller(FileController):
+class FileS3Controller(FileController, FileAbstract):
     def __init__(self):
         super().__init__()
         #  AWS S3 info
@@ -88,7 +88,7 @@ class FileS3Controller(FileController):
         file_content,
         file_type,
         is_thumbnail=0,
-        encode_to_base64=False,
+        encode_to_base64=False
     ):
         file_content = super().format_file_content(file_content)
 
