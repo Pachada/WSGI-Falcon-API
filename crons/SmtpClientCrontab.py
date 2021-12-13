@@ -17,7 +17,7 @@ class SmtpClientCrontab:
     @staticmethod
     def get_instance():
         if not SmtpClientCrontab.__instance:
-            SmtpClientCrontab()
+            return SmtpClientCrontab()
         return SmtpClientCrontab.__instance
 
     def __init__(self):
@@ -112,10 +112,7 @@ class SmtpClientCrontab:
             email.delete()
 
     def __send_email(self, server: smtplib.SMTP, email: EmailPool):
-        error = False
-        if not Utils.check_if_valid_email(email.email):
-            error = True
-
+        error = not Utils.check_if_valid_email(email.email)
         if not error:
             msg, content = self.__create_message(email)
             response_code = server.sendmail(self.fromemail, email.email, msg)

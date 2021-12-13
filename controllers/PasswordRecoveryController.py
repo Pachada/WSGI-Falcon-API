@@ -69,7 +69,7 @@ class PasswordRecoveryController(Controller):
             self.response(resp, 401, message="Incorrect code")
             return
 
-        if not Utils.validate_otp(user):
+        if not Utils.validate_otp(user.otp_time):
             self.response(resp, 401, message="code expired")
             return
 

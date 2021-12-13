@@ -72,7 +72,10 @@ class Controller:
         model,
         id: int = None,
         filters=None,
+        join=None,
         order_by=None,
+        recursive=False,
+        recursiveLimit=2
     ):
         if id:
             row = model.get(id)
@@ -80,28 +83,38 @@ class Controller:
                 self.response(resp, 404, error=self.ID_NOT_FOUND)
                 return
         else:
-            row = model.getAll(filters, orderBy=order_by)
+            row = model.getAll(filters, join=join, orderBy=order_by)
 
-        self.response(resp, 200, Utils.serialize_model(row))
+        self.response(resp, 200, Utils.serialize_model(row, recursive=recursive, recursiveLimit=recursiveLimit))
 
     def generic_on_post(
-        self, req: Request, resp: Response, model, content_location, id: int = None
+        self,
+        req: Request,
+        resp: Response,
+        model,
+        content_location,
+        id: int = None,
+        data=None,
+        extra_data: dict = {},
     ):
         if id:
             self.response(resp, 405)
             return
 
-        try:
-            data: dict = json.loads(req.stream.read())
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
-            return
+        if not data:
+            try:
+                data: dict = json.loads(req.stream.read())
+            except Exception as exc:
+                print(exc)
+                self.response(resp, 400, error=str(exc))
+                return
+
+        data.update(extra_data)
 
         new_record = model()
 
         if not self.set_values(new_record, data):
-            self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
+            self.response(resp, 500, error=self.PROBLEM_SAVING_TO_DB)
             return
 
         self.response(resp, 201, Utils.serialize_model(new_record))
@@ -147,7 +160,7 @@ class Controller:
 
         row = model.get(id)
         if not row:
-            self.response(resp, 404, self.ID_NOT_FOUND)
+            self.response(resp, 404, error=self.ID_NOT_FOUND)
             return
 
         data = Utils.serialize_model(row)
@@ -158,8 +171,9 @@ class Controller:
                 self.response(resp, 200, data)
                 return
 
-        if soft_delete and not row.soft_delete() or not row.delete():
-            self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
+        deleted = row.soft_delete() if soft_delete else row.delete()
+        if not deleted:
+            self.response(resp, 500, error=self.PROBLEM_SAVING_TO_DB)
             return
 
         self.response(resp, 200, data)

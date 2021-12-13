@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 8.0.22, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.25, for Linux (x86_64)
 --
 -- Host: localhost    Database: restapi
 -- ------------------------------------------------------
@@ -16,6 +16,31 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `app_version`
+--
+
+DROP TABLE IF EXISTS `app_version`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `app_version` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `version` float NOT NULL,
+  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `app_version`
+--
+
+LOCK TABLES `app_version` WRITE;
+/*!40000 ALTER TABLE `app_version` DISABLE KEYS */;
+INSERT INTO `app_version` VALUES (1,0.1,'2021-09-04 13:35:47');
+/*!40000 ALTER TABLE `app_version` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `device`
 --
 
@@ -27,11 +52,14 @@ CREATE TABLE `device` (
   `uuid` varchar(300) NOT NULL,
   `user_id` bigint NOT NULL,
   `token` varchar(100) DEFAULT NULL,
+  `app_version_id` bigint DEFAULT '1',
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `fk_device_user_id_idx` (`user_id`),
+  KEY `fk_device_app_version_id_idx` (`app_version_id`),
+  CONSTRAINT `fk_device_app_version_id` FOREIGN KEY (`app_version_id`) REFERENCES `app_version` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_device_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -42,7 +70,7 @@ CREATE TABLE `device` (
 
 LOCK TABLES `device` WRITE;
 /*!40000 ALTER TABLE `device` DISABLE KEYS */;
-INSERT INTO `device` VALUES (1,'12345-6789-09876-54321',1,NULL,'2021-05-03 16:06:01','2021-05-03 16:06:01',1),(2,'unknown',1,NULL,'2021-05-04 17:13:40','2021-05-04 17:13:40',1);
+INSERT INTO `device` VALUES (1,'12345-6789-09876-54321',1,NULL,1,'2021-05-03 16:06:01','2021-05-03 16:06:01',1),(2,'unknown',1,NULL,1,'2021-05-04 17:13:40','2021-05-04 17:13:40',1);
 /*!40000 ALTER TABLE `device` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -161,7 +189,7 @@ CREATE TABLE `file` (
   `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `enable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -398,7 +426,7 @@ CREATE TABLE `session` (
 
 LOCK TABLES `session` WRITE;
 /*!40000 ALTER TABLE `session` DISABLE KEYS */;
-INSERT INTO `session` VALUES (1,1,1,'O4FIfN4kUsbJHAaaJCSldp2Fnm_LG2yxU7wzNqboZOs','2021-05-03 16:06:01','2021-08-02 21:44:34',1),(2,1,2,'ha1b2ijiCDf_ah96LNIo0iSNShK_JmQdc9pezOmkpd8','2021-05-04 17:13:40','2021-05-04 17:13:40',1);
+INSERT INTO `session` VALUES (1,1,1,'g5Tya1y-u9rhBQxxetQgMpvg8Vnq0wdqw2dxdZqntpc','2021-05-03 16:06:01','2021-08-13 20:45:32',1),(2,1,2,'ha1b2ijiCDf_ah96LNIo0iSNShK_JmQdc9pezOmkpd8','2021-05-04 17:13:40','2021-05-04 17:13:40',1);
 /*!40000 ALTER TABLE `session` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -476,4 +504,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-08-03 10:52:08
+-- Dump completed on 2021-09-10 21:30:36

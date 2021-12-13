@@ -12,6 +12,7 @@ from falcon.media.multipart import BodyPart
 import magic
 from abc import ABC, abstractmethod
 
+
 class FileSizeGraterThanAllowed(Exception):
     """Exception raised for errors in the input salary.
 
@@ -25,7 +26,8 @@ class FileSizeGraterThanAllowed(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f'{self.message}'
+        return f"{self.message}"
+
 
 class ContentTypeNotAllowed(Exception):
     """Exception raised for errors in the input salary.
@@ -37,13 +39,15 @@ class ContentTypeNotAllowed(Exception):
 
     def __init__(self, invalid_type, accepted_types):
         self.invalid_type = invalid_type
-        self.message = (f"Archivos de tipo {invalid_type} no son permitidos, "
-                        f"por favor sube un archivo permitido: {accepted_types}"
-                        )
+        self.message = (
+            f"Archivos de tipo {invalid_type} no son permitidos, "
+            f"por favor sube un archivo permitido: {accepted_types}"
+        )
         super().__init__(self.message)
 
     def __str__(self):
-        return f'{self.message}'
+        return f"{self.message}"
+
 
 class FileController(Controller):
 
@@ -56,7 +60,6 @@ class FileController(Controller):
         self.accepted_files = json.loads(self.config.get("FILES", "accepted_files"))
         # Maximum file size accepted
         self.max_file_size = int(self.config.get("FILES", "max_file_size"))
-    
 
     def procces_stream(self, part: BodyPart):
         self.check_if_valid_content_type(part.content_type)
@@ -68,8 +71,8 @@ class FileController(Controller):
             read_so_far += len(chunk)
             if read_so_far > self.max_file_size:
                 raise FileSizeGraterThanAllowed()
-        
-        return b''.join(data)
+
+        return b"".join(data)
 
     def on_post(self, req: Request, resp: Response, id: int = None):
         if id:
@@ -79,12 +82,12 @@ class FileController(Controller):
         make_thumbnail = self.check_if_make_thumbnail(req)
         data = []
         form = req.get_media()
-        for part in form: # Only procces the first file
+        for part in form:  # Only procces the first file
             part: BodyPart = part
             try:
                 stream_content = self.procces_stream(part)
-            except  Exception as e:
-                self.response(resp, 400, error = str(e))
+            except Exception as e:
+                self.response(resp, 400, error=str(e))
                 return
 
             file_data, thumbnail_data, code = self.procces_file(
@@ -94,7 +97,8 @@ class FileController(Controller):
                 make_thumbnail=make_thumbnail,
             )
             data.append(file_data)
-            if thumbnail_data: data.append(thumbnail_data)
+            if thumbnail_data:
+                data.append(thumbnail_data)
             break
 
         self.response(resp, code, data)
@@ -136,17 +140,19 @@ class FileController(Controller):
         return sys.getsizeof(data) < self.max_file_size
 
     def check_if_make_thumbnail(self, req: Request):
-        return req.params.get("thumbnail") == "True"        
+        return req.params.get("thumbnail") == "True"
 
     def procces_file(
         self, filename, data, content_type, encode_to_base64=False, make_thumbnail=False
     ):
 
-        file = self.create_file( # the create_file method is implemented by the subclasses
-            filename,
-            data,
-            content_type,
-            encode_to_base64=encode_to_base64,
+        file = (
+            self.create_file(  # the create_file method is implemented by the subclasses
+                filename,
+                data,
+                content_type,
+                encode_to_base64=encode_to_base64,
+            )
         )
 
         if not file:
@@ -180,12 +186,14 @@ class FileController(Controller):
             + "_thumbnail"
             + ("." + filename[1] if len(filename) > 1 else "")
         )
-        return self.create_file(  # the create_file method is implemented by the subclasses
-            thumbnail_name,
-            thumbnail_content,
-            content_type,
-            is_thumbnail=1,
-            encode_to_base64=encode_to_base64,
+        return (
+            self.create_file(  # the create_file method is implemented by the subclasses
+                thumbnail_name,
+                thumbnail_content,
+                content_type,
+                is_thumbnail=1,
+                encode_to_base64=encode_to_base64,
+            )
         )
 
     def create_thumbnail_image(self, image_data):
@@ -209,9 +217,9 @@ class FileController(Controller):
 
     def get_mimetype(self, data):
         return magic.from_buffer(data, mime=True)
-    
+
     def get_base64_file_length(self, b64string):
-        return (len(b64string) * 3) / 4 - b64string.count('=', -1, -5)
+        return (len(b64string) * 3) / 4 - b64string.count("=", -1, -5)
 
     def get_base64_info(self, req: Request):
         try:
@@ -226,7 +234,7 @@ class FileController(Controller):
 
         if self.get_base64_file_length(base64_info) > self.max_file_size:
             return None, None, f"El archivo {file_name} es mayor a 4mb."
-        
+
         return base64_info, file_name, None
 
     def format_file_content(self, file_content):
@@ -247,6 +255,6 @@ class FileAbstract(ABC):
         file_content,
         file_type,
         is_thumbnail=0,
-        encode_to_base64=True
+        encode_to_base64=True,
     ):
         pass

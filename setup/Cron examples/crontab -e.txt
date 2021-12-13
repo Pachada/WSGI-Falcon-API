@@ -21,6 +21,15 @@ y agregamos el Cron
 * * * * * sh /home/ubuntu/api/crons/push_notifications_cron.sh
 
 Para agregar el cron para que el servidor se inicialice cuando se boote el servidor 
-creamos el start-cron.sh y en crotab -e agregamos:
+creamos el start-cron.sh:
 
-@reboot sh /home/ubuntu/api/crons/start-cron.sh
+    #!/bin/bash
+    cd /home/ubuntu/api
+    nohup python3 -u run.py &
+
+y en crotab -e agregamos:
+
+@reboot sh /home/ubuntu/api/crons/start-cron.sh >> /home/ubuntu/api/nohup.out 2>&1
+
+Aquí se tiene que especificar que el output de este cron sea directamente el archivo nohup.out
+

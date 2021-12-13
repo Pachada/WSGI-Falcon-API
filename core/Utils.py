@@ -259,14 +259,14 @@ class Utils:
         return otp
 
     @staticmethod
-    def validate_otp(user):
+    def validate_otp(otp_time):
         """
-        Validates if the otp_time of a user has not expired
+        Validates if the otp_time has not expired
 
         Parameters
         ----------
-        user: `User`
-                user to check its otp time
+        otp_time: `datetime`
+                datetime the otp was created
 
         Returns
         -------
@@ -276,7 +276,7 @@ class Utils:
         config = configparser.ConfigParser()
         config.read(Utils.get_config_ini_file_path())
         otp_expiration_time = int(config.get("EXPIRATION_TIMES", "otp"))
-        delta = datetime.utcnow() - user.otp_time
+        delta = datetime.utcnow() - otp_time
         return delta.total_seconds() / 60 < otp_expiration_time
 
     @staticmethod
@@ -328,7 +328,7 @@ class Utils:
 
     @staticmethod
     def check_if_valid_email(email):
-        regex = "^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$"
+        regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
         return bool(re.search(regex, email))
 
     @staticmethod

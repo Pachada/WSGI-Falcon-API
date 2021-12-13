@@ -56,6 +56,8 @@ class Model:
         Be carefull; if the relatonship with the model is in Cascade, it will delete the row.
         """
         for file in self.get_files():
+            if not file:
+                continue
             if s3_file:
                 file.delete_file_from_s3(req, resp)
             elif local_file:
@@ -104,6 +106,7 @@ class Model:
         orderBy=None,
         deleted=False,
         join=None,
+        left_join=False,
     ):
         """
         The getAll() method process a query and returns all found values.
@@ -120,8 +123,10 @@ class Model:
             Parameter to order the query.
         deleted : `bool`
             False by default.
-        join : `None`
-            None by default.
+        join : `Model`
+            A list of model to join the query with. None by default.
+        left_join : `bool`
+            If the join should be done as left outer join. False by default.
 
         Returns
         -------
@@ -132,9 +137,9 @@ class Model:
         if join:
             if isinstance(join, list):
                 for model in join:
-                    query = query.join(model)
+                    query = query.join(model, isouter=left_join)
             else:
-                query = query.join(join)
+                query = query.join(join, isouter=left_join)
         if not deleted and "enable" in self.__table__.columns.keys():
             query = query.filter(self.enable == 1)
         if filter is not None:

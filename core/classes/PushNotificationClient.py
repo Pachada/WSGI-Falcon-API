@@ -10,7 +10,7 @@ class PushNotificationClient:
     @staticmethod
     def get_instance():
         if not PushNotificationClient.__instance:
-            PushNotificationClient()
+            return PushNotificationClient()
         return PushNotificationClient.__instance
 
     def __init__(self):

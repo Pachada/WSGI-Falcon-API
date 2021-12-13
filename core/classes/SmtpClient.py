@@ -19,11 +19,16 @@ class SmtpClient:
 
     def send_email_to_pool(
         self,
-        receiver_email: str,
+        receiver_email,
         data: dict,
         template_id: int,
         send_time: datetime = None,
     ):
+        if isinstance(receiver_email, list):
+            for email in receiver_email:
+                self.send_email_to_pool(email, data, template_id, send_time)
+            return
+
         content, subject = self.__create_message_for_pool(data, template_id)
         self.__save_to_pool(content, receiver_email, template_id, subject, send_time)
 
