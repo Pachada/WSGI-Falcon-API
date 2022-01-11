@@ -12,7 +12,7 @@ class ReminderCrontab():
         today = datetime.utcnow()
         delta = today - timedelta(days=7)
 
-        sessions = Session.getAll(Session.updated < delta)
+        sessions = Session.get_all(Session.updated < delta)
 
         if not sessions:
             print(f"{today.strftime('%d/%b/%Y %H:%M:%S')} No hay usuarios que recordar")

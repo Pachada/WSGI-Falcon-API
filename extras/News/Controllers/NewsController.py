@@ -56,7 +56,7 @@ class NewsController(Controller):
             # But when their stardate beggins
             if news.type_id == NewsType.URGENTE:
 
-                users = User.getAll(and_(User.id != user.id))
+                users = User.get_all(and_(User.id != user.id))
                 client = PushNotificationClient.get_instance()
                 for user in users:
                     client.send_notification_to_pool(

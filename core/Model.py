@@ -98,7 +98,7 @@ class Model:
             return query.first()
 
     @classmethod
-    def getAll(
+    def get_all(
         self,
         filter=None,
         limit=None,
@@ -109,7 +109,7 @@ class Model:
         left_join=False,
     ):
         """
-        The getAll() method process a query and returns all found values.
+        The get_all() method process a query and returns all found values.
 
         Parameters
         ----------
@@ -169,14 +169,14 @@ class Model:
 
     def soft_delete(self):
         """
-        The soft_delete() method changes the status of a row in deleted column into *deleted* by adding 1,
-        this indicate that the row has not been deteled at all but in next queries this row will not be
+        The soft_delete() method changes the status of a row in the enable column into *deleted* by changing its
+        value to 0, this indicate that the row has not been deteled at all but in next queries this row will not be
         taken at least that is specify in the query.
 
         Returns
         -------
         `bool`
-            True if deleted = 1 and save() method processes successful for softDelete(), False otherwise.
+            True if enable = 0 and save() method processes successful for soft_delete(), False otherwise.
         """
         try:
             self.enable = 0
@@ -358,10 +358,10 @@ class Model:
             return False
 
     @staticmethod
-    def saveAll(instances):
+    def save_all(instances):
         """
-        The saveAll() method adds more than one objects of Models and saves them to the database,
-        if something went wrong saveAll() can roll back changes made too.
+        The save_all() method adds more than one objects of Models and saves them to the database,
+        if something went wrong save_all() can roll back changes made too.
 
         Parameters
         ----------

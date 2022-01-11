@@ -112,7 +112,7 @@ class Authenticator(object):
                 resp.complete = True
                 return
 
-            if not Utils.validate_session(session):
+            if not Utils.validate_expiration_time(session.updated, "session"):
                 print("Session expired")
                 self.logout(session)
                 resource.response(resp, 401, message="Session expired")
@@ -138,7 +138,7 @@ class Authenticator(object):
     def login(username, password, device_uuid="unknown"):
         user = User.get(User.username == username)
         if user:
-            password = Utils.get_hashed_string(password)
+            password = Utils.get_hashed_string(password+user.salt)
             if password == user.password:
                 session = Authenticator.start_user_session(user, device_uuid)
                 if session:
@@ -167,14 +167,9 @@ class Authenticator(object):
         if session is None:
             session = Session(user_id=user.id, device_id=device.id)
 
-        session.token = Authenticator.generate_user_token()
+        session.token = Utils.generate_user_token()
         session.save()
         return session
-
-    @staticmethod
-    def generate_user_token(nbytes=32):
-        tok = os.urandom(nbytes)
-        return base64.urlsafe_b64encode(tok).rstrip(b"=").decode("ascii")
 
     @staticmethod
     def logout(session: Session):

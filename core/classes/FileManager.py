@@ -20,16 +20,17 @@ class FileManager:
     def get_file_info(file_path):
         """
                 The getFileInfo() method gets information of a file and return it in a dictionary.
-        ​
+
                 Parameters
                 ----------
                 file_path : `str`
                         A string for file path.
-        ​
+
                 Returns
                 -------
                 `dict`
                     A dictionary with size, name, hash and type oof file."""
+                    
         if os.path.exists(file_path):
             size = os.stat(file_path).st_size
             name = os.path.basename(file_path)
@@ -146,5 +147,5 @@ class FileManager:
         try:
             return file, handler.delete_file(file.object)
         except Exception as e:
-            print(str(e))
+            print(e)
             return None, None

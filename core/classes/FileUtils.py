@@ -14,11 +14,8 @@ from abc import ABC, abstractmethod
 
 
 class FileSizeGraterThanAllowed(Exception):
-    """Exception raised for errors in the input salary.
+    """Exception raised for errors in file processing
 
-    Attributes:
-        salary -- input salary which caused the error
-        message -- explanation of the error
     """
 
     def __init__(self):
@@ -30,11 +27,11 @@ class FileSizeGraterThanAllowed(Exception):
 
 
 class ContentTypeNotAllowed(Exception):
-    """Exception raised for errors in the input salary.
+    """Exception raised for errors in file processing
 
     Attributes:
-        salary -- input salary which caused the error
-        message -- explanation of the error
+        invalid_type -- file type not allowed
+        accepted_type -- acepted file extentions
     """
 
     def __init__(self, invalid_type, accepted_types):
@@ -82,25 +79,23 @@ class FileController(Controller):
         make_thumbnail = self.check_if_make_thumbnail(req)
         data = []
         form = req.get_media()
-        for part in form:  # Only procces the first file
-            part: BodyPart = part
-            try:
-                stream_content = self.procces_stream(part)
-            except Exception as e:
-                self.response(resp, 400, error=str(e))
-                return
+        part: BodyPart = form[0]
+        try:
+            stream_content = self.procces_stream(part)
+        except Exception as e:
+            self.response(resp, 400, error=str(e))
+            return
 
-            file_data, thumbnail_data, code = self.procces_file(
-                part.filename,
-                stream_content,
-                part.content_type,
-                make_thumbnail=make_thumbnail,
-            )
-            data.append(file_data)
-            if thumbnail_data:
-                data.append(thumbnail_data)
-            break
-
+        file_data, thumbnail_data, code = self.procces_file(
+            part.filename,
+            stream_content,
+            part.content_type,
+            make_thumbnail=make_thumbnail,
+        )
+        data.append(file_data)
+        if thumbnail_data:
+            data.append(thumbnail_data)
+        
         self.response(resp, code, data)
 
     def on_post_base64(self, req: Request, resp: Response, id: int = None):

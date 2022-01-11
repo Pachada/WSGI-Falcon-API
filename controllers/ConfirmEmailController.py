@@ -13,64 +13,48 @@ class ConfirmEmailController(Controller):
         }
 
     def __request(self, req: Request, resp: Response):
-        try:
-            session: Session = req.context.session
-            user: User = session.user
+        session: Session = req.context.session
+        user: User = session.user
 
-            email_code = Utils.generate_otp(5)
-            user.email_confirmation_code = email_code
-            user.email_confirmation_code_time = datetime.utcnow()
-            if not user.save():
-                self.response(resp, 500, error=self.PROBLEM_SAVING_TO_DB)
-                return
+        email_code = Utils.generate_user_token()
+        user.email_confirmation_code = email_code
+        user.email_confirmation_code_time = datetime.utcnow()
+        if not user.save():
+            self.response(resp, 500, error = self.PROBLEM_SAVING_TO_DB)
+            return
 
-            data_for_email = {"email_confirmation_code": email_code}
-            client = SmtpClient.get_instance()
-            if Utils.check_if_valid_email(user.username):
-                client.send_email_to_pool(
-                    user.username, data_for_email, EmailTemplate.CONFIRM_EMAIL
-                )
-            else:
-                client.send_email_to_pool(
-                    user.email, data_for_email, EmailTemplate.CONFIRM_EMAIL
-                )
+        data_for_email = {'token': email_code}
+        smtp_client = SmtpClient.get_instance()
+        smtp_client.send_email_to_pool(user.email, data_for_email, EmailTemplate.CONFIRM_EMAIL)
 
-            self.response(resp, 200, message="Email code saved successfully")
-
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
+        self.response(resp, 200, message="Email code saved successfully")
 
     def __validate_code(self, req: Request, resp: Response):
-        try:
-            data: dict = json.loads(req.stream.read())
-            email_code = data.get("email_code")
-            if not email_code:
-                self.response(resp, 400, error="email_code needed")
-                return
+        data: dict = self.get_req_data(req, resp)
+        if not data: return
 
-            session: Session = req.context.session
-            user: User = session.user
+        email_code = data.get('token')
+        if not email_code:
+            self.response(resp, 400, error = "token needed")
+            return
+        
+        user = User.get(User.email_confirmation_code == email_code)
+        if not user:
+            self.response(resp, 404, error = "Invalid code")
+            return
+        
+        if not Utils.validate_expiration_time(user.email_confirmation_code_time, "email_code"):
+            self.response(resp, 401, message = "Expiro el código")
+            return
 
-            if email_code != user.email_confirmation_code:
-                self.response(resp, 401, error="Incorrect code")
-                return
+        user.confirmed_email = 1
+        user.email_confirmation_code = None
+        user.email_confirmation_code_time = None
+        if not user.save():
+            self.response(resp, 500, error = self.PROBLEM_SAVING_TO_DB)
+            return
 
-            if not Utils.validate_email_code(user):
-                self.response(resp, 401, message="code expired")
-                return
-
-            user.confirmed_email = 1
-            user.email_confirmation_code = None
-            user.email_confirmation_code_time = None
-            if not user.save():
-                self.response(resp, 500, error=self.PROBLEM_SAVING_TO_DB)
-                return
-
-            self.response(resp, 200, message="Email confirmed successfully")
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
+        self.response(resp, 200, message = "El emails se confirmo satisfactoriamente")
 
     def on_post(self, req: Request, resp: Response, action: str):
         self.actions[action](req, resp)

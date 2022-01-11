@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, time
 import falcon
 import json
 from core.Utils import Utils
+from core.Model import Model
 
 
 class Controller:
@@ -47,7 +48,7 @@ class Controller:
             data["error_code"] = error_code
         resp.text = json.dumps(data, ensure_ascii=False)
 
-    def set_values(self, row, data: dict):
+    def set_values(self, row: Model, data: dict):
         try:
             for col in row.__table__.columns.keys():
                 if col in data:
@@ -64,12 +65,34 @@ class Controller:
             print("[ERROR-SETTING_VALUES]")
             print(exc)
             return False
+    
+    def get_req_data(self, req: Request, resp: Response):
+        try:
+            data: dict = json.loads(req.stream.read())
+        except Exception as exc:
+            print(exc)
+            self.response(resp, 400, error=str(exc))
+            return
+        
+        return data
+    
+    def get_model_object(self, req: Request, resp: Response, model: Model, id: int=None):
+        if not id:
+            self.response(resp, 405)
+            return
+        
+        row = model.get(id)
+        if not row: 
+            self.response(resp, 404, error=self.ID_NOT_FOUND)
+            return
+        
+        return row
 
     def generic_on_get(
         self,
         req: Request,
         resp: Response,
-        model,
+        model: Model,
         id: int = None,
         filters=None,
         join=None,
@@ -78,12 +101,10 @@ class Controller:
         recursiveLimit=2
     ):
         if id:
-            row = model.get(id)
-            if not row:
-                self.response(resp, 404, error=self.ID_NOT_FOUND)
-                return
+            row = self.get_model_object(req, resp, model, id)
+            if not row: return
         else:
-            row = model.getAll(filters, join=join, orderBy=order_by)
+            row = model.get_all(filters, join=join, orderBy=order_by)
 
         self.response(resp, 200, Utils.serialize_model(row, recursive=recursive, recursiveLimit=recursiveLimit))
 
@@ -91,7 +112,7 @@ class Controller:
         self,
         req: Request,
         resp: Response,
-        model,
+        model: Model,
         content_location,
         id: int = None,
         data=None,
@@ -102,12 +123,8 @@ class Controller:
             return
 
         if not data:
-            try:
-                data: dict = json.loads(req.stream.read())
-            except Exception as exc:
-                print(exc)
-                self.response(resp, 400, error=str(exc))
-                return
+            data = self.get_req_data(req, resp)
+        if not data: return
 
         data.update(extra_data)
 
@@ -121,21 +138,17 @@ class Controller:
         resp.append_header("content_location", f"/{content_location}/{new_record.id}")
 
     def generic_on_put(
-        self, req: Request, resp: Response, model, id: int = None, extra_data: dict = {}
+        self, req: Request, resp: Response, model: Model, id: int = None, extra_data: dict = {}
     ):
         if not id:
             self.response(resp, 405)
             return
 
-        row = model.get(id)
-        if not row:
-            self.response(resp, 404, self.ID_NOT_FOUND)
-            return
-        try:
-            data: dict = json.loads(req.stream.read())
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
+        row = self.get_model_object(req, resp, model, id)
+        if not row: return
+
+        data = self.get_req_data(req, resp)
+        if not data: return
 
         data.update(extra_data)
 
@@ -149,7 +162,7 @@ class Controller:
         self,
         req: Request,
         resp: Response,
-        model,
+        model: Model,
         id: int = None,
         soft_delete=True,
         delete_file=False,
@@ -158,10 +171,8 @@ class Controller:
             self.response(resp, 405)
             return
 
-        row = model.get(id)
-        if not row:
-            self.response(resp, 404, error=self.ID_NOT_FOUND)
-            return
+        row = self.get_model_object(req, resp, model, id)
+        if not row: return
 
         data = Utils.serialize_model(row)
 

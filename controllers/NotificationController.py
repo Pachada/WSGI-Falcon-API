@@ -23,31 +23,28 @@ class NotificationController(Controller):
         )
 
     def on_put(self, req: Request, resp: Response, id: int = None):
-        try:
-            if not id:
-                self.response(resp, 405)
-                return
+        if not id:
+            self.response(resp, 405)
+            return
 
-            # The id que recevie is the id of a PushNotificationPool object
-            # With that id we can get the PushNotificationSent object associated with it
-            # and mark it as readed.
-            notification = PushNotificationPool.get(id)
-            if not notification:
-                self.response(resp, 404, error=self.ID_NOT_FOUND)
-                return
+        # The id que recevie is the id of a PushNotificationPool object
+        # With that id we can get the PushNotificationSent object associated with it
+        # and mark it as readed.
+        notification = PushNotificationPool.get(id)
+        if not notification:
+            self.response(resp, 404, error=self.ID_NOT_FOUND)
+            return
 
-            notification_sent = PushNotificationSent.get(
-                PushNotificationSent.push_notification_pool_id == notification.id
-            )
-            if not notification_sent:
-                self.response(resp, 404, error=self.ID_NOT_FOUND)
-                return
+        notification_sent = PushNotificationSent.get(
+            PushNotificationSent.push_notification_pool_id == notification.id
+        )
+        if not notification_sent:
+            self.response(resp, 404, error=self.ID_NOT_FOUND)
+            return
 
-            data: dict = json.loads(req.stream.read())
-            notification_sent.read = data.get("read", 1)
-            notification_sent.save()
+        data: dict = self.get_req_data(req, resp)
+        if not data: return
+        notification_sent.read = data.get("read", 1)
+        notification_sent.save()
 
-            self.response(resp, 200, Utils.serialize_model(notification_sent))
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
+        self.response(resp, 200, Utils.serialize_model(notification_sent))

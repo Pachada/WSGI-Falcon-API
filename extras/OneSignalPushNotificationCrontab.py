@@ -34,7 +34,7 @@ class PushNotificationCrontabOneSignal():
     def send_push_notifications(self, query_limit):
         notifications_to_process = []
         try:
-            list_of_notifications_to_send = PushNotificationPool.getAll(
+            list_of_notifications_to_send = PushNotificationPool.get_all(
                 and_(
                     PushNotificationPool.status_id.in_([Status.PENDING, Status.ERROR]),
                     PushNotificationPool.send_attemps < 3,
@@ -67,7 +67,7 @@ class PushNotificationCrontabOneSignal():
                 # Send notifications to all the device of the user 
                 error = False
                 user:User = notification.user
-                user_devices = Device.getAll(and_(
+                user_devices = Device.get_all(and_(
                     Device.user_id == user.id,
                     Device.token != None
                 ))

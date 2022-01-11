@@ -22,15 +22,12 @@ class SessionController(Controller):
         self.response(resp, 200, data)
 
     def __login(self, req: Request, resp: Response):
-        try:
-            data: dict = json.loads(req.stream.read())
-        except Exception as exc:
-            self.response(resp, 400, error=str(exc))
-            return
+        data = self.get_req_data(req, resp)
+        if not data: return
 
-        username = data.get("username")
-        password = data.get("password")
-        uuid = data.get("device_uuid", "unknown")
+        username = str(data.get("username"))
+        password = str(data.get("password"))
+        uuid = str(data.get("device_uuid", "unknown"))
         if not username or not password:
             self.response(resp, 400, error="Username and password are required")
             return

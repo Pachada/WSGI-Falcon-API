@@ -5,7 +5,8 @@ from core.Utils import Utils
 class EmailTemplate(Base, Model):
     # Templates                  #Data
     PASSWORD_RECOVERY = 1       # {{otp}}
-    CONFIRM_EMAIL = 2           # {{email_confirmation_code}}
+    CONFIRM_EMAIL = 2           # {{token}}
+    ERROR = 3                  # flow, title, description, date, procedure
 
     __tablename__ = "email_template"
 

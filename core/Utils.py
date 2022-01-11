@@ -2,14 +2,16 @@ from datetime import time, date, datetime, timedelta
 from dateutil.parser import parse
 import string
 import re
-from random import randint
+import random
 import configparser
 import pytz
 import hashlib
 import os
+import base64
 
 
 class Utils:
+
     @staticmethod
     def get_config_ini_file_path():
         thisfolder = os.path.dirname(os.path.abspath(__file__))
@@ -150,9 +152,9 @@ class Utils:
         object,
         recursive=False,
         formatters=None,
-        recursiveLimit=3,
+        recursiveLimit=2,
         blacklist=[],
-        attributes_blacklist=[],
+        attributes_blacklist=[]
     ):
         """
         Take an object that can be a model instance or a model instances list
@@ -243,30 +245,32 @@ class Utils:
             return "{0:.2f}".format(value)
         else:
             return value
+    
+    @staticmethod
+    def generate_salt(length: int = 6):
+        return ''.join(random.choice(string.printable) for _ in range(length))
 
     @staticmethod
-    def generate_otp(length):
-        exclude = ["I", "O"]
+    def generate_otp(length: int):
         letters = list(string.ascii_uppercase)
-        numbers = [i for i in range(10)]
-        letters.extend(numbers)
-        otp = ""
-        while len(otp) < length:
-            index = randint(0, 35)
-            letter_to_add = letters[index]
-            if letter_to_add not in exclude:
-                otp += str(letter_to_add)
-        return otp
+        numbers = list(string.digits)
+        exclude = {"I", "O"}
+        characters = [i for i in (letters + numbers) if i not in exclude]
+        return ''.join(random.choice(characters for _ in range(length)))
 
     @staticmethod
-    def validate_otp(otp_time):
+    def validate_expiration_time(otp_time: datetime, config_row = 'otp'):
         """
         Validates if the otp_time has not expired
+        compare to the expiration time of the config_row in the config.ini file
 
         Parameters
         ----------
         otp_time: `datetime`
                 datetime the otp was created
+        
+        config_row: `str`
+                row in config.ini file
 
         Returns
         -------
@@ -275,61 +279,22 @@ class Utils:
         """
         config = configparser.ConfigParser()
         config.read(Utils.get_config_ini_file_path())
-        otp_expiration_time = int(config.get("EXPIRATION_TIMES", "otp"))
+        otp_expiration_time = int(config.get("EXPIRATION_TIMES", config_row))
         delta = datetime.utcnow() - otp_time
         return delta.total_seconds() / 60 < otp_expiration_time
 
     @staticmethod
-    def validate_email_code(user):
+    def check_if_valid_email(email: str):
         """
-        Validates if the email time of a user has not expired
-
-        Parameters
-        ----------
-        user: `User`
-                user to check its email time
-
-        Returns
-        -------
-        `bool`
-            True if email_time is still valid, False otherwise.
+        Validates that the email address is a valid one using regex
         """
-        config = configparser.ConfigParser()
-        config.read(Utils.get_config_ini_file_path())
-        email_confirmation_code_expiration_time = int(
-            config.get("EXPIRATION_TIMES", "email_code")
-        )
-        delta = datetime.utcnow() - user.email_confirmation_code_time
-        return delta.total_seconds() / 60 < email_confirmation_code_expiration_time
-
-    @staticmethod
-    def validate_session(session):
-        """
-        Validates if a sessions is valid
-
-        Parameters
-        ----------
-        session: `Session`
-                Session to check
-
-        Returns
-        -------
-        `bool`
-            True if session is still valid, False otherwise.
-        """
-        config = configparser.ConfigParser()
-        config.read(Utils.get_config_ini_file_path())
-        session_expiration_time = int(config.get("EXPIRATION_TIMES", "session"))
-        token = session.token
-        if token is not None:
-            delta = datetime.utcnow() - session.updated
-            return delta.total_seconds() / 60 < session_expiration_time
-        return False
-
-    @staticmethod
-    def check_if_valid_email(email):
         regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
         return bool(re.search(regex, email))
+
+    @staticmethod
+    def generate_user_token(nbytes = 32):
+        tok = os.urandom(nbytes)
+        return base64.urlsafe_b64encode(tok).rstrip(b'=').decode('ascii')
 
     @staticmethod
     def get_start_date_and_end_date(start_date=None, end_days=15):

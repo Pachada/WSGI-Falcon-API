@@ -10,6 +10,7 @@ class User(Base, Model):
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     username = Column(String(100), nullable=False)
     password = Column(String(300), nullable=False)
+    salt = Column(String(6), nullable=False)
     email = Column(String(100), nullable=False)
     phone = Column(String(15), default=None)
     role_id = Column(BigInteger, ForeignKey(Role.id), default=Role.USER)

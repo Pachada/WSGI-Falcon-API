@@ -201,7 +201,7 @@ class ExpoPushNotificationCrontab:
             push_notification.save()
 
     def __get_notifications_to_send(self, query_limit):
-        return PushNotificationPool.getAll(
+        return PushNotificationPool.get_all(
             and_(
                 PushNotificationPool.status_id.in_([Status.PENDING, Status.ERROR]),
                 PushNotificationPool.send_attemps < 3,
@@ -243,15 +243,12 @@ class ExpoPushNotificationCrontab:
             True if there was any error, otherwise False
         """
         template: PushNotificationTemplate = notification.template
-        private_notifiaction = False
-        if template.private:
-            private_notifiaction = True
-
+        private_notifiaction = bool(template.private)
         #
         # if the notifications is private check if the sessions is valid
         device: Device = session.device
         if not device.token or (
-            private_notifiaction and not Utils.validate_session(session)
+            private_notifiaction and not Utils.validate_expiration_time(session.updated, "session")
         ):
             return device, True
 

@@ -13,11 +13,8 @@ class UserController(Controller):
             self.response(resp, 405)
             return
 
-        try:
-            data: dict = json.loads(req.stream.read())
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
+        data: dict = self.get_req_data(req, resp)
+        if not data: return
 
         if data.get("username") and data.get("password"):
             return self.create_user(req, resp, data)
@@ -38,13 +35,11 @@ class UserController(Controller):
             self.response(resp, 409, error=message)
             return
 
-        user, error_message, code = self.create_user_helper(data)
-        if user is None:
-            self.response(resp, code, error=error_message)
-            return
+        user = self.create_user_helper(req , resp, data)
+        if not user: return
 
         session = Authenticator.login(
-            user.email, data.get("password"), data.get("device_uuid", "unknown")
+            user.email, str(data.get("password")), str(data.get("device_uuid", "unknown"))
         )
         data = {
             "session": Utils.serialize_model(
@@ -54,9 +49,10 @@ class UserController(Controller):
         self.response(resp, 201, data, message="Session started")
         resp.append_header("content_location", f"/users/{user.id}")
 
-    def create_user_helper(self, data: dict):
+    def create_user_helper(self, req: Request, resp: Response, data: dict):
         if not data.get("password"):
-            return None, "Se necesita el campo password", 400
+            self.response(resp, 400, "Password field requierd")
+            return 
 
         person = Person(
             firstname=data.get("name"),
@@ -64,17 +60,21 @@ class UserController(Controller):
             birthday=data.get("birthday"),
         )
         if not person.save():
-            return None, self.PROBLEM_SAVING_TO_DB, 500
+            self.response(resp, 500, error= self.PROBLEM_SAVING_TO_DB)
+            return
 
-        password_encrypted = Utils.get_hashed_string(data.get("password"))
+        salt = Utils.generate_salt()
+        password_encrypted = Utils.get_hashed_string(str(data.get("password")) + salt)
         user = User(
             username=data.get("username"),
             password=password_encrypted,
+            salt=salt,
             email=data.get("email"),
             phone=data.get("phone"),
             person_id=person.id,
         )
         if not user.save():
-            return None, self.PROBLEM_SAVING_TO_DB, 500
+            self.response(resp, 500, error= self.PROBLEM_SAVING_TO_DB)
+            return
 
-        return user, None, None
+        return user

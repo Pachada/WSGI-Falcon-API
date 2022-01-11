@@ -12,12 +12,8 @@ class DeviceController(Controller):
         else a HTTP_200 code
 
         """
-        try:
-            data: dict = json.loads(req.stream.read())
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
-            return
+        data: dict = self.get_req_data(req, resp)
+        if not data: return
 
         app_version = AppVersion.get_actual_version_class()
         if float(data.get("device_version")) < app_version.version:
@@ -27,9 +23,7 @@ class DeviceController(Controller):
         device: Device = req.context.session.device
         if device.app_version_id != app_version.id:
             device.app_version_id = app_version.id
-            if not device.save():
-                self.response(resp, 500, error=self.PROBLEM_SAVING_TO_DB)
-                return
+            device.save()
 
         self.response(resp, 200)
 
@@ -37,12 +31,8 @@ class DeviceController(Controller):
         """
         Adds the notification token to the device of the current session
         """
-        try:
-            data: dict = json.loads(req.stream.read())
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
-            return
+        data: dict = self.get_req_data(req, resp)
+        if not data: return
 
         if not data.get("token"):
             self.response(resp, 400, error="token needed")

@@ -34,6 +34,10 @@ class SmtpClientCrontab:
         self.fromemail = self.config.get("SMTP", "fromemail")
 
         self.context = ssl.create_default_context()
+    
+    @staticmethod
+    def procces_pool(limit: int = 10):
+        main(limit)
 
     def send_emails(self, query_limit: int):
         emails_to_send = []
@@ -89,7 +93,7 @@ class SmtpClientCrontab:
         email.save()
 
     def __get_emails_to_send(self, query_limit):
-        return EmailPool.getAll(
+        return EmailPool.get_all(
             and_(
                 EmailPool.status_id.in_([Status.PENDING, Status.ERROR]),
                 EmailPool.send_time <= datetime.utcnow(),

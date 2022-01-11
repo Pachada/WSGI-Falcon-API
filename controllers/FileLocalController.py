@@ -54,7 +54,7 @@ class FileLocalController(FileController, FileAbstract):
                     self.response(resp, 404, message="No such file or directory")
                     return
             else:
-                file = File.getAll()
+                file = File.get_all()
 
             self.response(resp, 200, self.__get_file_data_as_base64(file))
 

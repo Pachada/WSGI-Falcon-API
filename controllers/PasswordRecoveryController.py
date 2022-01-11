@@ -21,12 +21,12 @@ class PasswordRecoveryController(Controller):
             self.response(resp, 400, error=str(exc))
             return
 
-        username = data.get("username")
-        if not username:
-            self.response(resp, 400, error="username needed")
+        email = data.get("email")
+        if not email:
+            self.response(resp, 400, error="email needed")
             return
 
-        user = User.get(User.username == username)
+        user = User.get(User.email == email)
         if not user:
             self.response(resp, 404, error="User not found")
             return
@@ -40,24 +40,15 @@ class PasswordRecoveryController(Controller):
         data_for_email = {"otp": user.otp}
 
         client = SmtpClient.get_instance()
-        if Utils.check_if_valid_email(username):
-            client.send_email_to_pool(
-                username, data_for_email, EmailTemplate.PASSWORD_RECOVERY
-            )
-        else:
-            client.send_email_to_pool(
-                user.email, data_for_email, EmailTemplate.PASSWORD_RECOVERY
-            )
+        client.send_email_to_pool(
+            user.email, data_for_email, EmailTemplate.PASSWORD_RECOVERY
+        )
 
         self.response(resp, 200, message="OTP saved successfully")
 
     def __validate_code(self, req: Request, resp: Response):
-        try:
-            data: dict = json.loads(req.stream.read())
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
-            return
+        data: dict = self.get_req_data(req, resp)
+        if not data: return
 
         otp = data.get("otp")
         if not otp:
@@ -69,18 +60,18 @@ class PasswordRecoveryController(Controller):
             self.response(resp, 401, message="Incorrect code")
             return
 
-        if not Utils.validate_otp(user.otp_time):
+        if not Utils.validate_expiration_time(user.otp_time, "otp"):
             self.response(resp, 401, message="code expired")
             return
 
         device_uuid = data.get("device_uuid", "unknown")
-        session = Authenticator.login_by_otp(user, device_uuid)
         user.otp = None
         user.otp_time = None
         if not user.save():
             self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
             return
 
+        session = Authenticator.login_by_otp(user, device_uuid)
         req.context.session = session
         data = {
             "session": Utils.serialize_model(
@@ -93,14 +84,10 @@ class PasswordRecoveryController(Controller):
         self.response(resp, 200, data, message="Session started")
 
     def __change_password(self, req: Request, resp: Response):
-        try:
-            data: dict = json.loads(req.stream.read())
-        except Exception as exc:
-            print(exc)
-            self.response(resp, 400, error=str(exc))
-            return
+        data: dict = self.get_req_data(req, resp)
+        if not data: return
 
-        new_password: str = data.get("new_password")
+        new_password: str = str(data.get("new_password"))
         if not new_password:
             self.response(resp, 400, error="new_password is required")
             return
@@ -108,7 +95,7 @@ class PasswordRecoveryController(Controller):
         session = req.context.session
         user: User = session.user
 
-        user.password = Utils.get_hashed_string(new_password)
+        user.password = Utils.get_hashed_string(new_password + user.salt)
         if not user.save():
             self.response(resp, 500, self.PROBLEM_SAVING_TO_DB)
             return
