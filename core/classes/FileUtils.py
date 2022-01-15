@@ -47,6 +47,11 @@ class ContentTypeNotAllowed(Exception):
 
 
 class FileController(Controller):
+    """
+    The FileController class inherits new File controllers classes and
+    provide them with common used methods 
+
+    """
 
     CHUNK_SIZE = 8192
 
@@ -58,6 +63,13 @@ class FileController(Controller):
         # Maximum file size accepted
         self.max_file_size = int(self.config.get("FILES", "max_file_size"))
 
+    def compress_image(self, image_data):
+        with Image.open(io.BytesIO(image_data)) as image_data_content:
+            b = io.BytesIO()
+            image_data_content.save(b, image_data_content.format, optimize=True, quality=65)
+        b.seek(0)
+        return b
+
     def procces_stream(self, part: BodyPart):
         self.check_if_valid_content_type(part.content_type)
 
@@ -68,8 +80,9 @@ class FileController(Controller):
             read_so_far += len(chunk)
             if read_so_far > self.max_file_size:
                 raise FileSizeGraterThanAllowed()
-
-        return b"".join(data)
+        
+        # Compress the image and return the content
+        return self.compress_image(b"".join(data))
 
     def on_post(self, req: Request, resp: Response, id: int = None):
         if id:
@@ -77,25 +90,26 @@ class FileController(Controller):
             return
 
         make_thumbnail = self.check_if_make_thumbnail(req)
-        data = []
         form = req.get_media()
-        part: BodyPart = form[0]
-        try:
-            stream_content = self.procces_stream(part)
-        except Exception as e:
-            self.response(resp, 400, error=str(e))
-            return
+        for part in form:
+            part: BodyPart = part 
+            try:
+                stream_content = self.procces_stream(part)
+            except Exception as e:
+                self.response(resp, 400, error=str(e))
+                return
 
-        file_data, thumbnail_data, code = self.procces_file(
-            part.filename,
-            stream_content,
-            part.content_type,
-            make_thumbnail=make_thumbnail,
-        )
-        data.append(file_data)
-        if thumbnail_data:
-            data.append(thumbnail_data)
-        
+            file_data, thumbnail_data, code = self.procces_file(
+                part.filename,
+                stream_content,
+                part.content_type,
+                make_thumbnail=make_thumbnail,
+            )
+            data = [file_data]
+            if thumbnail_data:
+                data.append(thumbnail_data)
+            break # We only acept one file at a time
+
         self.response(resp, code, data)
 
     def on_post_base64(self, req: Request, resp: Response, id: int = None):
@@ -192,15 +206,10 @@ class FileController(Controller):
         )
 
     def create_thumbnail_image(self, image_data):
-        with Image.open(io.BytesIO(image_data)) as image_data_content:
+        with Image.open(image_data) as image_data_content:
             image_data_content.thumbnail(size=(640, 640))
             b = io.BytesIO()
-            if image_data_content.format == "PNG":
-                image_data_content.save(b, "PNG")
-            elif image_data_content.format == "JPG":
-                image_data_content.save(b, "JPG")
-            else:
-                image_data_content.save(b, "JPEG")
+            image_data_content.save(b, image_data_content.format)
         b.seek(0)
         return b
 
@@ -243,6 +252,9 @@ class FileController(Controller):
 
 
 class FileAbstract(ABC):
+    """
+    Abstract class that all FileController subclasses should implement
+    """
     @abstractmethod
     def create_file(
         self,

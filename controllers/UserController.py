@@ -24,6 +24,7 @@ class UserController(Controller):
 
     def on_delete(self, req: Request, resp: Response, id: int = None):
         super().generic_on_delete(req, resp, User, id)
+        #TODO We also delete the person and the sessions of the user
 
     # ------------------------------- Utils -------------------------------
 
@@ -39,7 +40,7 @@ class UserController(Controller):
         if not user: return
 
         session = Authenticator.login(
-            user.email, str(data.get("password")), str(data.get("device_uuid", "unknown"))
+            user.username, str(data.get("password")), str(data.get("device_uuid", "unknown"))
         )
         data = {
             "session": Utils.serialize_model(
@@ -55,7 +56,7 @@ class UserController(Controller):
             return 
 
         person = Person(
-            firstname=data.get("name"),
+            first_name=data.get("name"),
             last_name=data.get("last_name"),
             birthday=data.get("birthday"),
         )
