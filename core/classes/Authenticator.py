@@ -138,7 +138,7 @@ class Authenticator(object):
     def login(username, password, device_uuid="unknown"):
         user = User.get(User.username == username)
         if user:
-            password = Utils.get_hashed_string(password+user.salt)
+            password = Utils.get_hashed_string(password + user.salt)
             if password == user.password:
                 session = Authenticator.start_user_session(user, device_uuid)
                 if session:

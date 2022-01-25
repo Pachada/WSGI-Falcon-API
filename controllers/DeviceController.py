@@ -13,7 +13,8 @@ class DeviceController(Controller):
 
         """
         data: dict = self.get_req_data(req, resp)
-        if not data: return
+        if not data:
+            return
 
         app_version = AppVersion.get_actual_version_class()
         if float(data.get("device_version")) < app_version.version:
@@ -32,7 +33,8 @@ class DeviceController(Controller):
         Adds the notification token to the device of the current session
         """
         data: dict = self.get_req_data(req, resp)
-        if not data: return
+        if not data:
+            return
 
         if not data.get("token"):
             self.response(resp, 400, error="token needed")

@@ -14,7 +14,8 @@ class UserController(Controller):
             return
 
         data: dict = self.get_req_data(req, resp)
-        if not data: return
+        if not data:
+            return
 
         if data.get("username") and data.get("password"):
             return self.create_user(req, resp, data)
@@ -24,7 +25,7 @@ class UserController(Controller):
 
     def on_delete(self, req: Request, resp: Response, id: int = None):
         super().generic_on_delete(req, resp, User, id)
-        #TODO We also delete the person and the sessions of the user
+        # TODO We also delete the person and the sessions of the user
 
     # ------------------------------- Utils -------------------------------
 
@@ -36,11 +37,14 @@ class UserController(Controller):
             self.response(resp, 409, error=message)
             return
 
-        user = self.create_user_helper(req , resp, data)
-        if not user: return
+        user = self.create_user_helper(req, resp, data)
+        if not user:
+            return
 
         session = Authenticator.login(
-            user.username, str(data.get("password")), str(data.get("device_uuid", "unknown"))
+            user.username,
+            str(data.get("password")),
+            str(data.get("device_uuid", "unknown")),
         )
         data = {
             "session": Utils.serialize_model(
@@ -53,7 +57,7 @@ class UserController(Controller):
     def create_user_helper(self, req: Request, resp: Response, data: dict):
         if not data.get("password"):
             self.response(resp, 400, "Password field requierd")
-            return 
+            return
 
         person = Person(
             first_name=data.get("name"),
@@ -61,7 +65,7 @@ class UserController(Controller):
             birthday=data.get("birthday"),
         )
         if not person.save():
-            self.response(resp, 500, error= self.PROBLEM_SAVING_TO_DB)
+            self.response(resp, 500, error=self.PROBLEM_SAVING_TO_DB)
             return
 
         salt = Utils.generate_salt()
@@ -75,7 +79,7 @@ class UserController(Controller):
             person_id=person.id,
         )
         if not user.save():
-            self.response(resp, 500, error= self.PROBLEM_SAVING_TO_DB)
+            self.response(resp, 500, error=self.PROBLEM_SAVING_TO_DB)
             return
 
         return user

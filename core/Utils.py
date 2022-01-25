@@ -11,7 +11,6 @@ import base64
 
 
 class Utils:
-
     @staticmethod
     def get_config_ini_file_path():
         thisfolder = os.path.dirname(os.path.abspath(__file__))
@@ -154,7 +153,7 @@ class Utils:
         formatters=None,
         recursiveLimit=2,
         blacklist=[],
-        attributes_blacklist=[]
+        attributes_blacklist=[],
     ):
         """
         Take an object that can be a model instance or a model instances list
@@ -245,10 +244,10 @@ class Utils:
             return "{0:.2f}".format(value)
         else:
             return value
-    
+
     @staticmethod
     def generate_salt(length: int = 6):
-        return ''.join(random.choice(string.printable) for _ in range(length))
+        return "".join(random.choice(string.printable) for _ in range(length))
 
     @staticmethod
     def generate_otp(length: int):
@@ -256,10 +255,10 @@ class Utils:
         numbers = list(string.digits)
         exclude = {"I", "O"}
         characters = [i for i in (letters + numbers) if i not in exclude]
-        return ''.join(random.choice(characters for _ in range(length)))
+        return "".join(random.choice(characters for _ in range(length)))
 
     @staticmethod
-    def validate_expiration_time(otp_time: datetime, config_row = 'otp'):
+    def validate_expiration_time(otp_time: datetime, config_row="otp"):
         """
         Validates if the otp_time has not expired
         compare to the expiration time of the config_row in the config.ini file
@@ -268,7 +267,7 @@ class Utils:
         ----------
         otp_time: `datetime`
                 datetime the otp was created
-        
+
         config_row: `str`
                 row in config.ini file
 
@@ -292,9 +291,9 @@ class Utils:
         return bool(re.search(regex, email))
 
     @staticmethod
-    def generate_user_token(nbytes = 32):
+    def generate_user_token(nbytes=32):
         tok = os.urandom(nbytes)
-        return base64.urlsafe_b64encode(tok).rstrip(b'=').decode('ascii')
+        return base64.urlsafe_b64encode(tok).rstrip(b"=").decode("ascii")
 
     @staticmethod
     def get_start_date_and_end_date(start_date=None, end_days=15):

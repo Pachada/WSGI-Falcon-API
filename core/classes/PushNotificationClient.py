@@ -2,6 +2,8 @@ import json
 from models.User import User, datetime
 from models.PushNotificationTemplate import PushNotificationTemplate
 from models.PushNotificationPool import PushNotificationPool
+#from crons.ExpoPushNotificationCrontab import ExpoPushNotificationCrontab
+from crons.PushNotificationCrontabOneSignal import PushNotificationCrontabOneSignal
 
 
 class PushNotificationClient:
@@ -21,32 +23,31 @@ class PushNotificationClient:
 
     def send_notification_to_pool(
         self,
-        user: User,
+        user, # type: User | list
         template_id: int,
         data: dict = {},
         extra: dict = {},
-        notification_time: datetime = None,
+        send_time: datetime = None,
+        send_now=False
     ):
+        if isinstance(user, list):
+            for item in user:
+                self.send_notification_to_pool(item, template_id, data, extra, send_time)
+            return
+
         template = PushNotificationTemplate.get(template_id)
-        message_for_notification = f"{template.title}\n{template.message}"
+        message = f"{template.title}\n{template.message}"
         for key in data:
-            message_for_notification = message_for_notification.replace(
+            message = message.replace(
                 "{{" + key + "}}", data[key]
             )
 
         push_notification = PushNotificationPool(
             user_id=user.id,
             template_id=template.id,
-            message=message_for_notification,
-            notification_time=notification_time or datetime.utcnow(),
+            message=message,
+            notification_time=send_time or datetime.utcnow()
         )
-
-        # we create a new PushNotificationPool object and save it to DB
-        # in order to get its id. Then we add that id to the extra object.
-        # And save the PushNotificationPool object again.
-        push_notification.save()
-
-        extra["notification_id"] = push_notification.id
 
         catalogue = template.catalogue
         if catalogue:
@@ -54,3 +55,8 @@ class PushNotificationClient:
 
         push_notification.data = json.dumps(extra)
         push_notification.save()
+
+        if not send_now and send_time <= datetime.utcnow():
+            #client = ExpoPushNotificationCrontab.get_instance()
+            client = PushNotificationCrontabOneSignal.get_instance() 
+            client.procces_pool()

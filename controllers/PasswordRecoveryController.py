@@ -41,14 +41,15 @@ class PasswordRecoveryController(Controller):
 
         client = SmtpClient.get_instance()
         client.send_email_to_pool(
-            user.email, data_for_email, EmailTemplate.PASSWORD_RECOVERY
+            user.email, EmailTemplate.PASSWORD_RECOVERY, data_for_email, send_now=True
         )
 
         self.response(resp, 200, message="OTP saved successfully")
 
     def __validate_code(self, req: Request, resp: Response):
         data: dict = self.get_req_data(req, resp)
-        if not data: return
+        if not data:
+            return
 
         otp = data.get("otp")
         if not otp:
@@ -85,7 +86,8 @@ class PasswordRecoveryController(Controller):
 
     def __change_password(self, req: Request, resp: Response):
         data: dict = self.get_req_data(req, resp)
-        if not data: return
+        if not data:
+            return
 
         new_password: str = str(data.get("new_password"))
         if not new_password:

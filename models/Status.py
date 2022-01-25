@@ -3,7 +3,7 @@ from core.Utils import Utils
 
 
 class Status(Base, Model):
-    # STATUS
+    # STATUS FOR PUSH NOTIFICATIONS AND EMAILS
     PENDING = 1
     PROCESSING = 2
     ERROR = 3

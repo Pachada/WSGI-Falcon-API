@@ -14,9 +14,7 @@ from abc import ABC, abstractmethod
 
 
 class FileSizeGraterThanAllowed(Exception):
-    """Exception raised for errors in file processing
-
-    """
+    """Exception raised for errors in file processing"""
 
     def __init__(self):
         self.message = "El archivo es mayor a 4mb"
@@ -49,7 +47,7 @@ class ContentTypeNotAllowed(Exception):
 class FileController(Controller):
     """
     The FileController class inherits new File controllers classes and
-    provide them with common used methods 
+    provide them with common used methods
 
     """
 
@@ -66,7 +64,9 @@ class FileController(Controller):
     def compress_image(self, image_data):
         with Image.open(io.BytesIO(image_data)) as image_data_content:
             b = io.BytesIO()
-            image_data_content.save(b, image_data_content.format, optimize=True, quality=65)
+            image_data_content.save(
+                b, image_data_content.format, optimize=True, quality=65
+            )
         b.seek(0)
         return b
 
@@ -80,7 +80,7 @@ class FileController(Controller):
             read_so_far += len(chunk)
             if read_so_far > self.max_file_size:
                 raise FileSizeGraterThanAllowed()
-        
+
         # Compress the image and return the content
         return self.compress_image(b"".join(data))
 
@@ -92,7 +92,7 @@ class FileController(Controller):
         make_thumbnail = self.check_if_make_thumbnail(req)
         form = req.get_media()
         for part in form:
-            part: BodyPart = part 
+            part: BodyPart = part
             try:
                 stream_content = self.procces_stream(part)
             except Exception as e:
@@ -108,7 +108,7 @@ class FileController(Controller):
             data = [file_data]
             if thumbnail_data:
                 data.append(thumbnail_data)
-            break # We only acept one file at a time
+            break  # We only acept one file at a time
 
         self.response(resp, code, data)
 
@@ -255,6 +255,7 @@ class FileAbstract(ABC):
     """
     Abstract class that all FileController subclasses should implement
     """
+
     @abstractmethod
     def create_file(
         self,

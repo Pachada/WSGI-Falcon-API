@@ -4,11 +4,11 @@ from core.classes.Authenticator import Authenticator
 from falcon import API
 from core.Utils import Utils
 
-class RouteLoader():
 
+class RouteLoader:
     def __init__(self, server, authorization_middleware):
-        self.server:API = server
-        self.authorization_middleware:Authenticator = authorization_middleware
+        self.server: API = server
+        self.authorization_middleware: Authenticator = authorization_middleware
         self.config = configparser.ConfigParser()
         self.config.read(Utils.get_config_ini_file_path())
         self.context_from_config = self.config.get('ROUTES', 'context')
@@ -42,14 +42,3 @@ class RouteLoader():
         self.server.add_route(self.context_prefix + '/files/s3/base64/{id:int}', files3Controller, suffix='base64')
         self.server.add_route(self.context_prefix + '/notifications', notificationController)
         self.server.add_route(self.context_prefix + '/notifications/{id:int}', notificationController)
-
-        #BackOffice
-        self.server.add_route(self.context_prefix + '/users', userController)
-        self.server.add_route(self.context_prefix + '/users/{id:int}', userController)
-        self.server.add_route(self.context_prefix + '/persons', personController)
-        self.server.add_route(self.context_prefix + '/persons/{id:int}', personController)
-        self.server.add_route(self.context_prefix + '/roles', roleController)
-        self.server.add_route(self.context_prefix + '/roles/{id:int}', roleController)
-        self.server.add_route(self.context_prefix + '/devices', deviceController)
-        self.server.add_route(self.context_prefix + '/devices/{id:int}', deviceController)
-        self.server.add_route(self.context_prefix + '/devices/token', deviceController, suffix='token')

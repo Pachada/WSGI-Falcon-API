@@ -23,7 +23,8 @@ class SessionController(Controller):
 
     def __login(self, req: Request, resp: Response):
         data = self.get_req_data(req, resp)
-        if not data: return
+        if not data:
+            return
 
         username = str(data.get("username"))
         password = str(data.get("password"))

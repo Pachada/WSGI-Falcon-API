@@ -62,7 +62,7 @@ class NewsController(Controller):
                     client.send_notification_to_pool(
                         user,
                         PushNotificationTemplate.URGENT_NEWS,
-                        notification_time=news.startdate,
+                        send_time=news.startdate,
                     )
 
             self.response(resp, 201, Utils.serialize_model(news))

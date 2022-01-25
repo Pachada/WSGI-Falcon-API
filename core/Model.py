@@ -92,10 +92,7 @@ class Model:
             query = query.filter_by(id=value)
         else:
             query = query.filter(value)
-        if with_for_update:
-            return query.with_for_update().first()
-        else:
-            return query.first()
+        return query.with_for_update().first() if with_for_update else query.first()
 
     @classmethod
     def get_all(
@@ -244,10 +241,7 @@ class Model:
                     query = query.join(model)
             if not deleted and "enable" in self.__table__.columns.keys():
                 query = query.filter(self.enable == 1)
-            if filter is not None:
-                return query.filter(filter).count()
-            else:
-                return query.count()
+            return query.filter(filter).count() if filter is not None else query.count()
         except Exception as exc:
             print(exc)
             return False

@@ -1,4 +1,11 @@
-from core.classes.FileUtils import FileController, FileAbstract, Utils, File, Request, Response
+from core.classes.FileUtils import (
+    FileController,
+    FileAbstract,
+    Utils,
+    File,
+    Request,
+    Response,
+)
 import os
 import time
 from random import randint
@@ -130,7 +137,7 @@ class FileLocalController(FileController, FileAbstract):
         file_content,
         file_type,
         is_thumbnail=0,
-        encode_to_base64=True
+        encode_to_base64=True,
     ):
         random_number = randint(0, 100000)
         filename = (

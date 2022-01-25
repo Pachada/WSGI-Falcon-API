@@ -1,4 +1,11 @@
-from core.classes.FileUtils import FileController, FileAbstract, Utils, File, Request, Response
+from core.classes.FileUtils import (
+    FileController,
+    FileAbstract,
+    Utils,
+    File,
+    Request,
+    Response,
+)
 from io import BufferedReader
 import time
 from core.classes.FileManager import FileManager
@@ -83,12 +90,7 @@ class FileS3Controller(FileController, FileAbstract):
     # -------------------------------- Utils --------------------------------
 
     def create_file(
-        self,
-        file_name,
-        file_content,
-        file_type,
-        is_thumbnail=0,
-        encode_to_base64=False
+        self, file_name, file_content, file_type, is_thumbnail=0, encode_to_base64=False
     ):
         file_content = super().format_file_content(file_content)
 

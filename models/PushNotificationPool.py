@@ -16,7 +16,7 @@ class PushNotificationPool(Base, Model):
     status_id = Column(BigInteger, ForeignKey(Status.id), default=Status.PENDING)
     notification_time = Column(DateTime, default=Utils.time())
     message = Column(String(200), nullable=False)
-    data = Column(String(200), default=None)  # JSON/DICT
+    data = Column(String(200), default=None)  # JSON/DICT for information on the push
     ticket = Column(String, default=None)
     send_attemps = Column(mysql.TINYINT(1), default=0)
     created = Column(DateTime, default=Utils.time())

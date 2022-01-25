@@ -33,17 +33,17 @@ class SmtpClientCrontab:
         self.server = self.config.get("SMTP", "server")
         self.fromemail = self.config.get("SMTP", "fromemail")
 
-        self.context = ssl.create_default_context()
-    
     @staticmethod
     def procces_pool(limit: int = 10):
+        """Start the email sending procces"""
         main(limit)
 
     def send_emails(self, query_limit: int):
         emails_to_send = []
         try:
+            # Start the smtp server with the credential in config.ini
             with smtplib.SMTP(self.server, self.port) as server:
-                server.starttls(context=self.context)
+                server.starttls(context=ssl.create_default_context())
                 server.login(self.username, self.password)
 
                 emails_to_send = self.__get_emails_to_send(query_limit)
@@ -54,7 +54,7 @@ class SmtpClientCrontab:
                     )
                     return
 
-                self.__put_emails_in_proccesing_stratus(emails_to_send)
+                self.__put_emails_in_proccesing_status(emails_to_send)
 
                 errors = sum(
                     self.__send_email(server, email) for email in emails_to_send
@@ -66,7 +66,7 @@ class SmtpClientCrontab:
                 )
         except Exception as exc:
             print(exc)
-            print("Error sending email")
+            print("Error sending emails")
             if emails_to_send:
                 for email in emails_to_send:
                     self.__email_with_errors(email)
@@ -77,65 +77,75 @@ class SmtpClientCrontab:
         msg["From"] = self.fromemail
         msg["To"] = email.email
         msg.attach(MIMEText(email.content, "html"))
-        return msg.as_string(), email.content
+        return msg.as_string()
 
-    def __save_to_sended(self, msg: str, email: str, template_id: int, codes):
-        send = Status.ERROR
-        code = str(codes)
-
-        if not codes:
-            send = Status.SEND
-            code = "250: Requested mail action okay, completed"
+    def __save_to_sended(self, msg: str, email: str, template_id: int):
+        code = "250: Sended"
 
         email = EmailSent(
-            template_id=template_id, content=msg, email=email, status_id=send, code=code
+            template_id=template_id,
+            content=msg,
+            email=email,
+            status_id=Status.SEND,
+            code=code,
         )
-        email.save()
+        if not email.save():
+            print("[ERROR SAVING SENDED EMAIL]")
 
     def __get_emails_to_send(self, query_limit):
         return EmailPool.get_all(
             and_(
                 EmailPool.status_id.in_([Status.PENDING, Status.ERROR]),
                 EmailPool.send_time <= datetime.utcnow(),
-                EmailPool.send_attemps < self.max_send_attempts,
+                # EmailPool.send_attemps < self.max_send_attempts  - Los que superen el limite se borran
             ),
             limit=query_limit,
         )
 
-    def __put_emails_in_proccesing_stratus(self, data):
+    def __put_emails_in_proccesing_status(self, data: list):
         for email in data:
             email: EmailPool = email
             email.status_id = Status.PROCESSING
-            email.save()
+            if not email.save():
+                data.remove(email)
 
     def __email_with_errors(self, email: EmailPool):
-        email.status_id = Status.ERROR
-        email.send_attemps = email.send_attemps + 1
-        email.save()
+        email.send_attemps += 1
         if email.send_attemps >= self.max_send_attempts:
             email.delete()
+            return
 
-    def __send_email(self, server: smtplib.SMTP, email: EmailPool):
-        error = not Utils.check_if_valid_email(email.email)
+        email.status_id = Status.ERROR
+        email.save()
+
+    def __send_email(self, server: smtplib.SMTP, email_pool: EmailPool):
+        """Send the email
+        Returs 1 if there was an error, 0 otherwise
+        """
+        error = not Utils.check_if_valid_email(email_pool.email)
+
         if not error:
-            msg, content = self.__create_message(email)
-            response_code = server.sendmail(self.fromemail, email.email, msg)
+            msg = self.__create_message(email_pool)
+            response_code = server.sendmail(self.fromemail, email_pool.email, msg)
             if response_code:
                 error = True
 
         if error:
-            self.__email_with_errors(email)
+            self.__email_with_errors(email_pool)
             return 1
 
-        self.__save_to_sended(content, email.email, email.template_id, response_code)
-        email.delete()
+        # The email was sended, save it to the sended records and delete the EmailPool object
+        self.__save_to_sended(
+            email_pool.content, email_pool.email, email_pool.template_id
+        )
+        email_pool.delete()
 
         return 0
 
 
 def main():
     client = SmtpClientCrontab.get_instance()
-    client.send_emails(50)
+    client.send_emails(5000)
 
 
 if __name__ == "__main__":

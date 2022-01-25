@@ -65,7 +65,7 @@ class Controller:
             print("[ERROR-SETTING_VALUES]")
             print(exc)
             return False
-    
+
     def get_req_data(self, req: Request, resp: Response):
         try:
             data: dict = json.loads(req.stream.read())
@@ -73,19 +73,21 @@ class Controller:
             print(exc)
             self.response(resp, 400, error=str(exc))
             return
-        
+
         return data
-    
-    def get_model_object(self, req: Request, resp: Response, model: Model, id: int=None):
+
+    def get_model_object(
+        self, req: Request, resp: Response, model: Model, id: int = None
+    ):
         if not id:
             self.response(resp, 405)
             return
-        
+
         row = model.get(id)
-        if not row: 
+        if not row:
             self.response(resp, 404, error=self.ID_NOT_FOUND)
             return
-        
+
         return row
 
     def generic_on_get(
@@ -98,15 +100,22 @@ class Controller:
         join=None,
         order_by=None,
         recursive=False,
-        recursiveLimit=2
+        recursiveLimit=2,
     ):
         if id:
             row = self.get_model_object(req, resp, model, id)
-            if not row: return
+            if not row:
+                return
         else:
             row = model.get_all(filters, join=join, orderBy=order_by)
 
-        self.response(resp, 200, Utils.serialize_model(row, recursive=recursive, recursiveLimit=recursiveLimit))
+        self.response(
+            resp,
+            200,
+            Utils.serialize_model(
+                row, recursive=recursive, recursiveLimit=recursiveLimit
+            ),
+        )
 
     def generic_on_post(
         self,
@@ -124,7 +133,8 @@ class Controller:
 
         if not data:
             data = self.get_req_data(req, resp)
-        if not data: return
+        if not data:
+            return
 
         data.update(extra_data)
 
@@ -138,17 +148,24 @@ class Controller:
         resp.append_header("content_location", f"/{content_location}/{new_record.id}")
 
     def generic_on_put(
-        self, req: Request, resp: Response, model: Model, id: int = None, extra_data: dict = {}
+        self,
+        req: Request,
+        resp: Response,
+        model: Model,
+        id: int = None,
+        extra_data: dict = {},
     ):
         if not id:
             self.response(resp, 405)
             return
 
         row = self.get_model_object(req, resp, model, id)
-        if not row: return
+        if not row:
+            return
 
         data = self.get_req_data(req, resp)
-        if not data: return
+        if not data:
+            return
 
         data.update(extra_data)
 
@@ -172,7 +189,8 @@ class Controller:
             return
 
         row = self.get_model_object(req, resp, model, id)
-        if not row: return
+        if not row:
+            return
 
         data = Utils.serialize_model(row)
 

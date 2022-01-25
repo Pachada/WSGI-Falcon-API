@@ -8,85 +8,30 @@ from exponent_server_sdk import (
 )
 from requests.exceptions import ConnectionError, HTTPError
 import json
-from datetime import datetime
-from sqlalchemy import or_, and_
-from core.Utils import Utils
-from models.PushNotificationPool import PushNotificationPool
-from models.PushNotificationSent import PushNotificationSent
-from models.Device import Device
-from models.Session import Session
-from models.Status import Status
-from models.PushNotificationTemplate import PushNotificationTemplate
+from core.classes.PushNotificationUtils import (
+    PushNotificationUtils,
+    Status,
+    Device,
+    PushNotificationPool,
+)
 
 
-class ExpoPushNotificationCrontab:
+class ExpoPushNotificationCrontab(PushNotificationUtils):
     __instance = None
 
     @staticmethod
     def get_instance():
         if not ExpoPushNotificationCrontab.__instance:
-            ExpoPushNotificationCrontab()
+            return ExpoPushNotificationCrontab()
         return ExpoPushNotificationCrontab.__instance
 
     def __init__(self):
         if ExpoPushNotificationCrontab.__instance is not None:
             return ExpoPushNotificationCrontab.__instance
-        else:
-            ExpoPushNotificationCrontab.__instance = self
 
-    def send_push_notifications(self, query_limit):
-        notifications_to_process = []
-        try:
-            notifications_to_process = self.__get_notifications_to_send(query_limit)
+        ExpoPushNotificationCrontab.__instance = self
 
-            if not notifications_to_process:
-                print(
-                    f'Date time: {Utils.today_in_tz().strftime("%d/%b/%Y %H:%M:%S")}, no notifications to send.'
-                )
-                return
-
-            self.__put_notifications_in_processing_status(notifications_to_process)
-
-            errors = 0
-            notifications_to_send: dict = {}
-            for notification in notifications_to_process:
-                error = False
-                # Send the  notification to the device associated with the last session of the user
-                session = self.__get_last_sessions(notification)
-
-                if not session:
-                    error = True
-
-                if not error:
-                    device, error = self.__validate_device_token_and_valid_session(
-                        session, notification
-                    )
-
-                if error:
-                    errors += 1
-                    self.__notification_with_errors(notification)
-                    continue
-
-                # The sessión has a valid device and the device of that session has a token
-                notifications_to_send[notification] = device
-
-            errors += self.__send_push_notifications_to_expo_server(
-                notifications_to_send
-            )
-            selected = len(notifications_to_process)
-            send = selected - errors
-            print(
-                f'Date time: {Utils.today_in_tz().strftime("%d/%b/%Y %H:%M:%S")}, selected: {selected}, sended: {send}, errors: {errors}'
-            )
-
-        except Exception as exc:
-            print(exc)
-            print("Error sending push notifications")
-            if notifications_to_process:
-                for notification in notifications_to_process:
-                    self.__notification_with_errors(notification)
-
-    def __send_push_notifications_to_expo_server(self, data: dict):
+    def send_messages(self, data: dict[PushNotificationPool, Device]):
         """
         Send PushNotification to multiple tokens using Expo server
         """
@@ -95,8 +40,6 @@ class ExpoPushNotificationCrontab:
             error = False
             push_messages = []
             for push_notification, device in data.items():
-                push_notification: PushNotificationPool = push_notification
-                device: Device = device
                 message = PushMessage(
                     to=device.token,
                     body=push_notification.message,
@@ -121,7 +64,7 @@ class ExpoPushNotificationCrontab:
         if error:
             print("Error sendind push notifications to Expo server")
             for push_notification in data:
-                self.__notification_with_errors(push_notification)
+                self.notification_with_errors(push_notification)
                 errors += 1
             return errors
 
@@ -146,50 +89,24 @@ class ExpoPushNotificationCrontab:
             ticket.validate_response()
 
             push_notification.status_id = Status.SEND
-            push_notification.send_attemps = push_notification.send_attemps + 1
-            push_notification.save()
-            comments = "Sended"
+            self.save_to_sended(push_notification, device)
+            push_notification.delete()
 
         except DeviceNotRegisteredError:
             # Mark the push token as inactive
             error = True
             device.token = None
             device.save()
-            push_notification.soft_delete()
-            comments = "Device not registered error"
 
         except PushTicketError as exc:
             # Encountered some other per-notification error.
             error = True
-            comments = "push ticket error"
 
         if error:
-            self.__notification_with_errors(push_notification)
+            self.notification_with_errors(push_notification)
             errors += 1
 
-        self.__save_to_sended(push_notification, device, comments)
-
         return errors
-
-    def __save_to_sended(
-        self,
-        push_notification: PushNotificationPool,
-        device: Device = None,
-        comments=None,
-    ):
-        push_notification_send = PushNotificationSent(
-            user_id=push_notification.user_id,
-            device_id=device.id if device else None,
-            template_id=push_notification.template_id,
-            push_notification_pool_id=push_notification.id,
-            ticket=push_notification.ticket or None,
-            message=push_notification.message,
-            data=push_notification.data,
-            status_id=push_notification.status_id,
-            comments=comments or None,
-        )
-
-        push_notification_send.save()
 
     def __associate_tickets_with_their_notifications(
         self, data: dict, push_tickets: list
@@ -200,70 +117,10 @@ class ExpoPushNotificationCrontab:
             push_notification.ticket = ticket.id
             push_notification.save()
 
-    def __get_notifications_to_send(self, query_limit):
-        return PushNotificationPool.get_all(
-            and_(
-                PushNotificationPool.status_id.in_([Status.PENDING, Status.ERROR]),
-                PushNotificationPool.send_attemps < 3,
-                PushNotificationPool.notification_time <= datetime.utcnow(),
-            ),
-            limit=query_limit,
-        )
-
-    def __put_notifications_in_processing_status(self, data: list):
-        for notification in data:
-            notification: PushNotificationPool = notification
-            notification.status_id = Status.PROCESSING
-            if not notification.save():
-                data.remove(notification)
-
-    def __get_last_sessions(self, notification: PushNotificationPool):
-        last_session_time = Session.max(
-            "updated", Session.user_id == notification.user_id
-        )
-        return Session.get(
-            and_(
-                Session.updated == last_session_time,
-                Session.user_id == notification.user_id,
-            )
-        )
-
-    def __validate_device_token_and_valid_session(
-        self, session: Session, notification: PushNotificationPool
-    ):
-        """
-        Checks if the device of the session has a token
-        And if the notification template is private, check if the session is valid
-
-        Returns
-        ----------
-        `Device`
-            The device to send the notification to
-        `bool`
-            True if there was any error, otherwise False
-        """
-        template: PushNotificationTemplate = notification.template
-        private_notifiaction = bool(template.private)
-        #
-        # if the notifications is private check if the sessions is valid
-        device: Device = session.device
-        if not device.token or (
-            private_notifiaction and not Utils.validate_expiration_time(session.updated, "session")
-        ):
-            return device, True
-
-        return device, False
-
-    def __notification_with_errors(self, notification: PushNotificationPool):
-        notification.status_id = Status.ERROR
-        notification.send_attemps = notification.send_attemps + 1
-        notification.save()
-
-
-def main(query_limit):
-    client = ExpoPushNotificationCrontab.get_instance()
-    client.send_push_notifications(query_limit)
+    def main(self, query_limit):
+        self.send_push_notifications(query_limit)
 
 
 if __name__ == "__main__":
-    main(250)
+    client = ExpoPushNotificationCrontab.get_instance()
+    client.procces_pool(5000)
