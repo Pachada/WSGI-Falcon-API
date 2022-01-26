@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "91d937c3-03d0-40e8-98b7-849bb5ce285a",
+		"_postman_id": "4d765d20-0104-4bb3-85c3-29e870f3e13a",
 		"name": "REST API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -15,7 +15,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"daniel.trejo\",\r\n    \"password\": \"123\",\r\n    \"device_uuid\": \"12345-6789-09876-54321\"\r\n}\r\n",
+							"raw": "{\r\n    \"username\": \"Pachada\",\r\n    \"password\": \"123\",\r\n    \"device_uuid\": \"12345-6789-09876-54321\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -127,7 +127,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Daniel\",\r\n    \"last_name\": \"Trejo\",\r\n    \"birthday\": \"1998-01-10\",\r\n    \"email\": \"dtrejog98@gmail.com\",\r\n    \"username\": \"Pachada\",\r\n    \"password\": \"123\",\r\n    \"phone\": \"5528461145\",\r\n    \"device_uuid\": \"1234-5678-9012\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Daniel\",\r\n    \"last_name\": \"Trejo\",\r\n    \"birthday\": \"1998-01-10\",\r\n    \"email\": \"dtrejog98@gmail.com\",\r\n    \"username\": \"Pachada\",\r\n    \"password\": \"123\",\r\n    \"phone\": \"5528461145\",\r\n    \"device_uuid\": \"12345-6789-09876-54321\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -206,6 +206,44 @@
 			]
 		},
 		{
+			"name": "Devices",
+			"item": [
+				{
+					"name": "PUT device app version",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"device_version\": 0.2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/devices/version",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"devices",
+								"version"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Password Recovery",
 			"item": [
 				{
@@ -215,7 +253,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"daniel.trejo\"\r\n}",
+							"raw": "{\r\n    \"email\": \"dtrejo@hotmail.com\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -325,12 +363,7 @@
 											"type": "file",
 											"src": []
 										}
-									],
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
+									]
 								},
 								"url": {
 									"raw": "{{base_url}}/files/s3",
@@ -660,7 +693,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email_code\": \"\"\n}",
+							"raw": "{\n    \"token\": \"\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
