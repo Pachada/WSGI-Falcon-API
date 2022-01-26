@@ -1,6 +1,5 @@
 import tempfile
 import boto3
-from models.File import File
 
 
 class S3Handler(object):

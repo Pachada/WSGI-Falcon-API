@@ -1,4 +1,4 @@
-from core.Controller import Controller, Utils, Request, Response
+from core.Controller import Controller, Request, Response
 from models.Person import Person
 
 

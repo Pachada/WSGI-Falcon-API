@@ -4,8 +4,6 @@ from models.Session import Session
 from models.User import User
 from models.Device import Device
 from core.Utils import Utils
-import base64
-import os
 from sqlalchemy import and_
 import json
 

@@ -1,4 +1,4 @@
-from core.Controller import Controller, Utils, Request, Response, json, datetime
+from core.Controller import Controller, Utils, Request, Response, datetime
 
 
 class HealthCheckController(Controller):

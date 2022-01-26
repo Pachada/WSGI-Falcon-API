@@ -1,7 +1,6 @@
-from core.Controller import Controller, Utils, Request, Response, json, datetime
+from core.Controller import Controller, Utils, Request, Response
 from models.User import User
 from models.PushNotificationSent import PushNotificationSent, and_
-from models.PushNotificationPool import PushNotificationPool
 
 
 class NotificationController(Controller):

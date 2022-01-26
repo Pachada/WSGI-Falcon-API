@@ -1,4 +1,4 @@
-from core.Controller import Controller, Utils, Request, Response, json, datetime
+from core.Controller import Controller, Utils, Request, Response, datetime
 from models.User import User
 from models.EmailTemplate import EmailTemplate
 from core.classes.SmtpClient import SmtpClient

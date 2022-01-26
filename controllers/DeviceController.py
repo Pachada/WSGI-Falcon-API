@@ -1,9 +1,9 @@
-from core.Controller import Controller, Utils, Request, Response, json
+from core.Controller import Controller, Utils, Request, Response
 from models.Device import Device, AppVersion
 
 
 class DeviceController(Controller):
-    def on_put_version(self, req: Request, resp: Response, id: int = None):
+    def on_put_version(self, req: Request, resp: Response):
         """
 
         Checks if the version of the app the devices is running is equal or greater then the current app version

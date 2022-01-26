@@ -154,6 +154,7 @@ class Controller:
         model: Model,
         id: int = None,
         extra_data: dict = {},
+        return_row: bool = False
     ):
         if not id:
             self.response(resp, 405)
@@ -175,14 +176,17 @@ class Controller:
 
         self.response(resp, 200, Utils.serialize_model(row))
 
+        if return_row: return row
+
     def generic_on_delete(
         self,
         req: Request,
         resp: Response,
         model: Model,
         id: int = None,
-        soft_delete=True,
-        delete_file=False,
+        soft_delete: bool = True,
+        delete_file: bool = False,
+        return_row: bool = False
     ):
         if not id:
             self.response(resp, 405)
@@ -206,3 +210,5 @@ class Controller:
             return
 
         self.response(resp, 200, data)
+
+        if return_row: return row

@@ -24,6 +24,14 @@ class RouteLoader:
         
 
     def loadRoutes(self):
+        self.server.add_route(self.context_prefix + '/users', userController)
+        self.server.add_route(self.context_prefix + '/users/{id:int}', userController)
+        self.server.add_route(self.context_prefix + '/persons', personController)
+        self.server.add_route(self.context_prefix + '/persons/{id:int}', personController)
+        self.server.add_route(self.context_prefix + '/roles', roleController)
+        self.server.add_route(self.context_prefix + '/roles/{id:int}', roleController)
+        self.server.add_route(self.context_prefix + '/devices', deviceController)
+        self.server.add_route(self.context_prefix + '/devices/{id:int}', deviceController)
         self.server.add_route(self.context_prefix + '/test', testController)
         self.server.add_route(self.context_prefix + '/health-check/{action}', healthcheckController) #ping
         self.server.add_route(self.context_prefix + '/sessions/{action}', sessionController) #login, logout

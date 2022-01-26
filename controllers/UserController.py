@@ -1,7 +1,7 @@
-from core.Controller import Controller, Utils, Request, Response, json, datetime
+from core.Controller import Controller, Utils, Request, Response
 from models.Person import Person
 from models.User import User
-from core.classes.Authenticator import Authenticator
+from core.classes.Authenticator import Authenticator, Session
 
 
 class UserController(Controller):
@@ -24,8 +24,14 @@ class UserController(Controller):
         super().generic_on_put(req, resp, User, id)
 
     def on_delete(self, req: Request, resp: Response, id: int = None):
-        super().generic_on_delete(req, resp, User, id)
-        # TODO We also delete the person and the sessions of the user
+        user: User = super().generic_on_delete(
+            req, resp, User, id, return_row=True
+            )
+        # Delete the person and the sessions of the user
+        user.person.soft_delete()
+        sessions = Session.get_all(Session.user_id == user.id)
+        for session in sessions:
+            session.soft_delete()
 
     # ------------------------------- Utils -------------------------------
 
