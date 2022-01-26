@@ -27,9 +27,8 @@ class ConfirmEmailController(Controller):
             return
 
         data_for_email = {"token": email_code}
-        client = SmtpClient.get_instance()
-        client.send_email_to_pool(
-            user.email, EmailTemplate.CONFIRM_EMAIL, data_for_email, send_now=True
+        SmtpClient.send_email_to_pool(
+            EmailTemplate.CONFIRM_EMAIL, user, data_for_email, send_now=True
         )
 
     def __validate_code(self, req: Request, resp: Response, token: str = None):

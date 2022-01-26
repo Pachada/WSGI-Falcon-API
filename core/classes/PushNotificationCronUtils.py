@@ -9,7 +9,7 @@ from models.Session import Session, Device, Utils
 from models.PushNotificationSent import PushNotificationSent
 
 
-class PushNotificationUtils:
+class PushNotificationCronUtils:
     """
     Utils methos for Push Notification Crontabs
     """
@@ -24,7 +24,7 @@ class PushNotificationUtils:
         self.main(limit)
 
     def get_notifications_to_send(self, query_limit):
-        return PushNotificationPool.getAll(
+        return PushNotificationPool.get_all(
             and_(
                 PushNotificationPool.status_id.in_([Status.PENDING, Status.ERROR]),
                 PushNotificationPool.notification_time <= datetime.utcnow(),
@@ -40,7 +40,7 @@ class PushNotificationUtils:
                 data.remove(notification)
 
     def get_last_sessions(self, notification: PushNotificationPool):
-        return Session.getAll(
+        return Session.get_all(
             Session.user_id == notification.user_id,
             orderBy=Session.updated.desc(),
             limit=1,
@@ -65,10 +65,6 @@ class PushNotificationUtils:
         #
         # if the notifications is private check if the sessions is valid
         device: Device = session.device
-        if not device.token:
-            print("No token")
-        if not Utils.validate_session(session):
-            print("No valid session")
         if not device.token or (
             private_notifiaction and not Utils.validate_session(session)
         ):
@@ -105,8 +101,9 @@ class PushNotificationUtils:
                 notification: PushNotificationPool = notification
                 template: PushNotificationTemplate = notification.template
 
-                # if the template is not private, send it to all users
-                if not template.private:
+                # if the template is not private, and the notification_pool does not
+                # have a user, send it to all users
+                if not template.private and not notification.user_id:
                     errors += self.send_notification_to_all_users(notification)
                     continue
 
@@ -120,7 +117,6 @@ class PushNotificationUtils:
                     )
 
                 if error:
-                    print("Error")
                     errors += 1
                     self.notification_with_errors(notification)
                     continue
@@ -163,8 +159,7 @@ class PushNotificationUtils:
             user_id=push_notification.user_id,
             device_id=device.id if device else None,
             template_id=push_notification.template_id,
-            ticket=push_notification.ticket or None,
-            message=push_notification.message,
+            message=push_notification.message
         )
 
         push_notification_send.save()

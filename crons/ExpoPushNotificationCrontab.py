@@ -8,15 +8,14 @@ from exponent_server_sdk import (
 )
 from requests.exceptions import ConnectionError, HTTPError
 import json
-from core.classes.PushNotificationUtils import (
-    PushNotificationUtils,
-    Status,
+from core.classes.PushNotificationCronUtils import (
+    PushNotificationCronUtils,
     Device,
-    PushNotificationPool,
+    PushNotificationPool
 )
 
 
-class ExpoPushNotificationCrontab(PushNotificationUtils):
+class ExpoPushNotificationCrontab(PushNotificationCronUtils):
     __instance = None
 
     @staticmethod
@@ -30,6 +29,17 @@ class ExpoPushNotificationCrontab(PushNotificationUtils):
             return ExpoPushNotificationCrontab.__instance
 
         ExpoPushNotificationCrontab.__instance = self
+    
+    def send_notification_to_all_users(self, notification: PushNotificationPool):
+        # TODO Send the notification to all users
+        notification.delete()
+        print("ERROR SENDING PUSH NOTIFICATION TO ALL USERS TO EXPO SERVER")
+        print(
+            "The way to send notification to all users for the moment \
+            is to call the PushNotificationClient.send_notification_to_pool with the \
+            user parameter containen a list of all users."
+        )
+        return 1
 
     def send_messages(self, data: dict[PushNotificationPool, Device]):
         """
@@ -48,8 +58,6 @@ class ExpoPushNotificationCrontab(PushNotificationUtils):
                 push_messages.append(message)
 
             push_tickets = PushClient().publish_multiple(push_messages)
-            # Lets associate the ticket with the PushNotificationPool
-            self.__associate_tickets_with_their_notifications(data, push_tickets)
 
         except PushServerError as exc:
             # Encountered some likely formatting/validation error.
@@ -71,51 +79,36 @@ class ExpoPushNotificationCrontab(PushNotificationUtils):
         # We got a response back, but we don't know whether it's an error yet.
         # This call raises errors so we can handle them with normal exception
         # flows.
-        for ticket in push_tickets:
-            errors += self.__validate_notification_response(ticket, data)
+        errors += self.__validate_notification_response(push_tickets, data)
 
         return errors
 
-    def __validate_notification_response(self, ticket, data):
+    def __validate_notification_response(self, push_tickets: list[PushTicket], data: dict[PushNotificationPool, Device]):
         errors = 0
-        try:
-            ticket: PushTicket = ticket
-            push_notification = PushNotificationPool.get(
-                PushNotificationPool.ticket == ticket.id
-            )
-            device: Device = data[push_notification]
-            error = False
+        for (push_notification, device), ticket in zip(data.items(), push_tickets):
+            try:
+                error = False
 
-            ticket.validate_response()
+                ticket.validate_response()
 
-            push_notification.status_id = Status.SEND
-            self.save_to_sended(push_notification, device)
-            push_notification.delete()
+                self.save_to_sended(push_notification, device)
+                push_notification.delete()
 
-        except DeviceNotRegisteredError:
-            # Mark the push token as inactive
-            error = True
-            device.token = None
-            device.save()
+            except DeviceNotRegisteredError:
+                # Mark the push token as inactive
+                error = True
+                device.token = None
+                device.save()
 
-        except PushTicketError as exc:
-            # Encountered some other per-notification error.
-            error = True
+            except PushTicketError as exc:
+                # Encountered some other per-notification error.
+                error = True
 
-        if error:
-            self.notification_with_errors(push_notification)
-            errors += 1
+            if error:
+                self.notification_with_errors(push_notification)
+                errors += 1
 
         return errors
-
-    def __associate_tickets_with_their_notifications(
-        self, data: dict, push_tickets: list
-    ):
-        for (push_notification, _), ticket in zip(data.items(), push_tickets):
-            push_notification: PushNotificationPool = push_notification
-            ticket: PushTicket = ticket
-            push_notification.ticket = ticket.id
-            push_notification.save()
 
     def main(self, query_limit):
         self.send_push_notifications(query_limit)

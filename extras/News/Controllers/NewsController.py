@@ -12,7 +12,7 @@ import pytz
 
 class NewsController(Controller):
     def on_get_pendings(self, req: Request, resp: Response):
-        news = News.getAll(News.startdate >= datetime.utcnow())
+        news = News.get_all(News.startdate >= datetime.utcnow())
         self.response(resp, 200, Utils.serialize_model(news))
 
     def on_get(self, req, resp, id=None):

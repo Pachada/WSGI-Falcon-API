@@ -39,9 +39,8 @@ class PasswordRecoveryController(Controller):
 
         data_for_email = {"otp": user.otp}
 
-        client = SmtpClient.get_instance()
-        client.send_email_to_pool(
-            user.email, EmailTemplate.PASSWORD_RECOVERY, data_for_email, send_now=True
+        SmtpClient.send_email_to_pool(
+            EmailTemplate.PASSWORD_RECOVERY, user, data_for_email, send_now=True
         )
 
         self.response(resp, 200, message="OTP saved successfully")

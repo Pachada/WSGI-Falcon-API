@@ -12,9 +12,10 @@ class EmailTemplate(Base, Model):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(String(45), nullable=False)
-    subject = Column(String(100), nullable=False)
     description = Column(String(500), nullable=False)
+    subject = Column(String(100), nullable=False)
     html = Column(Text, nullable=False)
+    private = Column(mysql.TINYINT(1), nullable=False)
     created = Column(DateTime, default=Utils.time())
     updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
     enable = Column(mysql.TINYINT(1), default=1)

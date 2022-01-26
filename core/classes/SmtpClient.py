@@ -1,68 +1,59 @@
+from models.User import User
 from models.EmailPool import EmailPool, datetime
 from models.EmailTemplate import EmailTemplate
 from crons.SmtpClientCrontab import SmtpClientCrontab
 
 
 class SmtpClient:
-    __instance = None
 
     @staticmethod
-    def get_instance():
-        if not SmtpClient.__instance:
-            SmtpClient()
-        return SmtpClient.__instance
-
-    def __init__(self):
-        if SmtpClient.__instance is not None:
-            return SmtpClient.__instance
-        else:
-            SmtpClient.__instance = self
-
     def send_email_to_pool(
-        self,
-        receiver_email,
         template_id: int,
-        data: dict={},
+        user, # type:  User | list
+        data: dict = {},
         send_time: datetime = datetime.utcnow(),
-        send_now=False,
+        send_now=False
     ):
-        if isinstance(receiver_email, list):
-            for email in receiver_email:
-                self.send_email_to_pool(email, data, template_id, send_time, send_now)
+        template = EmailTemplate.get(template_id)
+        content = SmtpClient.__format_content(template, data)
+
+        if isinstance(user, list):
+            for item in user:
+                SmtpClient.__save_to_pool(
+                    template, content, send_time, item
+                )
             return
 
-        content, subject = self.__create_message_for_pool(data, template_id)
-        self.__save_to_pool(
-            content, receiver_email, template_id, subject, send_time, send_now
-        )
+        SmtpClient.__save_to_pool(
+                    template, content, send_time, user
+                )
+        
+        if send_now and send_time <= datetime.utcnow():
+            client = SmtpClientCrontab.get_instance() 
+            client.procces_pool()
 
-    def __create_message_for_pool(self, data: dict, template_id: int):
-        template = EmailTemplate.get(template_id)
+    @staticmethod
+    def __format_content(template: EmailTemplate, data: dict):
         content = str(template.html)
         for key in data:
             content = content.replace("{{" + key + "}}", data[key])
 
-        subject = template.subject
-        return content, subject
+        return content
 
+    @staticmethod
     def __save_to_pool(
-        self,
-        msg: str,
-        email: str,
-        template_id: int,
-        subject: str,
-        send_time: datetime = None,
-        send_now=False,
-    ):
-        email = EmailPool(
-            template_id=template_id,
-            content=msg,
-            email=email,
-            subject=subject,
-            send_time=send_time or datetime.utcnow()
+        template: EmailTemplate, 
+        content: str,
+        send_time: datetime,
+        user: User 
+        ):
+        email_pool = EmailPool(
+            user_id=user.id if user else None,
+            template_id=template.id,
+            subject=template.subject,
+            content=content,
+            send_time=send_time
         )
+        
+        email_pool.save()
 
-        email.save()
-
-        if send_now:
-            SmtpClientCrontab.procces_pool()

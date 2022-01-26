@@ -3,7 +3,7 @@ import configparser
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from models.EmailSent import EmailSent, and_
-from models.EmailPool import EmailPool
+from models.EmailPool import EmailPool, User
 from datetime import datetime
 from models.Status import Status
 from core.Utils import Utils
@@ -71,23 +71,18 @@ class SmtpClientCrontab:
                 for email in emails_to_send:
                     self.__email_with_errors(email)
 
-    def __create_message(self, email: EmailPool):
+    def __create_message(self, email_pool: EmailPool):
         msg = MIMEMultipart()
-        msg["Subject"] = email.subject
-        msg["From"] = self.fromemail
-        msg["To"] = email.email
-        msg.attach(MIMEText(email.content, "html"))
+        msg["Subject"] = email_pool.subject
+        msg.attach(MIMEText(email_pool.content, "html"))
         return msg.as_string()
 
-    def __save_to_sended(self, msg: str, email: str, template_id: int):
-        code = "250: Sended"
+    def __save_to_sended(self, msg: str, user_id: int, template_id: int):
 
         email = EmailSent(
+            user_id=user_id,
             template_id=template_id,
             content=msg,
-            email=email,
-            status_id=Status.SEND,
-            code=code,
         )
         if not email.save():
             print("[ERROR SAVING SENDED EMAIL]")
@@ -96,15 +91,13 @@ class SmtpClientCrontab:
         return EmailPool.get_all(
             and_(
                 EmailPool.status_id.in_([Status.PENDING, Status.ERROR]),
-                EmailPool.send_time <= datetime.utcnow(),
-                # EmailPool.send_attemps < self.max_send_attempts  - Los que superen el limite se borran
+                EmailPool.send_time <= datetime.utcnow()
             ),
             limit=query_limit,
         )
 
-    def __put_emails_in_proccesing_status(self, data: list):
+    def __put_emails_in_proccesing_status(self, data: list[EmailPool]):
         for email in data:
-            email: EmailPool = email
             email.status_id = Status.PROCESSING
             if not email.save():
                 data.remove(email)
@@ -122,11 +115,13 @@ class SmtpClientCrontab:
         """Send the email
         Returs 1 if there was an error, 0 otherwise
         """
-        error = not Utils.check_if_valid_email(email_pool.email)
+        user: User = email_pool.user
+        error = not Utils.check_if_valid_email(user.email)
 
         if not error:
             msg = self.__create_message(email_pool)
-            response_code = server.sendmail(self.fromemail, email_pool.email, msg)
+            # If the email was sended with out errors it will return an empty dict
+            response_code = server.sendmail(self.fromemail, user.email, msg)
             if response_code:
                 error = True
 
@@ -136,7 +131,7 @@ class SmtpClientCrontab:
 
         # The email was sended, save it to the sended records and delete the EmailPool object
         self.__save_to_sended(
-            email_pool.content, email_pool.email, email_pool.template_id
+            email_pool.content, user.id, email_pool.template_id
         )
         email_pool.delete()
 

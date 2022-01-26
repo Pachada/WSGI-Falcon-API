@@ -5,7 +5,7 @@ from models.NewsType import NewsType
 
 class NewsTypeController(Controller):
     def on_get(self, req, resp):
-        types = NewsType.getAll()
+        types = NewsType.get_all()
         data = Utils.serialize_model(types)
         self.response(resp, 200, data)
 
