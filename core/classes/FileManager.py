@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from core.classes.S3Handler import S3Handler
+from core.classes.aws.S3Handler import S3Handler
 from models.File import File
 
 try:

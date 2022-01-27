@@ -2,14 +2,12 @@ import smtplib, ssl
 import configparser
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from models.EmailSent import EmailSent, and_
+from models.EmailSent import EmailSent
 from models.EmailPool import EmailPool, User
-from datetime import datetime
-from models.Status import Status
-from core.Utils import Utils
+from core.classes.NotificationCronsUtils import NotificationCronsUtils, Utils
 
 
-class SmtpClientCrontab:
+class SmtpClientCrontab(NotificationCronsUtils):
 
     __instance = None
     max_send_attempts = 3
@@ -33,11 +31,6 @@ class SmtpClientCrontab:
         self.server = self.config.get("SMTP", "server")
         self.fromemail = self.config.get("SMTP", "fromemail")
 
-    @staticmethod
-    def procces_pool(limit: int = 10):
-        """Start the email sending procces"""
-        main(limit)
-
     def send_emails(self, query_limit: int):
         emails_to_send = []
         try:
@@ -46,30 +39,26 @@ class SmtpClientCrontab:
                 server.starttls(context=ssl.create_default_context())
                 server.login(self.username, self.password)
 
-                emails_to_send = self.__get_emails_to_send(query_limit)
+                emails_to_send = self.get_rows_to_send(EmailPool, query_limit)
 
                 if not emails_to_send:
-                    print(
-                        f'Date and time: {Utils.today_in_tz().strftime("%d/%b/%Y %H:%M:%S")}, No emails to send'
-                    )
+                    self.nothing_to_send()
                     return
 
-                self.__put_emails_in_proccesing_status(emails_to_send)
+                self.put_rows_in_proccesing_status(emails_to_send)
 
                 errors = sum(
                     self.__send_email(server, email) for email in emails_to_send
                 )
-                selected = len(emails_to_send)
-                send = selected - errors
-                print(
-                    f'Date and time: {Utils.today_in_tz().strftime("%d/%b/%Y %H:%M:%S")}, selected: {selected}, sended: {send}, errores: {errors}'
-                )
+
+                self.show_results(len(emails_to_send), errors)
+                
         except Exception as exc:
             print(exc)
             print("Error sending emails")
             if emails_to_send:
                 for email in emails_to_send:
-                    self.__email_with_errors(email)
+                    self.row_with_errors(email)
 
     def __create_message(self, email_pool: EmailPool):
         msg = MIMEMultipart()
@@ -82,34 +71,10 @@ class SmtpClientCrontab:
         email = EmailSent(
             user_id=user_id,
             template_id=template_id,
-            content=msg,
+            content=msg
         )
         if not email.save():
             print("[ERROR SAVING SENDED EMAIL]")
-
-    def __get_emails_to_send(self, query_limit):
-        return EmailPool.get_all(
-            and_(
-                EmailPool.status_id.in_([Status.PENDING, Status.ERROR]),
-                EmailPool.send_time <= datetime.utcnow()
-            ),
-            limit=query_limit,
-        )
-
-    def __put_emails_in_proccesing_status(self, data: list[EmailPool]):
-        for email in data:
-            email.status_id = Status.PROCESSING
-            if not email.save():
-                data.remove(email)
-
-    def __email_with_errors(self, email: EmailPool):
-        email.send_attemps += 1
-        if email.send_attemps >= self.max_send_attempts:
-            email.delete()
-            return
-
-        email.status_id = Status.ERROR
-        email.save()
 
     def __send_email(self, server: smtplib.SMTP, email_pool: EmailPool):
         """Send the email
@@ -126,7 +91,7 @@ class SmtpClientCrontab:
                 error = True
 
         if error:
-            self.__email_with_errors(email_pool)
+            self.row_with_errors(email_pool)
             return 1
 
         # The email was sended, save it to the sended records and delete the EmailPool object
@@ -137,11 +102,10 @@ class SmtpClientCrontab:
 
         return 0
 
-
-def main():
-    client = SmtpClientCrontab.get_instance()
-    client.send_emails(5000)
+    def main(self,):
+        self.send_emails(5000)
 
 
 if __name__ == "__main__":
-    main()
+    client = SmtpClientCrontab.get_instance()
+    client.procces_pool(5000)

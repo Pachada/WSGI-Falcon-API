@@ -289,6 +289,14 @@ class Utils:
         """
         regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
         return bool(re.search(regex, email))
+    
+    @staticmethod
+    def check_if_valid_ten_digits_number(number: str):
+        """
+        Validates thatnumber is a 10 digit one  using regex
+        """
+        regex = r"\d{10}"
+        return bool(re.search(regex, number))
 
     @staticmethod
     def generate_user_token(nbytes=32):

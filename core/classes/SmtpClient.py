@@ -1,6 +1,5 @@
 from models.User import User
-from models.EmailPool import EmailPool, datetime
-from models.EmailTemplate import EmailTemplate
+from models.EmailPool import EmailPool, datetime, EmailTemplate
 from crons.SmtpClientCrontab import SmtpClientCrontab
 
 
@@ -48,7 +47,7 @@ class SmtpClient:
         user: User 
         ):
         email_pool = EmailPool(
-            user_id=user.id if user else None,
+            user_id=user.id,
             template_id=template.id,
             subject=template.subject,
             content=content,

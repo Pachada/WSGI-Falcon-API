@@ -27,7 +27,7 @@ class PushNotificationCronUtils:
         return PushNotificationPool.get_all(
             and_(
                 PushNotificationPool.status_id.in_([Status.PENDING, Status.ERROR]),
-                PushNotificationPool.notification_time <= datetime.utcnow(),
+                PushNotificationPool.send_time <= datetime.utcnow(),
             ),
             limit=query_limit,
         )
