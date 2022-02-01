@@ -9,6 +9,13 @@ class Status(Base, Model):
     ERROR = 3
     SEND = 4
 
+    # STATUS FOR THE USER VERIFICATION
+    MISSING = 5
+    IN_VERIFICATION = 6
+    ACEPTED = 7
+    REJECTED = 8
+    VERIFIED = 9
+
     __tablename__ = "status"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)

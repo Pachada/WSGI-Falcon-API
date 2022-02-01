@@ -66,7 +66,7 @@ class PushNotificationCronUtils:
         # if the notifications is private check if the sessions is valid
         device: Device = session.device
         if not device.token or (
-            private_notifiaction and not Utils.validate_session(session)
+            private_notifiaction and not Utils.validate_expiration_time(session.updated, "session")
         ):
             return device, True
 

@@ -165,7 +165,7 @@ class Authenticator(object):
         if session is None:
             session = Session(user_id=user.id, device_id=device.id)
 
-        session.token = Utils.generate_user_token()
+        session.token = Utils.generate_token()
         session.save()
         return session
 

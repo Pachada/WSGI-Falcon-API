@@ -81,4 +81,4 @@ class OneSignalPushNotificationCrontab(PushNotificationCronUtils):
 
 if __name__ == "__main__":
     client = OneSignalPushNotificationCrontab.get_instance()
-    client.procces_pool(5000)
+    client.main(5000)

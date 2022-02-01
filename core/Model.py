@@ -10,8 +10,9 @@ from sqlalchemy import (
     Float,
     CHAR,
     SmallInteger,
+    Boolean,
     func,
-    distinct,
+    distinct
 )
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import relationship, exc

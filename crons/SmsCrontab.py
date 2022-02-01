@@ -82,10 +82,10 @@ class SmsCrontab(NotificationCronsUtils):
 
         return 0
 
-    def main(self,):
-        self.send_sms(5000)
+    def main(self, query_limit):
+        self.send_sms(query_limit)
 
 
 if __name__ == "__main__":
     client = SmsCrontab.get_instance()
-    client.procces_pool(5000)
+    client.main(5000)

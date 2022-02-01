@@ -147,14 +147,7 @@ class Utils:
         return datetime.utcnow
 
     @staticmethod
-    def serialize_model(
-        object,
-        recursive=False,
-        formatters=None,
-        recursiveLimit=2,
-        blacklist=[],
-        attributes_blacklist=[],
-    ):
+    def serialize_model(object, recursive=False, formatters=None, recursiveLimit=2, blacklist = None, attributes_blacklist = None):
         """
         Take an object that can be a model instance or a model instances list
         and serialize it in a dictionary recursively, which means that serialization
@@ -181,6 +174,10 @@ class Utils:
         -------
         `dict`
             A dictionary with serialized data."""
+        if blacklist is None:
+            blacklist = []
+        if attributes_blacklist is None:
+            attributes_blacklist = []
         if not object:
             if isinstance(object, list):
                 return []
@@ -255,7 +252,7 @@ class Utils:
         numbers = list(string.digits)
         exclude = {"I", "O"}
         characters = [i for i in (letters + numbers) if i not in exclude]
-        return "".join(random.choice(characters for _ in range(length)))
+        return "".join(random.choice(characters) for _ in range(length))
 
     @staticmethod
     def validate_expiration_time(otp_time: datetime, config_row="otp"):
@@ -299,7 +296,7 @@ class Utils:
         return bool(re.search(regex, number))
 
     @staticmethod
-    def generate_user_token(nbytes=32):
+    def generate_token(nbytes=32):
         tok = os.urandom(nbytes)
         return base64.urlsafe_b64encode(tok).rstrip(b"=").decode("ascii")
 

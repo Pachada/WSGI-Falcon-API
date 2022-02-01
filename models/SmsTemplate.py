@@ -4,8 +4,7 @@ from core.Utils import Utils
 
 class SmsTemplate(Base, Model):
     # Templates                  #Data
-    PASSWORD_RECOVERY = 1       # {{otp}}
-    CONFIRM_PHONE = 2           # {{token}}
+    OTP = 1                      # {{otp}}
 
     __tablename__ = "sms_template"
 

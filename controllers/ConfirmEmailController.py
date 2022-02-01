@@ -1,5 +1,5 @@
 from core.Controller import Controller, Utils, Request, Response, datetime
-from models.User import User
+from models.UserVerification import UserVerification, User
 from models.EmailTemplate import EmailTemplate
 from core.classes.SmtpClient import SmtpClient
 from models.Session import Session
@@ -15,20 +15,24 @@ class ConfirmEmailController(Controller):
     def __request(self, req: Request, resp: Response):
         session: Session = req.context.session
         user: User = session.user
-        if user.confirmed_email:
+
+        if user.email_confirmed:
             self.response(resp, 409, error="This user email is already verified")
             return
 
-        email_code = Utils.generate_user_token()
-        user.email_confirmation_code = email_code
-        user.email_confirmation_code_time = datetime.utcnow()
-        if not user.save():
+        user_verification = UserVerification.get_verification_of_user(user)
+        if not user_verification: 
+            self.response(resp, 500, error = "Problema con la Verificación del Usuario")
+            return
+
+        user_verification.email_otp = Utils.generate_token()
+        user_verification.email_otp_time = datetime.utcnow()
+        if not user_verification.save():
             self.response(resp, 500, error=self.PROBLEM_SAVING_TO_DB)
             return
 
-        data_for_email = {"token": email_code}
         SmtpClient.send_email_to_pool(
-            EmailTemplate.CONFIRM_EMAIL, user, data_for_email, send_now=True
+            EmailTemplate.CONFIRM_EMAIL, user, {"token": user_verification.email_otp}, send_now=True
         )
 
     def __validate_code(self, req: Request, resp: Response, token: str = None):
@@ -41,23 +45,23 @@ class ConfirmEmailController(Controller):
             self.response(resp, 400, error="token field is required")
             return
 
-        user = User.get(User.email_confirmation_code == email_code)
-        if not user:
-            self.response(resp, 404, error="Invalid code")
+        user_verification = UserVerification.get(UserVerification.otp == str(email_code))
+        if not user_verification:
+            self.response(resp, 401, message="Incorrect code")
             return
 
-        if not Utils.validate_expiration_time(
-            user.email_confirmation_code_time, "email_code"
-        ):
-            self.response(resp, 401, message="Code expired")
+        if not Utils.validate_expiration_time(user_verification.otp_time, "email_code"):
+            self.response(resp, 401, message="code expired")
             return
 
-        user.confirmed_email = 1
-        user.email_confirmation_code = None
-        user.email_confirmation_code_time = None
+        user: User  = user_verification.user
+        user.email_confirmed = 1
+        user_verification.email_otp = None
+        user_verification.email_otp_time = None
         if not user.save():
             self.response(resp, 500, error=self.PROBLEM_SAVING_TO_DB)
             return
+        user_verification.save()
 
         self.response(resp, 200, message="Email confirmed successfully")
 

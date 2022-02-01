@@ -6,13 +6,9 @@ from crons.SmtpClientCrontab import SmtpClientCrontab
 class SmtpClient:
 
     @staticmethod
-    def send_email_to_pool(
-        template_id: int,
-        user, # type:  User | list
-        data: dict = {},
-        send_time: datetime = datetime.utcnow(),
-        send_now=False
-    ):
+    def send_email_to_pool(template_id: int, user, data: dict = None, send_time: datetime = datetime.utcnow(), send_now=False):
+        if data is None:
+            data = {}
         template = EmailTemplate.get(template_id)
         content = SmtpClient.__format_content(template, data)
 
@@ -26,7 +22,7 @@ class SmtpClient:
         SmtpClient.__save_to_pool(
                     template, content, send_time, user
                 )
-        
+
         if send_now and send_time <= datetime.utcnow():
             client = SmtpClientCrontab.get_instance() 
             client.procces_pool()
