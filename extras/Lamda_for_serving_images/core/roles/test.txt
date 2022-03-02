@@ -1,0 +1,23 @@
+{
+    "name": "get_streaks_users",
+    "method": "GET",
+    "resource": "Streak_UserController"
+},
+{
+    "name": "post_streaks_users",
+    "method": "POST",
+    "resource": "Streak_UserController"
+},
+{
+    "name": "put_streaks_users",
+    "method": "PUT",
+    "resource": "Streak_UserController"
+},
+{
+    "name": "delete_streaks_users",
+    "method": "DELETE",
+    "resource": "Streak_UserController"
+}
+
+
+"get_streaks_users", "post_streaks_users", "delete_streaks_users", "put_streaks_users"

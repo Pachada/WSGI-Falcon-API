@@ -1,0 +1,25 @@
+[
+    {
+        "role":"admin",
+        "groups":[
+            "files"
+        ],
+        "privileges":[]
+    },
+    {
+        "role":"duelazo",
+        "groups":[
+            "files"
+        ],
+        "privileges":[]
+    },
+    {
+        "role":"user",
+        "groups":[
+            "files"
+        ],
+        "privileges":[]
+    }
+
+
+]

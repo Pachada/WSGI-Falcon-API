@@ -1,7 +1,4 @@
-https://crontab.guru/
-
-
-En la carpeta cron creamos un archivo .sh:
+En la carpeta crons creamos un archivo .sh:
 - Nos movemos a la carpeta donde estan los crons
 - Exportamos al PYTHONPATH el directorio donde estan todos los archivos del API
 - Llamamos al script y redirigimos el output a un archivo en logs
@@ -18,6 +15,7 @@ luego: crontab -e
 
 y agregamos el Cron
 
+https://crontab.guru/
 * * * * * sh /home/ubuntu/api/crons/push_notifications_cron.sh
 
 Para agregar el cron para que el servidor se inicialice cuando se boote el servidor 

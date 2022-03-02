@@ -13,6 +13,6 @@ class Role(Base, Model):
     name = Column(String(30), nullable=False)
     created = Column(DateTime, default=Utils.time())
     updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
-    enable = Column(mysql.TINYINT(1), default=1, nullable=False)
+    enable = Column(Boolean, default=1, nullable=False)
 
     formatters = {"created": Utils.date_formatter, "updated": Utils.date_formatter}

@@ -14,6 +14,6 @@ class SmsTemplate(Base, Model):
     message = Column(String(160), nullable=False)
     created = Column(DateTime, default=Utils.time())
     updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
-    enable = Column(mysql.TINYINT(1), default=1)
+    enable = Column(Boolean, default=True)
 
     formatters = {"created": Utils.date_formatter, "updated": Utils.date_formatter}

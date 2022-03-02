@@ -21,7 +21,7 @@ class NotificationCronsUtils:
             limit=query_limit,
         )
     
-    def put_rows_in_proccesing_status(self, data: list[Model]):
+    def put_rows_in_proccesing_status(self, data: list):
         for row in data:
             row.status_id = Status.PROCESSING
             if not row.save():

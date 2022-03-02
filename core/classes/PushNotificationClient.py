@@ -9,14 +9,7 @@ from crons.OneSignalPushNotificationCrontab import OneSignalPushNotificationCron
 class PushNotificationClient:
     
     @staticmethod
-    def send_notification_to_pool(
-        template_id: int,
-        user = None, # type: None | User | list
-        data: dict = {},
-        extra: dict = {},
-        send_time: datetime = datetime.utcnow(),
-        send_now=False
-    ):
+    def send_notification_to_pool(template_id: int, user = None, data: dict = None, extra: dict = None, send_time: datetime = datetime.utcnow(), send_now=False):
         """
         Gives format to the message to send and save it to the push pool.
         If the push is meant to ALL users, the user parameters should be None,
@@ -43,6 +36,10 @@ class PushNotificationClient:
         ----------
         `None`
         """
+        if data is None:
+            data = {}
+        if extra is None:
+            extra = {}
         template = PushNotificationTemplate.get(template_id)
         message = PushNotificationClient.__format_message(template, data)
 
@@ -69,13 +66,9 @@ class PushNotificationClient:
         return message
     
     @staticmethod
-    def __save_to_pool(
-        template: PushNotificationTemplate, 
-        message: str,
-        send_time: datetime,
-        extra: dict = {},
-        user = None # type: None | User 
-        ):
+    def __save_to_pool(template: PushNotificationTemplate, message: str, send_time: datetime, extra: dict = None, user = None):
+        if extra is None:
+            extra = {}
         push_notification = PushNotificationPool(
             user_id=user.id if user else None,
             template_id=template.id,
@@ -87,5 +80,5 @@ class PushNotificationClient:
         if catalogue:
             extra["action"] = catalogue.action
             push_notification.data = json.dumps(extra)
-        
+
         push_notification.save()

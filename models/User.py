@@ -17,7 +17,7 @@ class User(Base, Model):
     person_id = Column(BigInteger, ForeignKey(Person.id))
     created = Column(DateTime, default=Utils.time())
     updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
-    enable = Column(mysql.TINYINT(1), default=1)
+    enable = Column(Boolean, default=True)
 
     #Verifications
     verified = Column(Boolean, default=False)

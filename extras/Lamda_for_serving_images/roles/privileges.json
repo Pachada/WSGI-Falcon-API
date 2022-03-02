@@ -1,0 +1,22 @@
+[
+    {
+        "name": "get_files_s3",
+        "method": "GET",
+        "resource": "FileS3Controller"
+    },
+    {
+        "name": "post_files_s3",
+        "method": "POST",
+        "resource": "FileS3Controller"
+    },
+    {
+        "name": "put_files_s3",
+        "method": "PUT",
+        "resource": "FileS3Controller"
+    },
+    {
+        "name": "delete_files_s3",
+        "method": "DELETE",
+        "resource": "FileS3Controller"
+    }
+]

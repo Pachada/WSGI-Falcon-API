@@ -19,7 +19,7 @@ class News(Base, Model):
     updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
     startdate = Column(DateTime, default=datetime.utcnow())
     enddate = Column(DateTime, default=datetime.utcnow())
-    enable = Column(mysql.TINYINT(1), default=1)
+    enable = Column(Boolean, default=True)
 
     user = relationship(User)
     file = relationship(File, foreign_keys=file_id_image)

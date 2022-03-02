@@ -65,7 +65,7 @@ class Model:
                 file.delete_file_from_local()
 
     @classmethod
-    def get(self, value, filter=None, deleted=False, join=None, with_for_update=False):
+    def get(self, value, filter=None, deleted=False, join=None, order_by=None, with_for_update=False):
         """
         The get() method can process a query with some parameters to get a response.
 
@@ -73,10 +73,14 @@ class Model:
         ----------
         value  :  `int`,`str`
                 A parameter to filter by.
-        filter  :  `str`
+        filter  :  `expr`
                 A parameter to filter.
         deleted  :  `bool`
                 False by default.
+        join : `Model`
+            A list of model to join the query with. None by default.
+        order_by : `expr`
+                None by default.
         with_for_update  :  `bool`
                 False by default.
 
@@ -85,6 +89,12 @@ class Model:
         `object`
             An object with query results."""
         query = DB.query(self)
+        if join:
+            if isinstance(join, list):
+                for model in join:
+                    query = query.join(model)
+            else:
+                query = query.join(join)
         if not deleted and "enable" in self.__table__.columns.keys():
             query = query.filter_by(enable=1)
         if filter is not None:
@@ -93,6 +103,9 @@ class Model:
             query = query.filter_by(id=value)
         else:
             query = query.filter(value)
+        if order_by is not None:
+            query = query.order_by(order_by)
+
         return query.with_for_update().first() if with_for_update else query.first()
 
     @classmethod

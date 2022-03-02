@@ -14,4 +14,4 @@ class NewsType(Base, Model):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     type = Column(String(50), nullable=False)
-    enable = Column(mysql.TINYINT(1), nullable=False, default=1)
+    enable = Column(Boolean, nullable=False, default=1)

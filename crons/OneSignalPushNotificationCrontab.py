@@ -48,7 +48,7 @@ class OneSignalPushNotificationCrontab(PushNotificationCronUtils):
             notification.save()
             return 1
 
-    def send_messages(self, data: dict[PushNotificationPool, Device]):
+    def send_messages(self, data): # data: dict[PushNotificationPool, Device]
         errors = 0
         for push_notification, device in data.items():
             try:

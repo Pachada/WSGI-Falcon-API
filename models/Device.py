@@ -14,7 +14,7 @@ class Device(Base, Model):
     app_version_id = Column(BigInteger, ForeignKey(AppVersion.id), default=1)
     created = Column(DateTime, default=Utils.time())
     updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
-    enable = Column(mysql.TINYINT(1), default=1)
+    enable = Column(Boolean, default=True)
 
     user = relationship(User)
     app_version = relationship(AppVersion)

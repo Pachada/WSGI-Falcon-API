@@ -1,0 +1,9 @@
+[
+    {
+        "group": "files",
+        "privileges": [
+            "post_files", "get_files", "delete_files", "put_files",
+            "get_files_s3", "post_files_s3", "delete_files_s3", "put_files_s3"
+        ]
+    }
+]

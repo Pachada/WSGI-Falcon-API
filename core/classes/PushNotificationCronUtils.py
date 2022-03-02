@@ -40,11 +40,15 @@ class PushNotificationCronUtils:
                 data.remove(notification)
 
     def get_last_sessions(self, notification: PushNotificationPool):
-        return Session.get_all(
+        session = Session.get_all(
             Session.user_id == notification.user_id,
             orderBy=Session.updated.desc(),
-            limit=1,
-        )[0]
+            limit=1
+        )
+        if not session: return
+
+        session: Session = session[0]
+        return session
 
     def validate_device_token_and_valid_session(
         self, session: Session, notification: PushNotificationPool
@@ -148,7 +152,7 @@ class PushNotificationCronUtils:
         # Implemented in subclass
         raise NotImplementedError
 
-    def send_messages(self, notifications_to_send: dict[PushNotificationPool, Device]):
+    def send_messages(self, notifications_to_send): # notifications_to_send: dict[PushNotificationPool, Device]
         # Implemented in subclass
         raise NotImplementedError
 

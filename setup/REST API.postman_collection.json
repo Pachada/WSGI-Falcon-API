@@ -247,13 +247,41 @@
 			"name": "Password Recovery",
 			"item": [
 				{
-					"name": "request ",
+					"name": "request with email",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"email\": \"dtrejo@hotmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/password-recovery/request",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"password-recovery",
+								"request"
+							]
+						},
+						"description": "Empieza el proceso de cambio de contraseña.\r\nRecibe el username y envía un OTP de 5 digitos al correo del usuario con ese username.\r\n{\r\n    \"username\": \"sergio.roman\"\r\n}"
+					},
+					"response": []
+				},
+				{
+					"name": "request with phone_number",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phone_number\": \"5528461145\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
