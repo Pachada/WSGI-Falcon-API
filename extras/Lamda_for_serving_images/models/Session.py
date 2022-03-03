@@ -3,24 +3,19 @@ from core.Utils import Utils
 from models.User import User
 from models.Device import Device
 
-class Session(Base, Model):
-    __tablename__ = 'session'
 
-    id = Column(Integer, primary_key = True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
-    device_id = Column(Integer, ForeignKey(Device.id), nullable=False)
+class Session(Base, Model):
+    __tablename__ = "session"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey(User.id), nullable=False)
+    device_id = Column(BigInteger, ForeignKey(Device.id), nullable=False)
     token = Column(String(120), nullable=False)
-    created = Column(DateTime, default = Utils.time())
-    updated = Column(DateTime, default = Utils.time(), onupdate =  Utils.time())
+    created = Column(DateTime, default=Utils.time())
+    updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
     enable = Column(Boolean, default=True)
 
     device = relationship(Device)
     user = relationship(User)
 
-    formatters = {
-        "created": Utils.date_formatter,
-        "updated": Utils.date_formatter
-    }
-
-    def __repr__(self):
-        return f"Session: user_id:{self.user_id}, device_id:{self.device_id}"
+    formatters = {"created": Utils.date_formatter, "updated": Utils.date_formatter}
