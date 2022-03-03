@@ -1,0 +1,19 @@
+Crear un control git en el proyecto
+
+1. git init  -- Se crea el archivo .git en el dir
+2. git remote add origin 'urlrepositorio'  -- Hacemos la conexión con el repositorio
+3. git checkout 'branch'  -- En que rama
+3.1 git checkout -b 'branch' -- Si no existe la rama
+
+
+Actualizar
+
+1. git fetch -- Traer la nueva info si es que hay, no actualiza
+2. git pull  -- Traer los archivos
+
+
+Subir archivos 
+
+1. git add . 
+2. git commit -m "'texto informativo de los cambios'"
+3. git push origin 'branch'
