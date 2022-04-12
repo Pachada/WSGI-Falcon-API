@@ -1,11 +1,11 @@
 from core.Model import *
-from core.Utils import Utils
 from models.Role import Role
 from models.Person import Person
 
 
 class User(Base, Model):
     __tablename__ = "user"
+    __autoload_with__ = engine
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     username = Column(String(100), nullable=False)
@@ -19,18 +19,13 @@ class User(Base, Model):
     updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
     enable = Column(Boolean, default=True)
 
-    #Verifications
+    # Verifications
     verified = Column(Boolean, default=False)
     email_confirmed = Column(Boolean, default=False)
     phone_confirmed = Column(Boolean, default=False)
 
     role = relationship(Role)
     person = relationship(Person)
-
-    formatters = {
-        "created": Utils.date_formatter,
-        "updated": Utils.date_formatter
-    }
 
     @staticmethod
     def check_if_user_exists(username, email):

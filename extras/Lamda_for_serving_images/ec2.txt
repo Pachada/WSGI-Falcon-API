@@ -1,1 +1,0 @@
-rsync --copy-links -v -a -e "ssh -i /home/pachada/.ssh/API_Duelazo.pem" /mnt/c/Users/dtrej/Documents/s3_img_server/ ubuntu@ec2-13-58-233-251.us-east-2.compute.amazonaws.com:~/server/

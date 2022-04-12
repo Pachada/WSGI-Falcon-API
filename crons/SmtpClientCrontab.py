@@ -102,8 +102,8 @@ class SmtpClientCrontab(NotificationCronsUtils):
 
         return 0
 
-    def main(self,):
-        self.send_emails(5000)
+    def main(self, limit = 5000):
+        self.send_emails(limit)
 
 
 if __name__ == "__main__":

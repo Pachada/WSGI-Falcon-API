@@ -1,9 +1,9 @@
 from core.Model import *
-from core.Utils import Utils
 
 
 class Person(Base, Model):
     __tablename__ = "person"
+    __autoload_with__ = engine
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     first_name = Column(String(50), default=None)
@@ -12,9 +12,3 @@ class Person(Base, Model):
     created = Column(DateTime, default=Utils.time())
     updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
     enable = Column(Boolean, default=True)
-
-    formatters = {
-        "created": Utils.date_formatter,
-        "updated": Utils.date_formatter,
-        "birthday": Utils.date_formatter,
-    }

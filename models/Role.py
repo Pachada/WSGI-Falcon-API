@@ -1,5 +1,4 @@
 from core.Model import *
-from core.Utils import Utils
 
 
 class Role(Base, Model):
@@ -8,6 +7,7 @@ class Role(Base, Model):
     USER = 2
 
     __tablename__ = "role"
+    __autoload_with__ = engine
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(String(30), nullable=False)
@@ -15,4 +15,3 @@ class Role(Base, Model):
     updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
     enable = Column(Boolean, default=1, nullable=False)
 
-    formatters = {"created": Utils.date_formatter, "updated": Utils.date_formatter}

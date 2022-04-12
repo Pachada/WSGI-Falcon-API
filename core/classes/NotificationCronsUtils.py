@@ -4,7 +4,7 @@ class NotificationCronsUtils:
 
     max_send_attempts = 3
 
-    def main(limit):
+    def main(self, limit):
         # Implemented in subclass
         raise NotImplementedError
 

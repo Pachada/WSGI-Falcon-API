@@ -1,11 +1,11 @@
 from core.Model import *
-from core.Utils import Utils
 from models.User import User
 from models.Device import Device
 
 
 class Session(Base, Model):
     __tablename__ = "session"
+    __autoload_with__ = engine
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, ForeignKey(User.id), nullable=False)
@@ -17,5 +17,3 @@ class Session(Base, Model):
 
     device = relationship(Device)
     user = relationship(User)
-
-    formatters = {"created": Utils.date_formatter, "updated": Utils.date_formatter}

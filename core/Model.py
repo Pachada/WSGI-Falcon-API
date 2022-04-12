@@ -20,7 +20,8 @@ from sqlalchemy.sql import func
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm.util import was_deleted, has_identity
 from datetime import datetime
-from core.database import Base, db_session as DB
+from core.database import Base, engine, db_session as DB
+from core.Utils import Utils
 
 
 class Model:
@@ -29,6 +30,9 @@ class Model:
     The Model Class has methods to process queries in database in a easily way like
     get one, get all, delete and save. The Model class inherits new models.
     """
+
+    def get_formatters(self):
+        return {attribute.name: Utils.date_formatter for attribute in self.__table__.columns if attribute.type.python_type == datetime}
 
     def exists_in_database(self):
         """

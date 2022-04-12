@@ -1,5 +1,4 @@
 from core.Model import *
-from core.Utils import Utils
 from models.User import User
 from models.PushNotificationTemplate import PushNotificationTemplate
 from models.Status import Status
@@ -7,6 +6,7 @@ from models.Status import Status
 
 class PushNotificationPool(Base, Model):
     __tablename__ = "push_notification_pool"
+    __autoload_with__ = engine
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, ForeignKey(User.id), default=None)
@@ -25,8 +25,3 @@ class PushNotificationPool(Base, Model):
     template = relationship(PushNotificationTemplate)
     status = relationship(Status)
 
-    formatters = {
-        "created": Utils.date_formatter, 
-        "updated": Utils.date_formatter,
-        "send_time": Utils.date_formatter
-        }

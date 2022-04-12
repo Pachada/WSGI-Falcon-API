@@ -198,7 +198,7 @@ class Utils:
 
         result = {}
         if formatters is None:
-            formatters = getattr(object, "formatters", {})
+            formatters = getattr(object, "formatters", object.get_formatters())
         for c in object.__table__.columns.keys():
             if c == "password" or c in attributes_blacklist:
                 continue

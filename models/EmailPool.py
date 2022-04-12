@@ -1,5 +1,4 @@
 from core.Model import *
-from core.Utils import Utils
 from models.EmailTemplate import EmailTemplate
 from models.Status import Status
 from models.User import User
@@ -7,6 +6,7 @@ from models.User import User
 
 class EmailPool(Base, Model):
     __tablename__ = "email_pool"
+    __autoload_with__ = engine
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, ForeignKey(User.id), nullable=False)
@@ -18,13 +18,7 @@ class EmailPool(Base, Model):
     send_attemps = Column(mysql.TINYINT(1), default=0)
     created = Column(DateTime, default=Utils.time())
     updated = Column(DateTime, default=Utils.time(), onupdate=Utils.time())
-    
+
     template = relationship(EmailTemplate)
     status = relationship(Status)
     user = relationship(User)
-
-    formatters = {
-        "created": Utils.date_formatter, 
-        "updated": Utils.date_formatter,
-        "send_time": Utils.date_formatter
-        }

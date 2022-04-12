@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from core.Utils import Utils
 
+
 Config = configparser.ConfigParser()
 Config.read(Utils.get_config_ini_file_path())
 
@@ -15,16 +16,7 @@ user = Config.get("DATABASE", "user")
 password = Config.get("DATABASE", "password")
 
 engine = create_engine(
-    "mysql+mysqlconnector://"
-    + str(user)
-    + ":"
-    + str(password)
-    + "@"
-    + str(host)
-    + ":"
-    + str(port)
-    + "/"
-    + str(database),
+    f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}",
     pool_size=20,
     max_overflow=10,
     pool_recycle=3600,
@@ -40,7 +32,7 @@ Base = declarative_base()
 Base.query = db_session.query_property()
 
 
-@event.listens_for(engine, "engine_connect")
+"""@event.listens_for(engine, "engine_connect")
 def ping_connection(connection, branch):
     if branch:
         return
@@ -56,4 +48,4 @@ def ping_connection(connection, branch):
         else:
             raise
     finally:
-        connection.should_close_with_result = save_should_close_with_result
+        connection.should_close_with_result = save_should_close_with_result"""

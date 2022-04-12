@@ -1,5 +1,0 @@
-falcon
-SQLAlchemy
-mysql-connector-python
-pytz
-zappa

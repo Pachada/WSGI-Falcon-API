@@ -7,6 +7,7 @@ from models.File import File
 
 class News(Base, Model):
     __tablename__ = "news"
+    __autoload_with__ = engine
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, ForeignKey(User.id))
@@ -25,10 +26,3 @@ class News(Base, Model):
     file = relationship(File, foreign_keys=file_id_image)
     thumbnail = relationship(File, foreign_keys=file_id_thumbnail)
     type = relationship(NewsType)
-
-    formatters = {
-        "created": Utils.date_formatter,
-        "updated": Utils.date_formatter,
-        "startdate": Utils.date_formatter,
-        "enddate": Utils.date_formatter,
-    }

@@ -11,6 +11,7 @@ class NewsType(Base, Model):
     DATOS_CURISOSO = 5
 
     __tablename__ = "news_types"
+    __autoload_with__ = engine
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     type = Column(String(50), nullable=False)
