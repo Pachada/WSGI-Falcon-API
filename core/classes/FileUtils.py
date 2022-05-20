@@ -52,6 +52,7 @@ class FileController(Controller):
     """
 
     CHUNK_SIZE = 8192
+    IMAGE_EXTENSIONS = {"image/jpeg", "image/png", "image/jpg"}
 
     def __init__(self):
         self.config = configparser.ConfigParser()
@@ -81,8 +82,11 @@ class FileController(Controller):
             if read_so_far > self.max_file_size:
                 raise FileSizeGraterThanAllowed()
 
-        # Compress the image and return the content
-        return self.compress_image(b"".join(data))
+        # if is an images,  compress it and return the content
+        if part.content_type in self.IMAGE_EXTENSIONS:
+            return self.compress_image(b"".join(data))
+        
+        return b"".join(data)
 
     def on_post(self, req: Request, resp: Response, id: int = None):
         if id:
@@ -169,7 +173,7 @@ class FileController(Controller):
 
         thumbnail = None
         if make_thumbnail and (
-            "jpeg" in content_type or "png" in content_type or "jpg" in content_type
+            content_type in self.IMAGE_EXTENSIONS 
         ):
             thumbnail = self.create_thumbnail(
                 data,
@@ -177,13 +181,7 @@ class FileController(Controller):
                 content_type,
                 encode_to_base64,
             )
-            if not thumbnail:
-                thumbnail = {
-                    "Filename_thumbnail": filename,
-                    "error": self.PROBLEM_SAVING_TO_DB,
-                }
-            else:
-                thumbnail = Utils.serialize_model(thumbnail)
+            thumbnail = Utils.serialize_model(thumbnail) if thumbnail else {"Filename_thumbnail": filename, "error": self.PROBLEM_SAVING_TO_DB,}
 
         return Utils.serialize_model(file), thumbnail, 201
 
@@ -206,6 +204,9 @@ class FileController(Controller):
         )
 
     def create_thumbnail_image(self, image_data):
+        if not isinstance(image_data, io.BytesIO):
+            image_data = io.BytesIO(image_data)
+            
         with Image.open(image_data) as image_data_content:
             image_data_content.thumbnail(size=(640, 640))
             b = io.BytesIO()

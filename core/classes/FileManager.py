@@ -46,17 +46,7 @@ class FileManager:
             return None
 
     @staticmethod
-    def put_file(
-        bucket_name,
-        content,
-        key,
-        file_type=None,
-        file_name=None,
-        profile=None,
-        region="us-west-2",
-        metadata={},
-        is_thumbnail=0,
-    ):
+    def put_file(bucket_name, content, key, file_type=None, file_name=None, profile=None, region="us-west-2", metadata = None, is_thumbnail=0):
         """
                 The putFile() method creates a temporary file and write inside it the content,
                 then creates a new handler of S3Handler class to use upload_file() method, finally
@@ -81,6 +71,8 @@ class FileManager:
                 -------
                 `models.File.File`
                     An instance of the saved file."""
+        if metadata is None:
+            metadata = {}
         tmpFile = tempfile.NamedTemporaryFile()
         tmpFile.write(content)
         tmpFile.seek(0)
@@ -97,8 +89,9 @@ class FileManager:
             is_thumbnail=is_thumbnail,
         )
 
+        tmpFile.close()
+        
         if record.save():
-            tmpFile.close()
             return record
 
         return None

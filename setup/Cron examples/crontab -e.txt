@@ -16,6 +16,7 @@ luego: crontab -e
 y agregamos el Cron
 
 https://crontab.guru/
+
 * * * * * sh /home/ubuntu/api/crons/push_notifications_cron.sh
 
 Para agregar el cron para que el servidor se inicialice cuando se boote el servidor 
