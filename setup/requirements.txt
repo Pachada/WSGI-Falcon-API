@@ -1,0 +1,10 @@
+falcon
+SQLAlchemy
+gevent
+Pillow
+python-magic
+pytz
+exponent-server-sdk
+mysql-connector-python
+boto3
+jinja2

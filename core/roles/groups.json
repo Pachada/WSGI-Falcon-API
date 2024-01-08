@@ -1,0 +1,46 @@
+[
+    {
+        "group": "session",
+        "privileges": ["get_session", "post_session"]
+    },
+    {
+        "group":"backoffice",
+        "privileges": [
+            "post_user", "get_user", "delete_user", "put_user",
+            "get_person", "post_person", "delete_person", "put_person",
+            "post_role", "get_role", "delete_role", "put_role",
+            "get_devices", "put_devices"
+                ]
+    },
+    {
+        "group":"backoffice_users",
+        "privileges": [
+            "post_user", "get_user", "put_user",
+            "get_person", "post_person", "put_person",
+            "get_role",
+            "get_devices", "put_devices"
+                ]
+    },
+    {
+        "group": "files",
+        "privileges": [
+            "post_files", "get_files", "delete_files", "put_files",
+            "get_files_s3", "post_files_s3", "delete_files_s3", "put_files_s3"
+        ]
+    },
+    {
+        "group":"notifications",
+        "privileges":[
+            "get_devices", "put_devices",
+            "get_notifications", "put_notifications", "post_notifications", "delete_notifications"
+        ]
+    },
+    {
+        "group":"status",
+        "privileges":[
+            "get_status", "put_status", "post_status", "delete_status"
+        ]
+    }
+    
+
+]

@@ -1,0 +1,1 @@
+rsync --copy-links -v -a -e ssh -r /mnt/c/Users/dtrej/Documents/Projects/Restful-API/ Rest-API:~/api/ --exclude='.git' --exclude='.gitignore' --exclude='files/*' --exclude='config.ini'

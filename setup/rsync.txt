@@ -1,0 +1,21 @@
+Primero les recomiendo crear un archivo config en su carpeta .ssh, les hará la vida más facil:
+
+nano config
+
+y aquí entran los host que usaremos, ejemplo:
+
+
+Host Rest-API
+        HostName ec2-13-58-121-45.us-east-2.compute.amazonaws.com
+        user ubuntu
+        IdentityFile ~/.ssh/API.pem
+
+
+y ya cuando quieran hace rsync:
+
+
+rsync --copy-links -v -a -e ssh -r /home/pachada/Documents/Projects/Restful-API Rest-API:~/api/ --exclude='.git' --exclude='.gitignore' --exclude='files/*' --exclude='config.ini'
+
+
+Si es un rsync sin el config seria algo como:
+rsync --copy-links -vae "ssh -i API_Duelazo.pem" -r /mnt/c/Users/Pachada/Documents/Projects/Duelazo-API/ ubuntu@ec2-52-14-246-144.us-east-2.compute.amazonaws.com:~/duelazo/ --exclude='config.ini' --exclude='.git' --exclude='.gitignore' --exclude='files/*'
