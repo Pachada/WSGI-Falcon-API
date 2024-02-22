@@ -106,7 +106,8 @@ class Controller:
         If neither ID nor query parameters are provided, it returns all model objects with pagination.
         """
         row = None
-        query = [filters] if filters else []
+        if not isinstance(filters, list):
+            query = [filters] if filters is not None else []
         
         if id:
             # if an ID is provided, get the model object with that ID
@@ -150,7 +151,7 @@ class Controller:
         row = model.get_all(filter=and_(*query), join=join, order_by=order_by, limit=per_page, offset=offset)
 
         # calculate the total number of pages
-        total_records = model.count()
+        total_records = model.count(filter=and_(*query))
         max_page = (total_records + per_page - 1) // per_page
         data = {
             "max_page": max_page,
