@@ -4,10 +4,7 @@ import tempfile
 from core.classes.aws.S3Handler import S3Handler
 from models.File import File
 
-try:
-    from magic import magic
-except ImportError:
-    import magic
+import filetype
 
 
 class FileManager:
@@ -34,7 +31,7 @@ class FileManager:
         if os.path.exists(file_path):
             size = os.stat(file_path).st_size
             name = os.path.basename(file_path)
-            _type = magic.from_file(file_path, mime=True)
+            _type = filetype.guess(file_path)
             # hash = hashlib.sha224(name + str(size)).hexdigest()
             return {
                 "size": size,

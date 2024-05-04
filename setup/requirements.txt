@@ -2,7 +2,7 @@ falcon
 SQLAlchemy
 gevent
 Pillow
-python-magic
+filetype
 pytz
 exponent-server-sdk
 mysql-connector-python

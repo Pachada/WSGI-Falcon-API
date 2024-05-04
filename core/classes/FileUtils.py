@@ -6,7 +6,7 @@ import sys
 from abc import ABC, abstractmethod
 from PIL import Image
 from falcon.media.multipart import BodyPart
-import magic
+import filetype
 
 from core.Controller import (
     Controller,
@@ -249,7 +249,7 @@ class FileController(Controller):
         return base64.b64encode(data)
 
     def get_mimetype(self, data):
-        return magic.from_buffer(data, mime=True)
+        return filetype.guess(data)
 
     def get_base64_file_length(self, b64string):
         return (len(b64string) * 3) / 4 - b64string.count("=", -1, -5)
