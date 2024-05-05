@@ -18,6 +18,8 @@ class SmtpClientCrontab(NotificationCronsUtils):
         self.password = self.config.get("SMTP", "password")
         self.server = self.config.get("SMTP", "server")
         self.fromemail = self.config.get("SMTP", "fromemail")
+        
+        self.email_pools_to_delete: list[EmailPool]= []
 
     def send_emails(self, query_limit: int):
         emails_to_send = self.get_rows_to_send(EmailPool, query_limit)
@@ -31,6 +33,8 @@ class SmtpClientCrontab(NotificationCronsUtils):
             server.starttls(context=ssl.create_default_context())
             server.login(self.username, self.password)
             errors = sum(self.send_email(server, email) for email in emails_to_send)
+            if self.email_pools_to_delete:
+                EmailPool.delete_multiple(EmailPool.id.in_([email.id for email in self.email_pools_to_delete]))
             self.show_results(len(emails_to_send), errors)
 
     def create_message(self, email_pool: EmailPool) -> str:
@@ -63,7 +67,7 @@ class SmtpClientCrontab(NotificationCronsUtils):
             return 1
 
         self.save_to_sent(email_pool.content, email, email_pool.template_id)
-        email_pool.delete()
+        self.email_pools_to_delete.append(email)
         return 0
 
     def send_one_email(self, email_pool: EmailPool):
@@ -71,6 +75,8 @@ class SmtpClientCrontab(NotificationCronsUtils):
             server.starttls(context=ssl.create_default_context())
             server.login(self.username, self.password)
             error = self.send_email(server, email_pool)
+            if not error and self.email_pools_to_delete:
+                EmailPool.delete(self.email_pools_to_delete[0].id)
             self.show_results(1, error)
 
     def main(self, limit: int = 5000):
