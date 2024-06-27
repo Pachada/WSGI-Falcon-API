@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from dateutil.parser import parse
 import string
 import re
@@ -145,10 +145,9 @@ class Utils:
         """
         Return the current utc0 time function
         Used for creating the models time.
-        SQLAClhemy recibes a function and execute it.
-
+        SQLAClhemy receives a function and executes it.
         """
-        return datetime.utcnow
+        return lambda: datetime.now(timezone.utc)
 
     @staticmethod
     def serialize_model(object, recursive=False, formatters=None, recursiveLimit=2, blacklist = None, attributes_blacklist = None):

@@ -2,6 +2,11 @@ En la carpeta crons creamos un archivo .sh:
 - Nos movemos a la carpeta donde estan los crons
 - Exportamos al PYTHONPATH el directorio donde estan todos los archivos del API
 - Llamamos al script y redirigimos el output a un archivo en logs
+- Si se crea el cron desde windows se tiene que utilizar dos2unix para formatear el archivo a unix
+    sudo apt-get install -y dos2unix
+    dos2unix start-cron.sh
+    o para cambiar todos los archivos: 
+    find /ruta/a/tus/archivos -name "*.sh" -exec dos2unix {} \;
 
 Ejemplo:
 

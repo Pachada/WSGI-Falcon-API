@@ -36,7 +36,7 @@ class Authenticator(object):
     def should_skip_authentication(self, req: Request, resource, params: dict):
         """
         Determine if authentication should be skipped based on the URL and resource method
-        The URL is expected to contain an 'api' segment in every URL: /api/{resource}
+        The URL is expected to contain an 'api' segment in every URL: v1/api/{resource}
 
         Args:
             req (Request): The incoming request object.
@@ -73,7 +73,6 @@ class Authenticator(object):
         return hasattr(resource, method_name) and getattr(getattr(resource, method_name), 'skip_auth', False)
 
     def handle_authentication(self, req, resp, resource):
-        # sourcery skip: extract-duplicate-method
         """
         Perform authentication checks for the current request.
 
