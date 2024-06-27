@@ -6,7 +6,7 @@ En la carpeta crons creamos un archivo .sh:
     sudo apt-get install -y dos2unix
     dos2unix start-cron.sh
     o para cambiar todos los archivos: 
-    find /ruta/a/tus/archivos -name "*.sh" -exec dos2unix {} \;
+    find -name "*.sh" -exec dos2unix {} \;
 
 Ejemplo:
 
