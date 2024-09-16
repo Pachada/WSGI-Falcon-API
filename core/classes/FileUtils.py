@@ -100,6 +100,10 @@ class FileController(Controller):
         if id:
             self.response(resp, HTTPStatus.METHOD_NOT_ALLOWED)
             return
+        
+        session = self.get_session(req, resp)
+        if not session:
+            return
 
         make_thumbnail = self.check_if_make_thumbnail(req)
         public_file = self.check_if_public_file(req)
@@ -118,7 +122,7 @@ class FileController(Controller):
                 stream_content,
                 part.content_type,
                 make_thumbnail=make_thumbnail,
-                user=req.context.session.user,
+                user=session.user,
                 public=public_file,
                 private=private_file
             )

@@ -1,5 +1,6 @@
 import json
-from models.User import User, datetime
+from datetime import datetime, timezone
+from models.User import User
 from models.PushNotificationTemplate import PushNotificationTemplate, PushNotificationCatalogue
 from models.PushNotificationPool import PushNotificationPool
 #from crons.ExpoPushNotificationCrontab import ExpoPushNotificationCrontab
@@ -14,7 +15,7 @@ class PushNotificationClient:
         user=None,
         data: dict = None,
         extra: dict = None,
-        send_time: datetime = datetime.utcnow(),
+        send_time: datetime = datetime.now(timezone.utc),
         send_now=False,
     ):
         """
@@ -57,7 +58,7 @@ class PushNotificationClient:
 
         PushNotificationClient.__save_to_pool(template, message, send_time, extra, user)
 
-        if send_now and send_time <= datetime.utcnow():
+        if send_now and send_time.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc):
             # client = ExpoPushNotificationCrontab.get_instance()
             client = OneSignalPushNotificationCrontab.get_instance()
             client.process_pool()

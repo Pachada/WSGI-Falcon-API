@@ -10,7 +10,7 @@ Host Rest-API
         user ubuntu
         IdentityFile ~/.ssh/API.pem
 
-
+el ssh ya solo sería ssh Rest-API
 y ya cuando quieran hace rsync:
 
 

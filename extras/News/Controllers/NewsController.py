@@ -33,7 +33,9 @@ class NewsController(Controller):
                 data.get("startdate"), 30
             )
 
-            session = req.context.session
+            session = self.get_session(req, resp)
+        if not session:
+            return
             user: User = session.user
 
             news = News(

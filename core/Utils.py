@@ -279,7 +279,7 @@ class Utils:
         config = configparser.ConfigParser()
         config.read(Utils.get_config_ini_file_path())
         otp_expiration_time = int(config.get("EXPIRATION_TIMES", config_row))
-        delta = datetime.utcnow() - otp_time
+        delta = datetime.now(timezone.utc) - otp_time.replace(tzinfo=timezone.utc)
         return delta.total_seconds() / 60 < otp_expiration_time
 
     @staticmethod
@@ -309,7 +309,7 @@ class Utils:
             end_days = 15
 
         if not start_date:
-            startdate = datetime.utcnow()
+            startdate = datetime.now(timezone.utc)
 
         else:
             startdate_formated = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S")
@@ -324,7 +324,7 @@ class Utils:
                 and startdate_formated.minute == 0
                 and startdate_formated.second == 0
             ) and today == startdate_formated:
-                startdate = datetime.utcnow()
+                startdate = datetime.now(timezone.utc)
 
         enddate = startdate + timedelta(days=end_days)
 

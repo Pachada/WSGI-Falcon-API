@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from models.User import User
 from models.EmailPool import EmailPool, datetime, EmailTemplate
 from crons.SmtpClientCrontab import SmtpClientCrontab
@@ -8,7 +9,7 @@ from core.Utils import logger
 class SmtpClient:
 
     @staticmethod
-    def send_email_to_pool(template_id: int, email, data: dict = None, send_time: datetime = datetime.utcnow(), send_now=False, jinja2=False):
+    def send_email_to_pool(template_id: int, email, data: dict = None, send_time: datetime = datetime.now(timezone.utc), send_now=False, jinja2=False):
         if data is None:
             data = {}
         template = EmailTemplate.get(template_id)
@@ -27,7 +28,7 @@ class SmtpClient:
             logger.error("Couldn't save email pool")
             return
 
-        if send_now and send_time <= datetime.utcnow():
+        if send_now and send_time.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc):
             client = SmtpClientCrontab()
             client.send_one_email(email_pool)
 

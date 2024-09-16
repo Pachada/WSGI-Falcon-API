@@ -16,7 +16,7 @@ from models.PushNotificationSent import PushNotificationSent, and_
 @ROUTE_LOADER('/notifications/{id:int}')
 class NotificationController(Controller):
     def on_get(self, req: Request, resp: Response, id: int = None):
-        user: User = req.context.session.user
+        user_id: int = req.context.token_data.get("user_id")
         super().generic_on_get(
             req,
             resp,
@@ -24,7 +24,7 @@ class NotificationController(Controller):
             id,
             filters=(
                 and_(
-                    PushNotificationSent.user_id == user.id,
+                    PushNotificationSent.user_id == user_id,
                     PushNotificationSent.readed == 0,
                 )
             ),

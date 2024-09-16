@@ -32,8 +32,11 @@ class DeviceController(Controller):
         if float(data.get("device_version", 0.0)) < app_version.version:
             self.response(resp, HTTPStatus.CONFLICT, error="Updated the app in the store")
             return
-
-        device: Device = req.context.session.device
+        
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        device: Device = session.device
         if device.app_version_id != app_version.id:
             device.app_version_id = app_version.id
             device.save()
@@ -45,8 +48,12 @@ class DeviceController(Controller):
         """
         Adds the notification token to the device of the current session
         """
+        
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        device: Device = session.device
         data: dict = req.media
-        device: Device = req.context.session.device
         device.token = data.get("token")
         if not device.save():
             self.response(resp, HTTPStatus.INTERNAL_SERVER_ERROR, error=self.PROBLEM_SAVING_TO_DB)

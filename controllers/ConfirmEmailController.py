@@ -4,6 +4,7 @@ from core.Controller import (
     Request,
     Response,
     datetime,
+    timezone,
     HTTPStatus,
     ROUTE_LOADER,
     falcon,
@@ -24,7 +25,10 @@ class ConfirmEmailController(Controller):
         }
 
     def __request(self, req: Request, resp: Response):
-        session: Session = req.context.session
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        
         user: User = session.user
 
         if user.email_confirmed:
@@ -37,7 +41,7 @@ class ConfirmEmailController(Controller):
             return
 
         user_verification.email_otp = Utils.generate_token()
-        user_verification.email_otp_time = datetime.utcnow()
+        user_verification.email_otp_time = datetime.now(timezone.utc)
         if not user_verification.save():
             self.response(resp, HTTPStatus.INTERNAL_SERVER_ERROR, error=self.PROBLEM_SAVING_TO_DB)
             return

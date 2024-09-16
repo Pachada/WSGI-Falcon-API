@@ -10,7 +10,6 @@ class Session(Base, Model):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(User.id))
     device_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Device.id))
-    token: Mapped[str]
     created: Mapped[datetime] = mapped_column(default=func.now())
     updated: Mapped[datetime] = mapped_column(default=func.now(), onupdate=func.now())
     enable: Mapped[bool] = mapped_column(default=True)

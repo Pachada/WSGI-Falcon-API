@@ -16,7 +16,7 @@ class Hooks:
     @staticmethod
     def check_privileges(req: Request, resp: Response, resource, params, allowed_roles_ids: set[int]):
         " Recibes a list of role_ids that are allowed to access the resource"
-        user_role_id: int = req.context.session.user.role_id
+        user_role_id: int = req.context.token_data.get("role_id")
         if user_role_id not in allowed_roles_ids:
             raise falcon.HTTPForbidden(description="You don't have permission to access this resource")
 

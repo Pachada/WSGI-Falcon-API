@@ -28,7 +28,10 @@ class UserController(Controller):
 
     @falcon.before(Hooks.put_validations)
     def on_put(self, req: Request, resp: Response, id: int = None):
-        user: User = req.context.session.user
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        user: User = session.user
         user_is_admin = user.role_id == Role.ADMIN
         # If the user.role of the session is admin it can modify every user
         # but if is not an admin it can only modify its own user
@@ -51,7 +54,10 @@ class UserController(Controller):
     def on_delete(self, req: Request, resp: Response, id: int = None):
         # If the user.role of the session is admin it can delete every user
         # but if is not an admin it can only modify its own user
-        user: User = req.context.session.user
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        user: User = session.user
         if user.role_id != Role.ADMIN and user.id != id:
             self.response(resp, HTTPStatus.UNAUTHORIZED, error="Users can only delete their own users")
             return
@@ -77,15 +83,15 @@ class UserController(Controller):
         if not user:
             return
 
-        session = Authenticator.login(
+        session, token = Authenticator.login(
             user.username,
             str(data.get("password")),
             str(data.get("device_uuid", "unknown")),
         )
+        
         data = {
-            "session": Utils.serialize_model(
-                session, recursive=True, recursiveLimit=3, blacklist=["device"]
-            )
+            "Bearer": token,
+            "session": Utils.serialize_model(session, recursive=True, recursiveLimit=3, blacklist=["device"])
         }
         self.response(resp, HTTPStatus.CREATED, data, message="Session started")
         resp.append_header("content_location", f"/users/{user.id}")

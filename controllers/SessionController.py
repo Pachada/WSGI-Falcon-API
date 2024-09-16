@@ -15,54 +15,47 @@ from models.Role import Role
 
 
 @ROUTE_LOADER('/sessions')
-@ROUTE_LOADER('/sessions/{action}') # login, logout
+@ROUTE_LOADER('/sessions/login', suffix="login")
+@ROUTE_LOADER('/sessions/logout', suffix="logout")
 class SessionController(Controller):
-    def __init__(self):
-        self.actions = {
-            "login": self.__login,
-            "logout": self.__logout,
-        }
 
     def on_get(self, req: Request, resp: Response):
-        session: Session = req.context.session
-        role: Role = session.user.role
-
-        session_data = Utils.serialize_model(session, recursive=True, recursiveLimit=2)
-
-        session_data["role"] = Utils.serialize_model(role)
-        data = {"session": session_data}
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        
+        data = {
+            "session": Utils.serialize_model(session, recursive=True, recursiveLimit=3, blacklist=["device"])
+        }
         self.response(resp, HTTPStatus.OK, data)
 
-    def __login(self, req: Request, resp: Response):
+    @Decorators.no_authorization_needed
+    @falcon.before(Hooks.post_validations, required_attributes={"username": str, "password": str})
+    def on_post_login(self, req: Request, resp: Response):
         data = self.get_req_data(req, resp)
         if not data:
             return
 
-        username = str(data.get("username"))
-        password = str(data.get("password"))
+        username: str = data["username"]
+        password: str = data["password"]
         uuid = str(data.get("device_uuid", "unknown"))
-        if not username or not password:
-            self.response(resp, HTTPStatus.BAD_REQUEST, error="Username and password are required")
-            return
 
-        session = Authenticator.login(username, password, uuid)
+        session, token = Authenticator.login(username, password, uuid)
         if not session:
             self.response(resp, HTTPStatus.UNAUTHORIZED, error="Invalid credentials")
             return
 
-        req.context.session = session
         data = {
-            "session": Utils.serialize_model(
-                session, recursive=True, recursiveLimit=3, blacklist=["device"]
-            )
+            "Bearer": token,
+            "session": Utils.serialize_model(session, recursive=True, recursiveLimit=3, blacklist=["device"])
         }
+        
         self.response(resp, HTTPStatus.OK, data, message="Session started")
 
-    def __logout(self, req: Request, resp: Response):
-        session = req.context.session
+    def on_post_logout(self, req: Request, resp: Response):
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        
         Authenticator.logout(session)
         self.response(resp, HTTPStatus.OK, message="Session ended")
-
-    @Decorators.no_authorization_needed
-    def on_post(self, req: Request, resp: Response, action: str):
-        self.actions[action](req, resp)

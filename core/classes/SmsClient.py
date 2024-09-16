@@ -1,4 +1,5 @@
-from models.User import User, datetime
+from datetime import datetime, timezone
+from models.User import User
 from models.SmsPool import SmsPool, SmsTemplate
 from crons.SmsCrontab import SmsCrontab
 from core.Utils import logger
@@ -7,7 +8,7 @@ from core.Utils import logger
 class SmsClient:
     
     @staticmethod
-    def send_sms_to_pool(template_id: int, user, data: dict = None, send_time: datetime = datetime.utcnow(), send_now=False):
+    def send_sms_to_pool(template_id: int, user, data: dict = None, send_time: datetime = datetime.now(timezone.utc), send_now=False):
         if data is None:
             data = {}
         
@@ -24,7 +25,7 @@ class SmsClient:
             logger.error("Could not save sms pool")
             return
 
-        if send_now and send_time <= datetime.utcnow():
+        if send_now and send_time.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc):
             SmsCrontab().send_one_sms(sms_pool)
 
     @staticmethod

@@ -34,7 +34,10 @@ class FileLocalController(FileController, FileAbstract):
             self.response(resp, HTTPStatus.NOT_FOUND, error="No  file")
             return
         
-        user: User = req.context.session.user
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        user: User = session.user
         user_role: Role = user.role
         if file.is_private and user_role != Role.ADMIN and user.id != file.user_who_uploaded_id:
             self.response(resp, HTTPStatus.FORBIDDEN, error="Private file")
@@ -62,7 +65,10 @@ class FileLocalController(FileController, FileAbstract):
             self.response(resp, HTTPStatus.NOT_FOUND, message="No such file or directory")
             return
 
-        user: User = req.context.session.user
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        user: User = session.user
         user_role: Role = user.role
         if user_role != Role.ADMIN and user.id != file.user_who_uploaded_id:
             self.response(resp, HTTPStatus.FORBIDDEN, error="You can only delete your own files")

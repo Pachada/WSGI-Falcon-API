@@ -1,4 +1,5 @@
-from models.Status import Status, and_, datetime, Model, Utils
+from datetime import datetime, timezone
+from models.Status import Status, and_, Model, Utils
 
 
 class NotificationCronsUtils:
@@ -17,7 +18,7 @@ class NotificationCronsUtils:
         return model.get_all(
             and_(
                 model.status_id.in_([Status.PENDING, Status.ERROR]),
-                model.send_time <= datetime.utcnow()
+                model.send_time <= datetime.now(timezone.utc)
             ),
             limit=query_limit,
         )

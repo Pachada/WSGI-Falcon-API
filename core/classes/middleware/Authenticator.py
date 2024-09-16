@@ -1,12 +1,15 @@
-from falcon.response import Response
-from falcon.request import Request
-from models.Session import Session
-from models.User import User
-from models.Device import Device
-from core.Utils import Utils, logger
-from sqlalchemy import and_
 import json
 from http import HTTPStatus
+
+from falcon.request import Request
+from falcon.response import Response
+from sqlalchemy import and_
+
+from core.classes.JWT.JWTUtils import JWTUtils, timedelta, datetime, timezone
+from core.Utils import Utils, logger
+from models.Device import Device
+from models.Session import Session
+from models.User import User
 
 
 class Authenticator(object):
@@ -29,7 +32,7 @@ class Authenticator(object):
             None
         """
         if self.should_skip_authentication(req, resource, params):
-            req.context.session = None
+            req.context.token_data = None
         else:
             self.handle_authentication(req, resp, resource)
 
@@ -84,61 +87,65 @@ class Authenticator(object):
         Returns:
             None
         """
-        session = Session.get(Session.token == req.auth)
-        if not session:
-            logger.info("No session")
-            resource.response(resp, HTTPStatus.UNAUTHORIZED, error="Unauthorized")
+        if not req.auth or not len(req.auth.strip()):
+            logger.info("Bearer missing")
+            resource.response(resp, HTTPStatus.UNAUTHORIZED, error="Bearer missing")
+            resp.complete = True
+            return
+        # Verify the token and decode it
+        token_data, error = JWTUtils.verify_token(req.auth)
+        if error:
+            logger.warning(error)
+            resource.response(resp, HTTPStatus.UNAUTHORIZED, error=error)
             resp.complete = True
             return
 
-        if not Utils.validate_expiration_time(session.updated, "session"):
-            logger.info("Session expired")
-            self.logout(session)
-            resource.response(resp, HTTPStatus.UNAUTHORIZED, message="Session expired")
-            resp.complete = True
-            return
-
-        req.context.session = session
+        req.context.token_data = token_data
 
     def process_response(self, req: Request, resp: Response, resource, req_succeeded):
         # Post-processing of the response (after routing).
         pass
 
     @staticmethod
-    def login(username, password, device_uuid="unknown"):
-        if user := User.get(User.email == username) or User.get(User.username == username):
-            password = Utils.get_hashed_string(password + user.salt)
-            if password == user.password:
-                if session := Authenticator.start_user_session(user, device_uuid):
-                    return session
+    def login(username: str, password: str, device_uuid: str="unknown") -> tuple[Session, str] | tuple[None, None]:
+        user = User.get(User.email == username) or User.get(User.username == username)
+        if user:
+            hashed_password = Utils.get_hashed_string(password + user.salt)
+            if hashed_password == user.password:
+                session, token = Authenticator.start_user_session(user, device_uuid)
+                if session:
+                    return session, token
 
-        return None
+        return None, None
 
     @staticmethod
     def login_by_otp(user, device_uuid="unknown"):
         return Authenticator.start_user_session(user, device_uuid)
 
     @staticmethod
-    def start_user_session(user: User, device_uuid):
+    def start_user_session(user: User, device_uuid) -> tuple[Session, str]:
         device = Device.get(and_(Device.user_id == user.id, Device.uuid == device_uuid))
 
         if device is None:
-            device = Device(
-                uuid=device_uuid,
-                user_id=user.id,
-            )
+            device = Device(uuid=device_uuid, user_id=user.id)
             device.save()
 
-        session = Session.get(
-            and_(Session.user_id == user.id, Session.device_id == device.id)
-        )
+        session = Session.get(and_(Session.user_id == user.id, Session.device_id == device.id))
 
         if session is None:
             session = Session(user_id=user.id, device_id=device.id)
-
-        session.token = Utils.generate_token()
+        
+        session.updated = datetime.now(timezone.utc)
         session.save()
-        return session
+            
+        token_data = {
+            "user_id": user.id,
+            "device_id": device.id,
+            "role_id": user.role_id,
+            "session_id": session.id
+        }
+
+        return session, JWTUtils.create_token(token_data, timedelta(days=7))
 
     @staticmethod
     def logout(session: Session):

@@ -60,7 +60,10 @@ class FileS3Controller(FileController, FileAbstract):
             self.response(resp, HTTPStatus.NOT_FOUND, error=self.ID_NOT_FOUND)
             return
 
-        user: User = req.context.session.user
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        user: User = session.user
         user_role: Role = user.role
         if user_role != Role.ADMIN and user.id != file.user_who_uploaded_id:
             self.response(resp, HTTPStatus.FORBIDDEN, error="You can only delete your own files")

@@ -1,6 +1,6 @@
 from falcon.response import Response
 from falcon.request import Request
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, timezone
 from falcon import falcon, code_to_http_status
 import json
 from core.Utils import Utils
@@ -8,6 +8,7 @@ from core.Model import Model, and_, String
 from http import HTTPStatus
 from core.Hooks import Hooks, Decorators
 from engine.Server import route_loader as ROUTE_LOADER
+from models.Session import Session
 
 
 class Controller:
@@ -28,11 +29,21 @@ class Controller:
             cls._instance = super().__new__(cls, *args, **kwargs)
         # Return the existing instance
         return cls._instance
+    
     # Error mesages
     MISSING_OR_EXCESSIVE_PARAMS = "Bad Request - Your request is missing or excessive parameters. Please verify and resubmit."
     PROBLEM_SAVING_TO_DB = "Internal Server Error - problem saving to database."
     INVALID_JSON = "Bad Request - Invalid JSON"
     ID_NOT_FOUND = "Not Found - Invalid ID"
+    
+    def get_session(self, req: Request, resp: Response) -> Session | None:
+        session_id = req.context.token_data.get("session_id")
+        session = Session.get(Session.id == session_id)
+        if not session:
+            self.response(resp, HTTPStatus.UNAUTHORIZED, error="Session not found")
+            return
+        
+        return session
 
     def response(self, resp: Response, http_code=200, data=None, message=None, error=None, error_code=None):
         resp.status = code_to_http_status(http_code)
@@ -65,7 +76,7 @@ class Controller:
 
     def get_req_data(self, req: Request, resp: Response):
         try:
-            data: dict = req.media
+            data: dict = req.get_media()
         except Exception as exc:
             print(exc)
             self.response(resp, HTTPStatus.BAD_REQUEST, error=str(exc))

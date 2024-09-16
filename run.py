@@ -12,3 +12,4 @@ def _force_https(app):
 
 http_server = WSGIServer(("0.0.0.0", 3000), _force_https(server))
 http_server.serve_forever()
+print("Server started")
