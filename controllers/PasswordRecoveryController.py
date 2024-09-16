@@ -59,10 +59,10 @@ class PasswordRecoveryController(Controller):
             self.response(resp, HTTPStatus.INTERNAL_SERVER_ERROR, error="Problem saving the user's OTP")
             return
     
-        """if phone_number:
+        if phone_number:
             SmsClient.send_sms_to_pool(SmsTemplate.OTP, user, {"otp": user_verification.otp}, send_now=True)
         else:
-            SmtpClient.send_email_to_pool(EmailTemplate.PASSWORD_RECOVERY, user.email, {"otp": user_verification.otp}, send_now=True)"""
+            SmtpClient.send_email_to_pool(EmailTemplate.PASSWORD_RECOVERY, user.email, {"otp": user_verification.otp}, send_now=True)
     
         self.response(resp, HTTPStatus.OK, message="OTP sent successfully")
 
