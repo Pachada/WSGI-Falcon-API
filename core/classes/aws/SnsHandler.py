@@ -1,6 +1,6 @@
 import json
 import logging
-import time
+
 import boto3
 from botocore.exceptions import ClientError
 
@@ -9,12 +9,13 @@ logger = logging.getLogger(__name__)
 
 class SnsHandler:
     """Encapsulates Amazon SNS topic and subscription functions."""
+
     def __init__(self, region_name: str):
         """
         :param sns_resource: A Boto3 Amazon SNS resource.
         """
         self.sns_resource = boto3.resource('sns', region_name=region_name)
-    
+
     def publish_text_message(self, phone_number, message, prefix="+52"):
         """
         Publishes a text message directly to a phone number without need for a

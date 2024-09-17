@@ -1,10 +1,10 @@
 import os
 import tempfile
 
+import filetype
+
 from core.classes.aws.S3Handler import S3Handler
 from models.File import File, logger
-
-import filetype
 
 
 class FileManager:
@@ -58,29 +58,30 @@ class FileManager:
         is_private=False
     ):
         """
-                The putFile() method creates a temporary file and write inside it the content,
-                then creates a new handler of S3Handler class to use upload_file() method, finally
-                saves a record file with metadata of file and return an instance of saved file.
-        ​
-                Parameters
-                ----------
-                bucket_name : `str`
-                        A string of bucket name.
-                profile : `str`
-                        A string of profile name.
-                content : `type`
-                        Content of file.
-                key : `str`
-                        A string of key.
-                region : `str`
-                        A string of region.
-                metadata : `dict`
-                        A dictionary of metadata, empty by default.
-        ​
-                Returns
-                -------
-                `models.File.File`
-                    An instance of the saved file."""
+        The putFile() method creates a temporary file and write inside it the content,
+        then creates a new handler of S3Handler class to use upload_file() method, finally
+        saves a record file with metadata of file and return an instance of saved file.
+
+        Parameters
+        ----------
+        bucket_name : `str`
+                A string of bucket name.
+        profile : `str`
+                A string of profile name.
+        content : `type`
+                Content of file.
+        key : `str`
+                A string of key.
+        region : `str`
+                A string of region.
+        metadata : `dict`
+                A dictionary of metadata, empty by default.
+
+        Returns
+        -------
+        `models.File.File`
+            An instance of the saved file.
+            """
         if metadata is None:
             metadata = {}
         tmpFile = tempfile.NamedTemporaryFile()
@@ -109,24 +110,25 @@ class FileManager:
     @staticmethod
     def get_file(bucket_name, file_id, aws_region, profile=None):
         """
-                The getfile() method gets a file from database and creates a handler to download it using
-                download_file() method.
-        ​
-                Parameters
-                ----------
-                bucket_name : `str`
-                        A string of bucket name.
-                profile : `str`
-                        A string of profile name.
-                idFile : `int`
-                        An integer of idFile
-                aws_region : `str`
-                        A string of Amazon web service region.
-        ​
-                Returns
-                -------
-                `instance`
-                    An instance of the downloaded file."""
+        The getfile() method gets a file from database and creates a handler to download it using
+        download_file() method.
+
+        Parameters
+        ----------
+        bucket_name : `str`
+                A string of bucket name.
+        profile : `str`
+                A string of profile name.
+        idFile : `int`
+                An integer of idFile
+        aws_region : `str`
+                A string of Amazon web service region.
+
+        Returns
+        -------
+        `instance`
+            An instance of the downloaded file.
+            """
         if file := File.get(file_id):
             handler = S3Handler(bucket_name, aws_region, profile=profile)
             try:

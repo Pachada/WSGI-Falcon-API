@@ -1,14 +1,7 @@
-from core.Controller import (
-    Controller, 
-    Utils, 
-    Request, 
-    Response, 
-    HTTPStatus, 
-    ROUTE_LOADER, 
-    falcon, 
-    Hooks
-)
-from models.Role import Role 
+from core.Controller import (ROUTE_LOADER, Controller, Hooks, HTTPStatus,
+                             Request, Response, Utils, falcon)
+from models.Role import Role
+
 
 @ROUTE_LOADER('/v1/test')
 class TestController(Controller):

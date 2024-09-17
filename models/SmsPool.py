@@ -10,7 +10,7 @@ class SmsPool(Base, Model):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(User.id), nullable=False)
-    template_id: Mapped[int]  = mapped_column(BigInteger, ForeignKey(SmsTemplate.id), nullable=False)
+    template_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(SmsTemplate.id), nullable=False)
     status_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Status.id), default=Status.PENDING)
     message: Mapped[str]
     send_time: Mapped[datetime] = mapped_column(default=func.now())
@@ -21,4 +21,3 @@ class SmsPool(Base, Model):
     template: Mapped[SmsTemplate] = relationship(SmsTemplate)
     status: Mapped[Status] = relationship(Status)
     user: Mapped[User] = relationship(User)
-

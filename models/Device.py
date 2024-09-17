@@ -1,6 +1,6 @@
 from core.Model import *
-from models.User import User
 from models.AppVersion import AppVersion
+from models.User import User
 
 
 class Device(Base, Model):

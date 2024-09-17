@@ -1,6 +1,6 @@
 from core.Model import *
-from models.User import User
 from models.Device import Device
+from models.User import User
 
 
 class Session(Base, Model):

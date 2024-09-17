@@ -1,10 +1,12 @@
 import json
 from datetime import datetime, timezone
-from models.User import User
-from models.PushNotificationTemplate import PushNotificationTemplate, PushNotificationCatalogue
+
+# from crons.ExpoPushNotificationCrontab import ExpoPushNotificationCrontab
+from crons.OneSignalPushNotificationCrontab import \
+    OneSignalPushNotificationCrontab
 from models.PushNotificationPool import PushNotificationPool
-#from crons.ExpoPushNotificationCrontab import ExpoPushNotificationCrontab
-from crons.OneSignalPushNotificationCrontab import OneSignalPushNotificationCrontab
+from models.PushNotificationTemplate import (PushNotificationCatalogue,
+                                             PushNotificationTemplate)
 
 
 class PushNotificationClient:

@@ -1,17 +1,11 @@
-from core.classes.FileUtils import (
-    FileController,
-    FileAbstract,
-    Utils,
-    File,
-    Request,
-    Response,
-    HTTPStatus,
-    ROUTE_LOADER
-)
-from io import BufferedReader
 import time
+from io import BufferedReader
+
 from core.classes.FileManager import FileManager
-from models.User import User, Role
+from core.classes.FileUtils import (ROUTE_LOADER, File, FileAbstract,
+                                    FileController, HTTPStatus, Request,
+                                    Response, Utils)
+from models.User import Role, User
 
 
 @ROUTE_LOADER('/v1/files/s3')

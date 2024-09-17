@@ -1,27 +1,18 @@
-from sqlalchemy import (
-    Integer,
-    String,
-    BigInteger,
-    ForeignKey,
-    DateTime,
-    Date,
-    Text,
-    Float,
-    CHAR,
-    SmallInteger,
-    Boolean,
-    func,
-    distinct
-)
-from sqlalchemy import or_, and_, select
-from sqlalchemy.sql.expression import Select
-from sqlalchemy.orm import relationship, exc, mapped_column, Mapped
-from sqlalchemy.sql import func
-from sqlalchemy.dialects import mysql
-from sqlalchemy.orm.util import was_deleted, has_identity
-from core.database import Base, engine, db_session as DB
-from core.Utils import Utils, datetime, date, logger
 from typing import List, Optional
+
+from sqlalchemy import (CHAR, BigInteger, Boolean, Date, DateTime, Float,
+                        ForeignKey, Integer, SmallInteger, String, Text, and_,
+                        distinct, func, or_, select)
+from sqlalchemy.dialects import mysql
+from sqlalchemy.orm import Mapped, exc, mapped_column, relationship
+from sqlalchemy.orm.util import has_identity, was_deleted
+from sqlalchemy.sql import func
+from sqlalchemy.sql.expression import Select
+
+from core.database import Base
+from core.database import db_session as DB
+from core.database import engine
+from core.Utils import Utils, date, datetime, logger
 
 
 class Model:
@@ -293,7 +284,6 @@ class Model:
         except Exception as exc:
             logger.error(exc)
             return False
-
 
     @classmethod
     def max(cls, field, filter=None):

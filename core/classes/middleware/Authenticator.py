@@ -5,7 +5,7 @@ from falcon.request import Request
 from falcon.response import Response
 from sqlalchemy import and_
 
-from core.classes.JWT.JWTUtils import JWTUtils, timedelta, datetime, timezone
+from core.classes.JWT.JWTUtils import JWTUtils, datetime, timedelta, timezone
 from core.Utils import Utils, logger
 from models.Device import Device
 from models.Session import Session
@@ -41,40 +41,40 @@ class Authenticator(object):
         """
         Determine if authentication should be skipped based on the URL and resource method
         The URL is expected to contain the version (v1, v2, v20, etc.) in every URL: vx/{resource}
-    
+
         Args:
             req (Request): The incoming request object.
             resource: The resource being accessed.
             params (dict): The parameters extracted from the request URL.
-    
+
         Returns:
             bool: True if authentication should be skipped, False otherwise.
         """
         # Check if the 'skip_auth' attribute of the resources is True
         if getattr(resource, 'skip_auth', False):
             return True
-    
+
         url_parts = req.path.split('/')
         # Use a regular expression to find the version segment (e.g., v1, v2, v10, etc.)
         version_pattern = re.compile(r'^v\d+$')
         version_index = next((i for i, part in enumerate(url_parts) if version_pattern.match(part)), None)
-    
+
         # If a version segment is found, remove everything up to and including the version segment
         if version_index is not None:
             url_parts = url_parts[version_index + 1:]
-        
+
         # If there is params, find that segment of the value and remove it from the URL parts
         if params:
             for value in params.values():
                 if value in url_parts:
                     url_parts.remove(value)
-    
+
         # Construct the method name by prefixing 'on_' to the lowercase HTTP method of the request
         method_name = 'on_' + req.method.lower()
 
         # If there is more than one part in the URL, use the last part as a suffix
         suffix = url_parts[-1] if len(url_parts) > 1 else None
-    
+
         # If a suffix is present, replace hyphens with underscores and append it to the method_name
         if suffix:
             method_name += '_' + suffix.replace('-', '_')
@@ -114,7 +114,7 @@ class Authenticator(object):
         pass
 
     @staticmethod
-    def login(username: str, password: str, device_uuid: str="unknown") -> tuple[Session, str] | tuple[None, None]:
+    def login(username: str, password: str, device_uuid: str = "unknown") -> tuple[Session, str] | tuple[None, None]:
         user = User.get(User.email == username) or User.get(User.username == username)
         if user:
             hashed_password = Utils.get_hashed_string(password + user.salt)
@@ -141,10 +141,10 @@ class Authenticator(object):
 
         if session is None:
             session = Session(user_id=user.id, device_id=device.id)
-        
+
         session.updated = datetime.now(timezone.utc)
         session.save()
-            
+
         token_data = {
             "user_id": user.id,
             "device_id": device.id,

@@ -1,12 +1,8 @@
-from models.PushNotificationPool import (
-    PushNotificationPool,
-    Status,
-    datetime,
-    PushNotificationTemplate,
-    and_,
-)
-from models.Session import Session, Device, Utils
+from models.PushNotificationPool import (PushNotificationPool,
+                                         PushNotificationTemplate, Status,
+                                         and_, datetime)
 from models.PushNotificationSent import PushNotificationSent
+from models.Session import Device, Session, Utils
 
 
 class PushNotificationCronUtils:
@@ -36,7 +32,7 @@ class PushNotificationCronUtils:
         for notification in data:
             notification: PushNotificationPool = notification
             notification.status_id = Status.PROCESSING
-        
+
         PushNotificationPool.save_all(data)
 
     def get_last_sessions(self, notification: PushNotificationPool):

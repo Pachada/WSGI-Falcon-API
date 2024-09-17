@@ -1,7 +1,7 @@
 from gevent.pywsgi import WSGIServer
-from engine.Server import server
-from core.Utils import logger
 
+from core.Utils import logger
+from engine.Server import server
 
 
 def _force_https(app):

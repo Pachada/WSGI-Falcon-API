@@ -1,10 +1,12 @@
 import configparser
-from sqlalchemy import create_engine, exc, event, select
-from sqlalchemy.orm import scoped_session, sessionmaker, DeclarativeBase, mapped_column, MappedAsDataclass
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
-from core.Utils import Utils
 
+from sqlalchemy import create_engine, event, exc, select
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import (DeclarativeBase, MappedAsDataclass, mapped_column,
+                            scoped_session, sessionmaker)
+
+from core.Utils import Utils
 
 Config = configparser.ConfigParser()
 Config.read(Utils.get_config_ini_file_path())
@@ -25,6 +27,7 @@ engine = create_engine(
     pool_pre_ping=True,
 )
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+
 
 class Base(DeclarativeBase):
     pass

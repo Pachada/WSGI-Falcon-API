@@ -1,18 +1,10 @@
-from core.classes.FileUtils import (
-    FileController,
-    FileAbstract,
-    Utils,
-    File,
-    Request,
-    Response,
-    HTTPStatus,
-    ROUTE_LOADER,
-    User,
-    logger
-)
 import os
 import time
 from random import randint
+
+from core.classes.FileUtils import (ROUTE_LOADER, File, FileAbstract,
+                                    FileController, HTTPStatus, Request,
+                                    Response, User, Utils, logger)
 from models.Role import Role
 
 
@@ -34,7 +26,7 @@ class FileLocalController(FileController, FileAbstract):
         if not file:
             self.response(resp, HTTPStatus.NOT_FOUND, error="No  file")
             return
-        
+
         session = self.get_session(req, resp)
         if not session:
             return

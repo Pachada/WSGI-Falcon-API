@@ -1,18 +1,11 @@
-from core.Controller import (
-    Controller,
-    ROUTE_LOADER,
-    Utils, 
-    Request, 
-    Response,
-    timezone,
-    datetime, 
-    HTTPStatus
-    )
+from core.Controller import (ROUTE_LOADER, Controller, HTTPStatus, Request,
+                             Response, Utils, datetime, timezone)
 
-@ROUTE_LOADER('/v1/health-check/{action}') # ping
+
+@ROUTE_LOADER('/v1/health-check/{action}')  # ping
 class HealthCheckController(Controller):
     skip_auth = True
-    
+
     def __init__(self):
         self.actions = {"ping": self.__ping}
 

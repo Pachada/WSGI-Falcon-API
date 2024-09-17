@@ -1,7 +1,9 @@
-import jwt
-from typing import Tuple, Optional
 import os
 from datetime import datetime, timedelta, timezone
+from typing import Optional, Tuple
+
+import jwt
+
 
 class JWTUtils:
     ALGORITHM = "RS256"  # Use RS256 for RSA
@@ -21,7 +23,6 @@ class JWTUtils:
             expire = datetime.now(timezone.utc) + timedelta(days=7)  # Default expiration time of 7 days
         payload["exp"] = expire
         return jwt.encode(payload, JWTUtils._get_private_key(), algorithm=JWTUtils.ALGORITHM)
-
 
     @staticmethod
     def verify_token(token: str) -> Tuple[Optional[dict], Optional[str]]:
@@ -47,7 +48,7 @@ class JWTUtils:
     def _get_private_key():
         # Key should be in the same folder as this file
         thisfolder = os.path.dirname(os.path.abspath(__file__))
-        private_key_path =  os.path.abspath(os.path.join(thisfolder, "private_key.pem"))
+        private_key_path = os.path.abspath(os.path.join(thisfolder, "private_key.pem"))
         with open(private_key_path, 'r') as key_file:
             return key_file.read()
 
@@ -55,6 +56,6 @@ class JWTUtils:
     def _get_public_key():
         # Key should be in the same folder as this file
         thisfolder = os.path.dirname(os.path.abspath(__file__))
-        public_key_path =  os.path.abspath(os.path.join(thisfolder, "public_key.pem"))
+        public_key_path = os.path.abspath(os.path.join(thisfolder, "public_key.pem"))
         with open(public_key_path, 'r') as key_file:
             return key_file.read()

@@ -1,17 +1,18 @@
 from datetime import datetime, timezone
-from models.User import User
-from models.SmsPool import SmsPool, SmsTemplate
-from crons.SmsCrontab import SmsCrontab
+
 from core.Utils import logger
+from crons.SmsCrontab import SmsCrontab
+from models.SmsPool import SmsPool, SmsTemplate
+from models.User import User
 
 
 class SmsClient:
-    
+
     @staticmethod
     def send_sms_to_pool(template_id: int, user, data: dict = None, send_time: datetime = datetime.now(timezone.utc), send_now=False):
         if data is None:
             data = {}
-        
+
         template = SmsTemplate.get(template_id)
         message = SmsClient.format_message(template, data)
 
@@ -33,9 +34,9 @@ class SmsClient:
         message = template.message
         for key, value in data.items():
             message = message.replace("{{" + key + "}}", value)
-        
+
         return message
-    
+
     @staticmethod
     def save_to_pool(template: SmsTemplate, message: str, send_time: datetime, user: User):
         sms_pool = SmsPool(
@@ -44,5 +45,5 @@ class SmsClient:
             message=message,
             send_time=send_time
         )
-        
+
         return sms_pool if sms_pool.save() else None

@@ -1,14 +1,6 @@
-from core.Controller import (
-    Controller,
-    Utils,
-    Request,
-    Response,
-    HTTPStatus,
-    ROUTE_LOADER,
-    falcon,
-    Hooks
-)
-from models.Device import Device, AppVersion
+from core.Controller import (ROUTE_LOADER, Controller, Hooks, HTTPStatus,
+                             Request, Response, Utils, falcon)
+from models.Device import AppVersion, Device
 from models.Role import Role
 
 
@@ -33,7 +25,7 @@ class DeviceController(Controller):
         if float(data.get("device_version", 0.0)) < app_version.version:
             self.response(resp, HTTPStatus.CONFLICT, error="Updated the app in the store")
             return
-        
+
         session = self.get_session(req, resp)
         if not session:
             return
@@ -49,7 +41,7 @@ class DeviceController(Controller):
         """
         Adds the notification token to the device of the current session
         """
-        
+
         session = self.get_session(req, resp)
         if not session:
             return

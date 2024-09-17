@@ -1,9 +1,11 @@
 from datetime import datetime, timezone
-from models.User import User
-from models.EmailPool import EmailPool, datetime, EmailTemplate
-from crons.SmtpClientCrontab import SmtpClientCrontab
+
 from jinja2 import Template
+
 from core.Utils import logger
+from crons.SmtpClientCrontab import SmtpClientCrontab
+from models.EmailPool import EmailPool, EmailTemplate, datetime
+from models.User import User
 
 
 class SmtpClient:

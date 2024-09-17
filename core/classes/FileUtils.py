@@ -1,25 +1,16 @@
+import base64
 import configparser
 import io
 import json
-import base64
 import sys
 from abc import ABC, abstractmethod
-from PIL import Image
-from falcon.media.multipart import BodyPart
-import filetype
 
-from core.Controller import (
-    Controller,
-    Utils,
-    Request,
-    Response,
-    datetime,
-    HTTPStatus,
-    ROUTE_LOADER,
-    falcon,
-    Hooks,
-    json
-)
+import filetype
+from falcon.media.multipart import BodyPart
+from PIL import Image
+
+from core.Controller import (ROUTE_LOADER, Controller, Hooks, HTTPStatus,
+                             Request, Response, Utils, datetime, falcon, json)
 from core.Utils import Utils, logger
 from models.File import File, User
 
@@ -100,7 +91,7 @@ class FileController(Controller):
         if id:
             self.response(resp, HTTPStatus.METHOD_NOT_ALLOWED)
             return
-        
+
         session = self.get_session(req, resp)
         if not session:
             return
@@ -156,9 +147,9 @@ class FileController(Controller):
         public_file = self.check_if_public_file(req)
         private_file = self.check_if_private_file(req)
         file, thumbnail, code = self.process_file(
-            file_name, 
-            base64_decoded, 
-            mimetype, 
+            file_name,
+            base64_decoded,
+            mimetype,
             make_thumbnail=make_thumbnail,
             public=public_file,
             private=private_file
@@ -181,7 +172,7 @@ class FileController(Controller):
 
     def check_if_public_file(self, req: Request):
         return req.params.get("public") == "True"
-    
+
     def check_if_private_file(self, req: Request):
         return req.params.get("private") == "True"
 

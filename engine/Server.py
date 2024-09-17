@@ -1,7 +1,9 @@
 import falcon
-from engine.RouteLoader import RouteLoader
+
 from core.classes.middleware.Authenticator import Authenticator
-from core.classes.middleware.SQLAlchemySessionManager import SQLAlchemySessionManager
+from core.classes.middleware.SQLAlchemySessionManager import \
+    SQLAlchemySessionManager
+from engine.RouteLoader import RouteLoader
 
 authorization_middleware = Authenticator()
 sqlalchemy_session_manager = SQLAlchemySessionManager()
@@ -13,4 +15,3 @@ server = falcon.App(cors_enable=True, middleware=[authorization_middleware, sqla
 route_loader = RouteLoader(server)
 # initialize all controllers
 from controllers import *
-

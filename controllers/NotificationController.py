@@ -1,14 +1,5 @@
-from core.Controller import (
-    Controller,
-    Utils,
-    Request,
-    Response,
-    HTTPStatus,
-    ROUTE_LOADER,
-    falcon,
-    Hooks
-)
-from models.User import User
+from core.Controller import (ROUTE_LOADER, Controller, Hooks, HTTPStatus,
+                             Request, Response, Utils, falcon)
 from models.PushNotificationSent import PushNotificationSent, and_
 
 
@@ -38,7 +29,7 @@ class NotificationController(Controller):
             return
 
         data: dict = req.media
-        
+
         notification_sent.read = data.get("read", 1)
         if not notification_sent.save():
             self.response(resp, HTTPStatus.INTERNAL_SERVER_ERROR, error=self.PROBLEM_SAVING_TO_DB)

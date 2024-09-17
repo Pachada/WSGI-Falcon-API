@@ -1,7 +1,7 @@
 from core.Model import *
-from models.User import User
 from models.PushNotificationTemplate import PushNotificationTemplate
 from models.Status import Status
+from models.User import User
 
 
 class PushNotificationPool(Base, Model):
@@ -10,7 +10,7 @@ class PushNotificationPool(Base, Model):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(User.id), default=None)
-    template_id: Mapped[int]= mapped_column(BigInteger, ForeignKey(PushNotificationTemplate.id), nullable=False)
+    template_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(PushNotificationTemplate.id), nullable=False)
     status_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Status.id), default=Status.PENDING)
     send_time: Mapped[datetime] = mapped_column(DateTime, default=Utils.time())
     message: Mapped[str]

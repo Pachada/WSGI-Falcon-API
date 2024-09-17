@@ -1,18 +1,13 @@
-from exponent_server_sdk import (
-    DeviceNotRegisteredError,
-    PushClient,
-    PushMessage,
-    PushServerError,
-    PushTicketError,
-    PushTicket,
-)
-from requests.exceptions import ConnectionError, HTTPError
 import json
-from core.classes.PushNotificationCronUtils import (
-    PushNotificationCronUtils,
-    Device,
-    PushNotificationPool
-)
+
+from exponent_server_sdk import (DeviceNotRegisteredError, PushClient,
+                                 PushMessage, PushServerError, PushTicket,
+                                 PushTicketError)
+from requests.exceptions import ConnectionError, HTTPError
+
+from core.classes.PushNotificationCronUtils import (Device,
+                                                    PushNotificationCronUtils,
+                                                    PushNotificationPool)
 
 
 class ExpoPushNotificationCrontab(PushNotificationCronUtils):
@@ -29,7 +24,7 @@ class ExpoPushNotificationCrontab(PushNotificationCronUtils):
             return ExpoPushNotificationCrontab.__instance
 
         ExpoPushNotificationCrontab.__instance = self
-    
+
     def send_notification_to_all_users(self, notification: PushNotificationPool):
         # TODO Send the notification to all users
         notification.delete()

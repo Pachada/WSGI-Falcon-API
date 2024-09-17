@@ -14,4 +14,3 @@ class Role(Base, Model):
     created: Mapped[datetime] = mapped_column(default=func.now())
     updated: Mapped[datetime] = mapped_column(default=func.now(), onupdate=func.now())
     enable: Mapped[bool] = mapped_column(default=True)
-

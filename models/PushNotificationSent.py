@@ -1,7 +1,7 @@
 from core.Model import *
+from models.Device import Device
 from models.PushNotificationTemplate import PushNotificationTemplate
 from models.User import User
-from models.Device import Device
 
 
 class PushNotificationSent(Base, Model):
@@ -11,7 +11,7 @@ class PushNotificationSent(Base, Model):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(User.id))
     device_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Device.id), default=None)
-    template_id : Mapped[int]= mapped_column(BigInteger, ForeignKey(PushNotificationTemplate.id))
+    template_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(PushNotificationTemplate.id))
     message: Mapped[str]
     readed: Mapped[int] = mapped_column(mysql.TINYINT(1), default=0)
     created: Mapped[datetime] = mapped_column(default=func.now())

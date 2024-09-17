@@ -2,6 +2,7 @@ import os
 
 INIT_FILE_NAME = "__init__.py"
 
+
 def create_init_file(path, root):
     # create an empty __init__.py file if it does not exist
     init_file = os.path.join(path, INIT_FILE_NAME)
@@ -34,7 +35,7 @@ def create_controllers_init_file():
     thisfolder = os.path.dirname(os.path.abspath(__file__))
     parent_folder = os.path.abspath(os.path.join(thisfolder, os.pardir))
     controllers_path = os.path.abspath(os.path.join(parent_folder, "controllers"))
-    
+
     print(controllers_path)
     # check if the path exists
     if not os.path.exists(controllers_path):
@@ -47,6 +48,6 @@ def create_controllers_init_file():
         # create __init__.py files for each directory
         create_init_file(root, controllers_path)
 
-    
+
 if __name__ == "__main__":
     create_controllers_init_file()

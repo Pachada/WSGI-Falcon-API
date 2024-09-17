@@ -1,28 +1,19 @@
-from core.Controller import (
-    Controller,
-    ROUTE_LOADER,
-    Utils, 
-    Request, 
-    Response, 
-    HTTPStatus,
-    falcon,
-    Decorators,
-    Hooks
-    )
-from models.User import User, Role, List
 from core.classes.middleware.Authenticator import Authenticator, Session
+from core.Controller import (ROUTE_LOADER, Controller, Decorators, Hooks,
+                             HTTPStatus, Request, Response, Utils, falcon)
+from models.User import List, Role, User
 
 
 @ROUTE_LOADER('/v1/users')
 @ROUTE_LOADER('/v1/users/{id:int}')
 class UserController(Controller):
-    
+
     @falcon.before(Hooks.check_privileges, allowed_roles_ids={Role.ADMIN})
     def on_get(self, req: Request, resp: Response, id: int = None):
         super().generic_on_get(req, resp, User, id)
 
     @Decorators.no_authorization_needed
-    @falcon.before(Hooks.post_validations, model = [User])
+    @falcon.before(Hooks.post_validations, model=[User])
     def on_post(self, req: Request, resp: Response):
         data = req.media
         self.create_user(req, resp, data)
@@ -39,7 +30,7 @@ class UserController(Controller):
         if not user_is_admin and user.id != id:
             self.response(resp, HTTPStatus.UNAUTHORIZED, error="Users can only modify their own users")
             return
-        
+
         # Check if a new role was sended
         data: dict = req.get_media()
         new_role = data.get("role_id")
@@ -50,7 +41,6 @@ class UserController(Controller):
             return
 
         super().generic_on_put(req, resp, User, id)
-
 
     def on_delete(self, req: Request, resp: Response, id: int = None):
         # If the user.role of the session is admin it can delete every user
@@ -87,7 +77,7 @@ class UserController(Controller):
             str(data.get("password")),
             str(data.get("device_uuid", "unknown")),
         )
-        
+
         data = {
             "Bearer": token,
             "session": Utils.serialize_model(session, recursive=True, recursiveLimit=3, blacklist=["device"])

@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
-from models.Status import Status, and_, Model, Utils
+
+from models.Status import Model, Status, Utils, and_
 
 
 class NotificationCronsUtils:

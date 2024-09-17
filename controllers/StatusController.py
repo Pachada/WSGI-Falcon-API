@@ -1,15 +1,8 @@
-from core.Controller import (
-    Controller, 
-    Utils, 
-    Request, 
-    Response, 
-    HTTPStatus, 
-    ROUTE_LOADER, 
-    falcon, 
-    Hooks
-)
-from models.Status import Status
+from core.Controller import (ROUTE_LOADER, Controller, Hooks, Request,
+                             Response, falcon)
 from models.Role import Role
+from models.Status import Status
+
 
 @ROUTE_LOADER('/v1/statuses')
 @ROUTE_LOADER('/v1/statuses/{id:int}')
@@ -18,7 +11,7 @@ class StatusController(Controller):
         super().generic_on_get(req, resp, Status, id)
 
     @falcon.before(Hooks.check_privileges, allowed_roles_ids={Role.ADMIN})
-    @falcon.before(Hooks.post_validations, model = Status)
+    @falcon.before(Hooks.post_validations, model=Status)
     def on_post(self, req: Request, resp: Response, id: int = None):
         super().generic_on_post(req, resp, Status, "statuses", id)
 

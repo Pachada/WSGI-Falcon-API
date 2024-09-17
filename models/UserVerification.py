@@ -1,7 +1,7 @@
 from core.Model import *
-from models.User import User
 from models.File import File
 from models.Status import Status
+from models.User import User
 
 
 class UserVerification(Base, Model):
@@ -9,7 +9,7 @@ class UserVerification(Base, Model):
     __autoload_with__ = engine
 
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(User.id), primary_key=True, nullable=False)
-    curp: Mapped[Optional[str]] 
+    curp: Mapped[Optional[str]]
     status_id_curp: Mapped[int] = mapped_column(BigInteger, ForeignKey(Status.id), default=Status.MISSING)
     file_id_ine: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey(File.id))
     status_id_ine: Mapped[int] = mapped_column(BigInteger, ForeignKey(Status.id), default=Status.MISSING)

@@ -1,11 +1,12 @@
+import configparser
 import smtplib
 import ssl
-import configparser
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from models.EmailSent import EmailSent
-from models.EmailPool import EmailPool
+
 from core.classes.NotificationCronsUtils import NotificationCronsUtils, Utils
+from models.EmailPool import EmailPool
+from models.EmailSent import EmailSent
 
 
 class SmtpClientCrontab(NotificationCronsUtils):
@@ -18,17 +19,17 @@ class SmtpClientCrontab(NotificationCronsUtils):
         self.password = self.config.get("SMTP", "password")
         self.server = self.config.get("SMTP", "server")
         self.fromemail = self.config.get("SMTP", "fromemail")
-        
-        self.email_pools_to_delete: list[EmailPool]= []
+
+        self.email_pools_to_delete: list[EmailPool] = []
 
     def send_emails(self, query_limit: int):
         emails_to_send = self.get_rows_to_send(EmailPool, query_limit)
         if not emails_to_send:
             self.nothing_to_send()
             return
-        
+
         self.put_rows_in_proccesing_status(emails_to_send)
-        
+
         with smtplib.SMTP(self.server, self.port) as server:
             server.starttls(context=ssl.create_default_context())
             server.login(self.username, self.password)

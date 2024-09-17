@@ -1,19 +1,10 @@
-from core.Controller import (
-    Controller,
-    Utils,
-    Request,
-    Response,
-    datetime,
-    timezone,
-    HTTPStatus,
-    ROUTE_LOADER,
-    falcon,
-    Hooks
-)
-from models.UserVerification import UserVerification, User
-from models.EmailTemplate import EmailTemplate
 from core.classes.SmtpClient import SmtpClient
+from core.Controller import (ROUTE_LOADER, Controller, Hooks, HTTPStatus,
+                             Request, Response, Utils, datetime, falcon,
+                             timezone)
+from models.EmailTemplate import EmailTemplate
 from models.Session import Session
+from models.UserVerification import User, UserVerification
 
 
 @ROUTE_LOADER('/v1/confirm-email/{action}')
@@ -28,7 +19,7 @@ class ConfirmEmailController(Controller):
         session = self.get_session(req, resp)
         if not session:
             return
-        
+
         user: User = session.user
 
         if user.email_confirmed:

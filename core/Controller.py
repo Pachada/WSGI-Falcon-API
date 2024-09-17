@@ -1,12 +1,14 @@
-from falcon.response import Response
-from falcon.request import Request
-from datetime import datetime, timedelta, time, timezone
-from falcon import falcon, code_to_http_status
 import json
-from core.Utils import Utils, logger
-from core.Model import Model, and_, String
+from datetime import datetime, time, timedelta, timezone
 from http import HTTPStatus
-from core.Hooks import Hooks, Decorators
+
+from falcon import code_to_http_status, falcon
+from falcon.request import Request
+from falcon.response import Response
+
+from core.Hooks import Decorators, Hooks
+from core.Model import Model, String, and_
+from core.Utils import Utils, logger
 from engine.Server import route_loader as ROUTE_LOADER
 from models.Session import Session
 
@@ -29,20 +31,20 @@ class Controller:
             cls._instance = super().__new__(cls, *args, **kwargs)
         # Return the existing instance
         return cls._instance
-    
+
     # Error mesages
     MISSING_OR_EXCESSIVE_PARAMS = "Bad Request - Your request is missing or excessive parameters. Please verify and resubmit."
     PROBLEM_SAVING_TO_DB = "Internal Server Error - problem saving to database."
     INVALID_JSON = "Bad Request - Invalid JSON"
     ID_NOT_FOUND = "Not Found - Invalid ID"
-    
+
     def get_session(self, req: Request, resp: Response) -> Session | None:
         session_id = req.context.token_data.get("session_id")
         session = Session.get(Session.id == session_id)
         if not session:
             self.response(resp, HTTPStatus.UNAUTHORIZED, error="Session not found")
             return
-        
+
         return session
 
     def response(self, resp: Response, http_code=200, data=None, message=None, error=None, error_code=None):
@@ -119,7 +121,7 @@ class Controller:
         row = None
         if not isinstance(filters, list):
             query = [filters] if filters is not None else []
-        
+
         if id:
             # if an ID is provided, get the model object with that ID
             if row := self.get_model_object(req, resp, model, id):

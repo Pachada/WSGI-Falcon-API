@@ -1,13 +1,13 @@
+import configparser
+
 from onesignal_sdk.client import Client
 from onesignal_sdk.error import OneSignalHTTPError
-import configparser
+
+from core.classes.PushNotificationCronUtils import (Device,
+                                                    PushNotificationCronUtils,
+                                                    PushNotificationPool,
+                                                    Status)
 from core.Utils import Utils
-from core.classes.PushNotificationCronUtils import (
-    PushNotificationCronUtils,
-    Status,
-    Device,
-    PushNotificationPool,
-)
 
 
 class OneSignalPushNotificationCrontab(PushNotificationCronUtils):

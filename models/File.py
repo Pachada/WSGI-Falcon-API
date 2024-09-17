@@ -13,8 +13,8 @@ class File(Base, Model):
     name: Mapped[str]
     hash: Mapped[str]
     is_thumbnail: Mapped[int] = mapped_column(mysql.TINYINT(1), insert_default=0)
-    url: Mapped[Optional[str]] # If a file has an url means that the file is publicly available
-    is_private: Mapped[bool] = mapped_column(default=False) # If private only the user_who_uploaded and admin can get the file
+    url: Mapped[Optional[str]]  # If a file has an url means that the file is publicly available
+    is_private: Mapped[bool] = mapped_column(default=False)  # If private only the user_who_uploaded and admin can get the file
     user_who_uploaded_id: Mapped[int] = mapped_column(ForeignKey(User.id))
     created: Mapped[datetime] = mapped_column(default=func.now())
     updated: Mapped[datetime] = mapped_column(default=func.now(), onupdate=func.now())
