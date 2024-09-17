@@ -1,6 +1,5 @@
 from core.Model import *
 from models.Role import Role
-from models.Person import Person
 
 class PasswordType(String):
     def bind_processor(self, dialect):
@@ -19,10 +18,14 @@ class User(Base, Model):
     email: Mapped[str]
     phone: Mapped[Optional[str]]
     role_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Role.id), default=Role.USER)
-    person_id: Mapped[Optional[int]] = mapped_column(BigInteger, ForeignKey(Person.id))
     created: Mapped[datetime] = mapped_column(default=func.now())
     updated: Mapped[datetime] = mapped_column(default=func.now(), onupdate=func.now())
     enable: Mapped[bool] = mapped_column(default=True)
+    
+    # Person
+    first_name: Mapped[str]
+    last_name: Mapped[str]
+    birthday: Mapped[date]
 
     # Verifications
     verified: Mapped[bool] = mapped_column(default=False)
@@ -30,7 +33,6 @@ class User(Base, Model):
     phone_confirmed: Mapped[bool] = mapped_column(default=False)
 
     role: Mapped[Role] = relationship(Role)
-    person: Mapped[Person] = relationship(Person)
     
     attributes_blacklist = {"salt"}
 

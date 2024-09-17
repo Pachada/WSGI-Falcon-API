@@ -37,7 +37,7 @@ class ConfirmEmailController(Controller):
 
         user_verification = UserVerification.get_verification_of_user(user)
         if not user_verification:
-            self.response(resp, HTTPStatus.INTERNAL_SERVER_ERROR, error="Problema con la Verificación del Usuario")
+            self.response(resp, HTTPStatus.INTERNAL_SERVER_ERROR, error="Problem with User Verification")
             return
 
         user_verification.email_otp = Utils.generate_token()
