@@ -12,8 +12,8 @@ from models.User import User
 from models.PushNotificationSent import PushNotificationSent, and_
 
 
-@ROUTE_LOADER('/notifications')
-@ROUTE_LOADER('/notifications/{id:int}')
+@ROUTE_LOADER('/v1/notifications')
+@ROUTE_LOADER('/v1/notifications/{id:int}')
 class NotificationController(Controller):
     def on_get(self, req: Request, resp: Response, id: int = None):
         user_id: int = req.context.token_data.get("user_id")

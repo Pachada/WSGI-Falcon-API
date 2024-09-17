@@ -7,7 +7,8 @@ from core.classes.FileUtils import (
     Response,
     HTTPStatus,
     ROUTE_LOADER,
-    User
+    User,
+    logger
 )
 import os
 import time
@@ -15,10 +16,10 @@ from random import randint
 from models.Role import Role
 
 
-@ROUTE_LOADER('/files/local')
-@ROUTE_LOADER('/files/local/{id:int}')
-@ROUTE_LOADER('/files/local/base64', suffix="base64")
-@ROUTE_LOADER('/files/local/base64/{id:int}', suffix="base64")
+@ROUTE_LOADER('/v1/files/local')
+@ROUTE_LOADER('/v1/files/local/{id:int}')
+@ROUTE_LOADER('/v1/files/local/base64', suffix="base64")
+@ROUTE_LOADER('/v1/files/local/base64/{id:int}', suffix="base64")
 class FileLocalController(FileController, FileAbstract):
     def __init__(self):
         super().__init__()
@@ -92,7 +93,7 @@ class FileLocalController(FileController, FileAbstract):
             self.response(resp, HTTPStatus.OK, self.__get_file_data_as_base64(file))
 
         except Exception as exc:
-            print(exc)
+            logger.error(exc)
             self.response(resp, HTTPStatus.INTERNAL_SERVER_ERROR, error=str(exc))
 
     # -------------------------------- Utils --------------------------------

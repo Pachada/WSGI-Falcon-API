@@ -9,7 +9,7 @@ from core.Controller import (
     HTTPStatus
     )
 
-@ROUTE_LOADER('/health-check/{action}') # ping
+@ROUTE_LOADER('/v1/health-check/{action}') # ping
 class HealthCheckController(Controller):
     skip_auth = True
     

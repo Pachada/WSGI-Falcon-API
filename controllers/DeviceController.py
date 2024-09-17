@@ -12,8 +12,8 @@ from models.Device import Device, AppVersion
 from models.Role import Role
 
 
-@ROUTE_LOADER('/devices')
-@ROUTE_LOADER('/devices/{id:int}')
+@ROUTE_LOADER('/v1/devices')
+@ROUTE_LOADER('/v1/devices/{id:int}')
 class DeviceController(Controller):
     def on_put_version(self, req: Request, resp: Response):
         """

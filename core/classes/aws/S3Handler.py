@@ -1,5 +1,6 @@
 import tempfile
 import boto3
+from core.Utils import logger
 
 
 class S3Handler(object):
@@ -74,7 +75,7 @@ class S3Handler(object):
             tmpFile.seek(0)
             return tmpFile
 
-        print("No Bucket")
+        logger.error("No Bucket")
         return None
 
     def delete_file(self, key):

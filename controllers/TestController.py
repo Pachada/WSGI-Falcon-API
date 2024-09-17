@@ -10,7 +10,7 @@ from core.Controller import (
 )
 from models.Role import Role 
 
-@ROUTE_LOADER('/test')
+@ROUTE_LOADER('/v1/test')
 class TestController(Controller):
     skip_auth = True
 

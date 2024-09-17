@@ -14,8 +14,8 @@ from models.User import User, Role, List
 from core.classes.middleware.Authenticator import Authenticator, Session
 
 
-@ROUTE_LOADER('/users')
-@ROUTE_LOADER('/users/{id:int}')
+@ROUTE_LOADER('/v1/users')
+@ROUTE_LOADER('/v1/users/{id:int}')
 class UserController(Controller):
     def on_get(self, req: Request, resp: Response, id: int = None):
         super().generic_on_get(req, resp, User, id)

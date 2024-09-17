@@ -1,6 +1,6 @@
 import configparser
 from falcon import App
-from core.Utils import Utils
+from core.Utils import Utils, logger
 
 
 class RouteLoader:
@@ -10,8 +10,7 @@ class RouteLoader:
         self.config = configparser.ConfigParser()
         self.config.read(Utils.get_config_ini_file_path())
         self.context_from_config = self.config.get('ROUTES', 'context')
-        self.context_prefix = '/'+self.context_from_config if self.context_from_config != '' else ''
-
+        self.context_prefix = f"/{self.context_from_config}" if self.context_from_config != '' else ''
 
     def __call__(self, route, suffix=None):
         def decorator(cls):
@@ -19,7 +18,7 @@ class RouteLoader:
             if instance is None:
                 instance = self._registry[cls] = cls()
             self._server.add_route(self.context_prefix + route, instance, suffix=suffix)
-            print(f"Route: {self.context_prefix + route}, {instance}, suffix={suffix} ")
+            logger.info(f"Route: {self.context_prefix + route}, {instance}, suffix={suffix} ")
             return cls
 
         return decorator

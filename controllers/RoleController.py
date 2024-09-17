@@ -11,8 +11,8 @@ from core.Controller import (
 from models.Role import Role
 
 
-@ROUTE_LOADER('/roles')
-@ROUTE_LOADER('/roles/{id:int}')
+@ROUTE_LOADER('/v1/roles')
+@ROUTE_LOADER('/v1/roles/{id:int}')
 class RoleController(Controller):
     
     @falcon.before(Hooks.check_privileges, allowed_roles_ids={Role.ADMIN})

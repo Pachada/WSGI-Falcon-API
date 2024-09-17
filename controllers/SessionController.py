@@ -14,9 +14,9 @@ from models.Session import Session
 from models.Role import Role
 
 
-@ROUTE_LOADER('/sessions')
-@ROUTE_LOADER('/sessions/login', suffix="login")
-@ROUTE_LOADER('/sessions/logout', suffix="logout")
+@ROUTE_LOADER('/v1/sessions')
+@ROUTE_LOADER('/v1/sessions/login', suffix="login")
+@ROUTE_LOADER('/v1/sessions/logout', suffix="logout")
 class SessionController(Controller):
 
     def on_get(self, req: Request, resp: Response):

@@ -11,8 +11,8 @@ from core.Controller import (
 from models.Status import Status
 from models.Role import Role
 
-@ROUTE_LOADER('/statuses')
-@ROUTE_LOADER('/statuses/{id:int}')
+@ROUTE_LOADER('/v1/statuses')
+@ROUTE_LOADER('/v1/statuses/{id:int}')
 class StatusController(Controller):
     def on_get(self, req: Request, resp: Response, id: int = None):
         super().generic_on_get(req, resp, Status, id)

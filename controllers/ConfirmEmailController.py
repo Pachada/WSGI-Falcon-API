@@ -16,7 +16,7 @@ from core.classes.SmtpClient import SmtpClient
 from models.Session import Session
 
 
-@ROUTE_LOADER('/confirm-email/{action}')
+@ROUTE_LOADER('/v1/confirm-email/{action}')
 class ConfirmEmailController(Controller):
     def __init__(self):
         self.actions = {

@@ -20,7 +20,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm.util import was_deleted, has_identity
 from core.database import Base, engine, db_session as DB
-from core.Utils import Utils, datetime, date
+from core.Utils import Utils, datetime, date, logger
 from typing import List, Optional
 
 
@@ -174,8 +174,8 @@ class Model:
             return True
         except Exception as exc:
             DB.rollback()
-            print("[ERROR-SAVING]")
-            print(exc)
+            logger.error("[ERROR-SAVING]")
+            logger.error(exc)
             return False
 
     def soft_delete(self):
@@ -193,8 +193,8 @@ class Model:
             self.enable = 0
             return self.save()
         except Exception as exc:
-            print("[ERROR-SOFT-DELETING]")
-            print(exc)
+            logger.error("[ERROR-SOFT-DELETING]")
+            logger.error(exc)
             return False
 
     def delete(self):
@@ -213,8 +213,8 @@ class Model:
             return True
         except Exception as exc:
             DB.rollback()
-            print("[ERROR-DELETING]")
-            print(exc)
+            logger.error("[ERROR-DELETING]")
+            logger.error(exc)
             return False
 
     @classmethod
@@ -226,7 +226,7 @@ class Model:
             DB.commit()
             return True
         except Exception as exc:
-            print(exc)
+            logger.error(exc)
             return False
 
     @classmethod
@@ -264,7 +264,7 @@ class Model:
             stmt = select(func.count()).select_from(stmt.subquery())
             return DB.execute(stmt).scalar()
         except Exception as exc:
-            print(exc)
+            logger.error(exc)
             return False
 
     @classmethod
@@ -291,7 +291,7 @@ class Model:
             result = DB.execute(query).scalar()
             return result or 0
         except Exception as exc:
-            print(exc)
+            logger.error(exc)
             return False
 
 
@@ -321,7 +321,7 @@ class Model:
 
                 return DB.scalar(query)
         except Exception as exc:
-            print(exc)
+            logger.error(exc)
             return False
 
     @classmethod
@@ -350,7 +350,7 @@ class Model:
 
                 return DB.scalar(query)
         except Exception as exc:
-            print(exc)
+            logger.error(exc)
             return False
 
     @classmethod
@@ -383,7 +383,7 @@ class Model:
 
                 return DB.all(query)
         except Exception as exc:
-            print(exc)
+            logger.error(exc)
             return False
 
     @staticmethod
@@ -412,8 +412,8 @@ class Model:
             return True
         except Exception as exc:
             DB.rollback()
-            print("[ERROR-SAVING-ALL]")
-            print(exc)
+            logger.error("[ERROR-SAVING-ALL]")
+            logger.error(exc)
             return False
 
     @staticmethod
@@ -436,6 +436,6 @@ class Model:
             return True
         except Exception as exc:
             DB.rollback()
-            print("[ERROR-EXPUNGE]")
-            print(exc)
+            logger.error("[ERROR-EXPUNGE]")
+            logger.error(exc)
             return False

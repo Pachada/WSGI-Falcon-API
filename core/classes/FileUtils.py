@@ -20,7 +20,7 @@ from core.Controller import (
     Hooks,
     json
 )
-from core.Utils import Utils
+from core.Utils import Utils, logger
 from models.File import File, User
 
 

@@ -2,7 +2,7 @@ import os
 import tempfile
 
 from core.classes.aws.S3Handler import S3Handler
-from models.File import File
+from models.File import File, logger
 
 import filetype
 
@@ -133,8 +133,8 @@ class FileManager:
                 fileobj = handler.download_file(file.object)
                 return file, fileobj
             except Exception as e:
-                print("[ERROR-GETTING-FILE-FROM-S3]")
-                print(e)
+                logger.error("[ERROR-GETTING-FILE-FROM-S3]")
+                logger.error(e)
                 return file, None
 
         return None, None
@@ -150,5 +150,5 @@ class FileManager:
         try:
             return handler.delete_file(file.object)
         except Exception as e:
-            print(e)
+            logger.error(e)
             return

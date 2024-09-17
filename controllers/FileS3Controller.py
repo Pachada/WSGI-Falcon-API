@@ -14,10 +14,10 @@ from core.classes.FileManager import FileManager
 from models.User import User, Role
 
 
-@ROUTE_LOADER('/files/s3')
-@ROUTE_LOADER('/files/s3/{id:int}')
-@ROUTE_LOADER('/files/s3/base64', suffix="base64")
-@ROUTE_LOADER('/files/s3/base64/{id:int}', suffix="base64")
+@ROUTE_LOADER('/v1/files/s3')
+@ROUTE_LOADER('/v1/files/s3/{id:int}')
+@ROUTE_LOADER('/v1/files/s3/base64', suffix="base64")
+@ROUTE_LOADER('/v1/files/s3/base64/{id:int}', suffix="base64")
 class FileS3Controller(FileController, FileAbstract):
     def __init__(self):
         super().__init__()

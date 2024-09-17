@@ -23,13 +23,13 @@ class File(Base, Model):
     user_who_uploaded: Mapped[User] = relationship(User)
 
     def delete_file_from_s3(self, req, resp):
-        print(f"Borrando file: {self.id} del s3")
+        logger.info(f"Borrando file: {self.id} del s3")
         from controllers import files3Controller
 
         files3Controller.on_delete(req, resp, self.id)
 
     def delete_file_from_local(self, req, resp):
-        print(f"Borrando file: {self.id} del local")
+        logger.info(f"Borrando file: {self.id} del local")
         from controllers import filelocalController
 
         filelocalController.on_delete(req, resp, self.id)

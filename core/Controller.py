@@ -3,7 +3,7 @@ from falcon.request import Request
 from datetime import datetime, timedelta, time, timezone
 from falcon import falcon, code_to_http_status
 import json
-from core.Utils import Utils
+from core.Utils import Utils, logger
 from core.Model import Model, and_, String
 from http import HTTPStatus
 from core.Hooks import Hooks, Decorators
@@ -70,15 +70,15 @@ class Controller:
             return row.save()
 
         except Exception as exc:
-            print("[ERROR-SETTING_VALUES]")
-            print(exc)
+            logger.error("[ERROR-SETTING_VALUES]")
+            logger.error(exc)
             return False
 
     def get_req_data(self, req: Request, resp: Response):
         try:
             data: dict = req.get_media()
         except Exception as exc:
-            print(exc)
+            logger.error(exc)
             self.response(resp, HTTPStatus.BAD_REQUEST, error=str(exc))
             return
 

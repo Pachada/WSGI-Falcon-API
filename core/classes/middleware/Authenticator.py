@@ -20,6 +20,7 @@ class Authenticator(object):
 
     def process_resource(self, req: Request, resp: Response, resource, params):
         """
+        Process the request after routing.
         Process the resource and determine whether to skip authentication or perform authentication checks.
 
         Args:
@@ -39,39 +40,43 @@ class Authenticator(object):
     def should_skip_authentication(self, req: Request, resource, params: dict):
         """
         Determine if authentication should be skipped based on the URL and resource method
-        The URL is expected to contain an 'api' segment in every URL: v1/api/{resource}
-
+        The URL is expected to contain the version in the first segment in every URL: vx/{resource}
+    
         Args:
             req (Request): The incoming request object.
             resource: The resource being accessed.
             params (dict): The parameters extracted from the request URL.
-
+    
         Returns:
             bool: True if authentication should be skipped, False otherwise.
         """
         # Check if the 'skip_auth' attribute of the resources is True
         if getattr(resource, 'skip_auth', False):
             return True
-        # Check if the method has the attribute 'skip_auth'
-        # First we need to get the method 
+    
         # Split the request path into individual parts using '/' as the separator
         url_parts = req.path.split('/')
-        # Find the index of the 'api' part in the url_parts list and add 1 to it
-        # This will give us the index of the part after 'api'
-        api_suffix_index = url_parts.index('api') + 1
-        # Slice the url_parts list starting from the part after 'api'
-        # If api_suffix_index is greater than the length of url_parts, an empty list is assigned
-        url_parts = url_parts[api_suffix_index:] if api_suffix_index < len(url_parts) else []
-        # If action or resource_id is present, remove the last part from url_parts: /url/{action|id}
-        if params.get('action') or params.get('id'):
-            url_parts.pop()
+
+        # Remove the first empty part and the version part from the URL parts
+        if len(url_parts) > 2:
+            url_parts = url_parts[2:]
+    
+        # If there is params, find that segment of the value and remove it from the URL parts
+        if params:
+            for value in params.values():
+                if value in url_parts:
+                    url_parts.remove(value)
+    
         # Construct the method name by prefixing 'on_' to the lowercase HTTP method of the request
         method_name = 'on_' + req.method.lower()
+
         # Get the last part of url_parts if it contains more than one element, otherwise assign None
         suffix = url_parts[-1] if len(url_parts) > 1 else None
+    
         # If a suffix is present, append it to the method_name
         if suffix:
             method_name += '_' + suffix
+    
         # Check if the resource has the method_name attribute and if the 'skip_auth' attribute of the method is True
         return hasattr(resource, method_name) and getattr(getattr(resource, method_name), 'skip_auth', False)
 
