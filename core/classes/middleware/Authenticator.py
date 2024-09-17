@@ -1,4 +1,4 @@
-import json
+import re
 from http import HTTPStatus
 
 from falcon.request import Request
@@ -40,7 +40,7 @@ class Authenticator(object):
     def should_skip_authentication(self, req: Request, resource, params: dict):
         """
         Determine if authentication should be skipped based on the URL and resource method
-        The URL is expected to contain the version in the first segment in every URL: vx/{resource}
+        The URL is expected to contain the version (v1, v2, v20, etc.) in every URL: vx/{resource}
     
         Args:
             req (Request): The incoming request object.
@@ -54,13 +54,15 @@ class Authenticator(object):
         if getattr(resource, 'skip_auth', False):
             return True
     
-        # Split the request path into individual parts using '/' as the separator
         url_parts = req.path.split('/')
-
-        # Remove the first empty part and the version part from the URL parts
-        if len(url_parts) > 2:
-            url_parts = url_parts[2:]
+        # Use a regular expression to find the version segment (e.g., v1, v2, v10, etc.)
+        version_pattern = re.compile(r'^v\d+$')
+        version_index = next((i for i, part in enumerate(url_parts) if version_pattern.match(part)), None)
     
+        # If a version segment is found, remove everything up to and including the version segment
+        if version_index is not None:
+            url_parts = url_parts[version_index + 1:]
+        
         # If there is params, find that segment of the value and remove it from the URL parts
         if params:
             for value in params.values():
@@ -70,13 +72,13 @@ class Authenticator(object):
         # Construct the method name by prefixing 'on_' to the lowercase HTTP method of the request
         method_name = 'on_' + req.method.lower()
 
-        # Get the last part of url_parts if it contains more than one element, otherwise assign None
+        # If there is more than one part in the URL, use the last part as a suffix
         suffix = url_parts[-1] if len(url_parts) > 1 else None
     
-        # If a suffix is present, append it to the method_name
+        # If a suffix is present, replace hyphens with underscores and append it to the method_name
         if suffix:
-            method_name += '_' + suffix
-    
+            method_name += '_' + suffix.replace('-', '_')
+
         # Check if the resource has the method_name attribute and if the 'skip_auth' attribute of the method is True
         return hasattr(resource, method_name) and getattr(getattr(resource, method_name), 'skip_auth', False)
 
