@@ -18,7 +18,7 @@ class RouteLoader:
             if instance is None:
                 instance = self._registry[cls] = cls()
             self._server.add_route(self.context_prefix + route, instance, suffix=suffix)
-            logger.info(f"Route: {self.context_prefix + route}, {instance}, suffix={suffix} ")
+            logger.info(f"Route: {self.context_prefix + route}, {instance.__class__.__name__}, suffix={suffix} ")
             return cls
 
         return decorator

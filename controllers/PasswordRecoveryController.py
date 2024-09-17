@@ -18,8 +18,8 @@ from core.classes.SmtpClient import SmtpClient
 from core.classes.SmsClient import SmsClient, SmsTemplate
 
 
-@ROUTE_LOADER("/password-recovery/{action}") # request, validate-code
-@ROUTE_LOADER("/password-recovery/change-password", suffix="change_password")
+@ROUTE_LOADER('/v1/password-recovery/{action}') # request, validate-code
+@ROUTE_LOADER('/v1/password-recovery/change-password', suffix="change_password")
 class PasswordRecoveryController(Controller):
     def __init__(self):
         self.actions = {
