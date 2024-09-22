@@ -86,7 +86,7 @@
 
 - **Call API**:
   ```sh
-  curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"path": "/api/health-check/ping", "httpMethod": "GET", "requestContext": {}, "body": null}'
+  curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"path": "/v1/health-check/ping", "httpMethod": "GET", "requestContext": {}, "body": null}'
   ```
 
 - **Login to ECR**:

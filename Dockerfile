@@ -25,7 +25,7 @@ CMD [ "handler.lambda_handler" ]
 # zappa: zappa save-python-settings-file lambda_docker_falcon -o zappa_settings.py
 # build: docker build -t falcon_api:falcon_api .
 # test: docker run -p 9000:8080 falcon_api:falcon_api  
-# call: curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"path": "/api/health-check/ping", "httpMethod": "GET", "requestContext": {}, "body": null}'
+# call: curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"path": "/v1/health-check/ping", "httpMethod": "GET", "requestContext": {}, "body": null}'
 # login ecr: aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin XXXXX.dkr.ecr.us-east-2.amazonaws.com
 # tag: docker tag falcon_api:falcon_api XXXXX.dkr.ecr.us-east-2.amazonaws.com/{{ECR_NAME}}:falcon_api
 # push: docker push XXXXX.dkr.ecr.us-east-2.amazonaws.com/{{ECR_NAME}}:falcon_api
