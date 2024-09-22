@@ -9,4 +9,4 @@ mysql-connector-python
 boto3
 jinja2
 zappa
-jwt
+pyjwt
