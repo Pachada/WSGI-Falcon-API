@@ -15,6 +15,7 @@ mysql-connector-python = "*"
 boto3 = "*"
 jinja2 = "*"
 zappa = "*"
+jwt = "*"
 
 [dev-packages]
 
