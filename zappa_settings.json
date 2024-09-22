@@ -10,6 +10,8 @@
             "s3transfer",
             "concurrent"
         ],
+        "profile_name": "default",
+        "aws_region": "us-east-1",
         "environment_variables": {
             "EXAMPLE_ENV_VAR": "prod"
         }
