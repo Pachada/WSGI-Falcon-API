@@ -1,0 +1,17 @@
+{
+    "lambda_docker_falcon": {
+        "app_function": "engine.server.server",
+        "project_name": "flacon_project",
+        "lambda_description": "Zappa + Docker + Falcon",
+        "exclude": [
+            "boto3",
+            "dateutil",
+            "botocore",
+            "s3transfer",
+            "concurrent"
+        ],
+        "environment_variables": {
+            "EXAMPLE_ENV_VAR": "prod"
+        }
+    }
+}

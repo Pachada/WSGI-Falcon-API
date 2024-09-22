@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+falcon = "*"
+sqlalchemy = "*"
+gevent = "*"
+pillow = "*"
+filetype = "*"
+pytz = "*"
+exponent-server-sdk = "*"
+mysql-connector-python = "*"
+boto3 = "*"
+jinja2 = "*"
+zappa = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
