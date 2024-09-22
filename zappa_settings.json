@@ -1,6 +1,6 @@
 {
     "lambda_docker_falcon": {
-        "app_function": "engine.server.server",
+        "app_function": "engine.Server.server",
         "project_name": "flacon_project",
         "lambda_description": "Zappa + Docker + Falcon",
         "exclude": [
