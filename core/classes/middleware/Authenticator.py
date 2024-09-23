@@ -44,6 +44,9 @@ class Authenticator(object):
             req.context.token_data = None
         else:
             self.handle_authentication(req, resp, resource)
+            # If found an error, return
+            if resp.complete:
+                return
             # Validate that the role can access the resource
             role_id = req.context.token_data.get("role_id")
             if role_accesses := role_access.get(role_id):
