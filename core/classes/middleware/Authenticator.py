@@ -10,6 +10,7 @@ from core.Utils import Utils, logger
 from models.Device import Device
 from models.Session import Session
 from models.User import User
+from models.Role import role_access
 
 
 class Authenticator(object):
@@ -21,21 +22,34 @@ class Authenticator(object):
     def process_resource(self, req: Request, resp: Response, resource, params):
         """
         Process the request after routing.
-        Process the resource and determine whether to skip authentication or perform authentication checks.
-
+        Determine whether to skip authentication or perform authentication checks, and validate role access to the resource.
+    
         Args:
             req (Request): The incoming request object.
             resp (Response): The outgoing response object.
             resource: The resource being accessed.
             params (dict): The parameters extracted from the request URL.
-
+    
         Returns:
             None
+    
+        Authentication Flow:
+        1. Check if authentication should be skipped for the resource.
+           - If skipped, set req.context.token_data to None.
+        2. If authentication is not skipped, handle the authentication process.
+           - Validate the role associated with the token can access the resource.
+           - If the role does not have access, respond with HTTP 403 Forbidden and mark the response as complete.
         """
         if self.should_skip_authentication(req, resource, params):
             req.context.token_data = None
         else:
             self.handle_authentication(req, resp, resource)
+            # Validate that the role can access the resource
+            role_id = req.context.token_data.get("role_id")
+            if role_accesses := role_access.get(role_id):
+                if resource.__class__.__name__ not in role_accesses:
+                    resource.response(resp, HTTPStatus.FORBIDDEN, error="Forbidden")
+                    resp.complete = True
 
     def should_skip_authentication(self, req: Request, resource, params: dict):
         """
