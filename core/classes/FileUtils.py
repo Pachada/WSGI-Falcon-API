@@ -112,8 +112,8 @@ class FileController(Controller):
                 part.filename,
                 stream_content,
                 part.content_type,
-                make_thumbnail=make_thumbnail,
                 user=session.user,
+                make_thumbnail=make_thumbnail,
                 public=public_file,
                 private=private_file
             )
@@ -127,6 +127,10 @@ class FileController(Controller):
     def on_post_base64(self, req: Request, resp: Response, id: int = None):
         if id:
             self.response(resp, HTTPStatus.METHOD_NOT_ALLOWED)
+            return
+        
+        session = self.get_session(req, resp)
+        if not session:
             return
 
         base64_info, file_name, error_message = self.get_base64_info(req)
@@ -150,6 +154,7 @@ class FileController(Controller):
             file_name,
             base64_decoded,
             mimetype,
+            user=session.user,
             make_thumbnail=make_thumbnail,
             public=public_file,
             private=private_file
@@ -244,7 +249,7 @@ class FileController(Controller):
         return base64.b64encode(data)
 
     def get_mimetype(self, data):
-        return filetype.guess(data)
+        return filetype.guess(data).mime
 
     def get_base64_file_length(self, b64string):
         return (len(b64string) * 3) / 4 - b64string.count("=", -1, -5)

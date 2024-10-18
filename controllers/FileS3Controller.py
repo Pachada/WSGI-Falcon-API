@@ -35,6 +35,16 @@ class FileS3Controller(FileController, FileAbstract):
         if not file_object:
             self.response(resp, HTTPStatus.INTERNAL_SERVER_ERROR, error="Error geting file from s3")
             return
+        
+        file: File = file
+        session = self.get_session(req, resp)
+        if not session:
+            return
+        user: User = session.user
+        user_role: Role = user.role
+        if file.is_private and user_role != Role.ADMIN and user.id != file.user_who_uploaded_id:
+            self.response(resp, HTTPStatus.FORBIDDEN, error="Private file")
+            return
 
         resp.set_header("content-disposition", f'inline; filename="{file.name}"')
         resp.stream = BufferedReader(file_object)
@@ -42,7 +52,10 @@ class FileS3Controller(FileController, FileAbstract):
         resp.content_type = file.type
 
     def on_post(self, req: Request, resp: Response, id: int = None):
-        super().on_post(req, resp, id)
+        return super().on_post(req, resp, id)
+    
+    def on_post_base64(self,  req: Request, resp: Response, id: int = None):
+        return super().on_post_base64(req, resp, id)
 
     def on_delete(self, req: Request, resp: Response, id: int = None):
         if not id:
@@ -123,7 +136,7 @@ class FileS3Controller(FileController, FileAbstract):
             url = f"https://{bucket}.s3.amazonaws.com/{file_hash}.{file_type_new}"  # https://bucket_name.s3.amazonaws.com/6d9860c300a8744cbbf3f5.png
 
         return FileManager.put_file(
-            self.bucket,
+            bucket,
             file_content,
             file_hash,
             user_id=user.id,

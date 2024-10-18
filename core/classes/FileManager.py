@@ -31,7 +31,7 @@ class FileManager:
         if os.path.exists(file_path):
             size = os.stat(file_path).st_size
             name = os.path.basename(file_path)
-            _type = filetype.guess(file_path)
+            _type = filetype.guess(file_path).mime
             # hash = hashlib.sha224(name + str(size)).hexdigest()
             return {
                 "size": size,

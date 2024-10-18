@@ -30,6 +30,9 @@
 
 5. **Configurar acceso a RDS**:
    - Dar acceso a la RDS desde la configuración en la Lambda.
+  
+6. **Crear un VPC Endpoint**:
+   - Crear un VPC Endpoint hacia el gateway de S3 para que el Lambda pueda acceder al S3.
 
 ### Zappa con Docker
 

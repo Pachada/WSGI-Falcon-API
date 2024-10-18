@@ -46,7 +46,10 @@ class FileLocalController(FileController, FileAbstract):
         resp.content_type = file.type
 
     def on_post(self, req: Request, resp: Response, id: int = None):
-        super().on_post(req, resp, id)
+        return super().on_post(req, resp, id)
+    
+    def on_post_base64(self,  req: Request, resp: Response, id: int = None):
+        return super().on_post_base64(req, resp, id)
 
     def on_delete(self, req: Request, resp: Response, id: int = None):
         if not id:
