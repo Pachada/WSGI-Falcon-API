@@ -118,7 +118,8 @@ class FileS3Controller(FileController, FileAbstract):
         is_thumbnail=0,
         encode_to_base64=False,
         public=False,
-        private=False
+        private=False,
+        metadata=None
     ):
         file_content = super().format_file_content(file_content)
 
@@ -130,11 +131,14 @@ class FileS3Controller(FileController, FileAbstract):
 
         bucket = self.bucket
         url = None
+        # For public files, append file extension to key and setup public URL
         if public:
             bucket = self.public_bucket
             file_type_new = file_type.split("/")[1]
-            url = f"https://{bucket}.s3.amazonaws.com/{file_hash}.{file_type_new}"  # https://bucket_name.s3.amazonaws.com/6d9860c300a8744cbbf3f5.png
-
+            file_hash = f"{file_hash}.{file_type_new}"
+            url = f"https://{bucket}.s3.amazonaws.com/{file_hash}"  # https://bucket_name.s3.amazonaws.com/6d9860c300a8744cbbf3f5.png
+            metadata = {'Content-Type': file_type}
+        
         return FileManager.put_file(
             bucket,
             file_content,
@@ -145,5 +149,6 @@ class FileS3Controller(FileController, FileAbstract):
             region=self.region,
             is_thumbnail=is_thumbnail,
             url=url,
-            is_private=private
+            is_private=private,
+            metadata=metadata
         )

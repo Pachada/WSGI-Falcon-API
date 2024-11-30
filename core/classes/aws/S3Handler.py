@@ -1,7 +1,5 @@
 import tempfile
-
 import boto3
-
 from core.Utils import logger
 
 
@@ -23,7 +21,8 @@ class S3Handler(object):
         profile : `str`
                 A stringr for profile name.
         region : `str`
-                A stringr for region name."""
+                A stringr for region name.
+        """
         self.bucket_name = bucket_name
         if profile:
             self.session = boto3.Session(profile_name=profile)
@@ -50,10 +49,22 @@ class S3Handler(object):
         Returns
         -------
         `instance`
-                A instance of bucket.put_object() method."""
+                A instance of bucket.put_object() method.
+        """
         if self.bucket:
+            if "Content-Type" in metadata:
+                return self.bucket.put_object(
+                    Key=path,
+                    Body=fileObj,
+                    ACL=public,
+                    Metadata=metadata,
+                    ContentType=metadata["Content-Type"]
+                )
             return self.bucket.put_object(
-                Key=path, Body=fileObj, ACL=public, Metadata=metadata
+                Key=path,
+                Body=fileObj,
+                ACL=public,
+                Metadata=metadata
             )
         return None
 
@@ -70,13 +81,13 @@ class S3Handler(object):
         Returns
         -------
         `instance`
-                A instance of a file."""
+                A instance of a file.
+        """
         if self.bucket:
             tmpFile = tempfile.NamedTemporaryFile()
             self.bucket.download_fileobj(path, tmpFile)
             tmpFile.seek(0)
             return tmpFile
-
         logger.error("No Bucket")
         return None
 
@@ -93,8 +104,8 @@ class S3Handler(object):
         Returns
         -------
         `bool`
-                True if file was deleted successfully, False otherwise"""
-
+                True if file was deleted successfully, False otherwise
+        """
         if self.bucket:
             deleted = self.bucket.delete_objects(Delete={"Objects": [{"Key": key}]})
             if len(deleted.get("Deleted")) == 1:
